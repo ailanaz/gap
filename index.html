@@ -138,7 +138,7 @@
   .btn-ghost { background: var(--module); color: var(--border-blue); border-color: var(--border-blue); }
   .btn-ghost:hover { background: rgba(46, 91, 255, 0.10); }
 
-  .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
 
   .stat-module { background: var(--panel); border: 2px solid var(--border-inactive); padding: 18px 20px; }
   .stat-module:hover { border-color: var(--border-blue); }
@@ -223,6 +223,10 @@
 
   .roi-led { width: 6px; height: 6px; background: var(--signal-green); }
   .roi-body { padding: 10px; }
+  .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid rgba(57,255,20,0.1); }
+  .roi-row:last-child { border-bottom: none; }
+  .roi-key { font-size: 9px; font-weight: 700; color: rgba(57,255,20,0.55); letter-spacing: 0.12em; }
+  .roi-val { font-size: 13px; font-weight: 800; color: var(--signal-green); letter-spacing: 0.04em; }
   .roi-text { font-size: 12px; font-weight: 700; color: var(--signal-green); letter-spacing: 0.08em; text-transform: uppercase; }
 
   .card-footer {
@@ -416,28 +420,28 @@
   </div>
   <div class="header-right">
     <span class="header-readout">[SYNC_DATE] <strong>16.04.26</strong></span>
-    <span class="header-readout">[STREAM_RATIO] <strong id="ratio-display">A73 // B16 // C11</strong></span>
+    <span class="header-readout">[SYS] <strong>GAP_SYSTEM_V1.0</strong></span>
     <div class="led-status">
       <div class="led-dot"></div>
-      Active
+      Operational
     </div>
   </div>
 </header>
 
 <nav>
   <div class="nav-tab active" data-view="triage" onclick="switchView('triage', this)">
-    Triage_Node
+    [TRG]
     <span class="nav-count" id="triage-count">12</span>
   </div>
   <div class="nav-tab" data-view="map" onclick="switchView('map', this)">
-    World_Grid
+    [MAP]
   </div>
   <div class="nav-tab" data-view="hub" onclick="switchView('hub', this)">
-    Vault_Node
+    [VLT]
     <span class="nav-count" id="hub-count">34</span>
   </div>
   <div class="nav-tab" data-view="pipeline" onclick="switchView('pipeline', this)">
-    Pipeline_Sys
+    [PPLN]
   </div>
 </nav>
 
@@ -447,21 +451,19 @@
   <div class="view active" id="view-triage">
     <div class="section-header">
       <div>
-        <div class="section-title">TRIAGE_QUEUE // ACTIVE_NODE // 16.04.26</div>
-        <div class="section-subtitle">SELECT A RECORD TO FORCE GREEN BORDER. ASIA SIGNALS DEFAULT TO SIGNAL BLUE.</div>
+        <div class="section-title">SYSTEM_FEED // ALPHA_STREAM_01 // 16.04.26</div>
+        <div class="section-subtitle">[GAP_SYSTEM_V1.0] // [STATUS: OPERATIONAL]</div>
       </div>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-ghost" onclick="zapAll()">Purge Batch</button>
-        <button class="btn btn-signal" onclick="showToast('PIPELINE REFRESHING')">Refresh</button>
+        <button class="btn btn-ghost" onclick="zapAll()">[PURGE_BATCH]</button>
+        <button class="btn btn-signal" onclick="showToast('PIPELINE REFRESHING')">[SYNC_FEED]</button>
       </div>
     </div>
 
     <div class="stats-row">
-      <div class="stat-module"><div class="stat-module-label active">[UNPROCESSED]</div><div class="stat-val stat-val-lit" id="stat-unprocessed">12</div><div class="stat-sub">Awaiting triage</div></div>
-      <div class="stat-module"><div class="stat-module-label">[VAULT_COUNT]</div><div class="stat-val">34</div><div class="stat-sub">Locked records</div></div>
+      <div class="stat-module"><div class="stat-module-label active">[PENDING]</div><div class="stat-val stat-val-lit" id="stat-unprocessed">12</div><div class="stat-sub">[12_PENDING_SIGNALS]</div></div>
+      <div class="stat-module"><div class="stat-module-label">[VAULT]</div><div class="stat-val">34</div><div class="stat-sub">Locked records</div></div>
       <div class="stat-module"><div class="stat-module-label">[DISCARDED]</div><div class="stat-val">89</div><div class="stat-sub">Weekly purge</div></div>
-      <div class="stat-module"><div class="stat-module-label active">[AVG_PAYOFF]</div><div class="stat-val stat-val-lit">18d</div><div class="stat-sub">Median payback</div></div>
-      <div class="stat-module"><div class="stat-module-label">[TOP_ORIGIN]</div><div class="stat-val" style="font-size:17px">ASIA</div><div class="stat-sub">41% of intake</div></div>
     </div>
 
     <div class="filter-bar">
@@ -486,7 +488,7 @@
     <div class="section-header">
       <div>
         <div class="section-title">GLOBAL_GRID // REGION_NODE // 16.04.26</div>
-        <div class="section-subtitle">SIGNAL BLUE COORDINATES TRACK THE SYSTEM LAYER BEHIND EACH ORIGIN NODE.</div>
+        <div class="section-subtitle">[ORIGIN_MAP] // [SELECT_NODE_TO_FILTER]</div>
       </div>
     </div>
     <div class="map-container">
@@ -551,7 +553,7 @@
     <div class="section-header">
       <div>
         <div class="section-title">VAULT_NODE // COPY_QUEUE // 16.04.26</div>
-        <div class="section-subtitle">GREEN OUTPUT IS RESERVED FOR ROI AND ACTIVE QUEUE HANDOFFS.</div>
+        <div class="section-subtitle">[KEPT_SIGNALS] // [HANDOFF_READY]</div>
       </div>
       <button class="btn btn-ghost" onclick="showToast('ALL SOCIAL COPY EXPORTED')">Export All</button>
     </div>
@@ -578,12 +580,12 @@
     <div class="section-header">
       <div>
         <div class="section-title">PIPELINE_MATRIX // SYSTEM_NODE // 16.04.26</div>
-        <div class="section-subtitle">SIGNAL BLUE HANDLES METADATA. SAFETY GREEN MARKS LIVE AND ROI OUTPUT ONLY.</div>
+        <div class="section-subtitle">[STREAM_CONFIG] // [FILTER_RULESET]</div>
       </div>
       <button class="btn btn-ghost" onclick="showToast('MAKE.COM SCENARIO OPENED')">Open Make.com</button>
     </div>
     <div class="priority-alert">
-      <strong>[PRIORITY]</strong> WIPO Patent API and RetailTech Japan 2026 feeds connected first to establish the 75% Tech baseline.
+      <strong>[PRIORITY_INIT]</strong> WIPO_PATENT_API // RETAILTECH_JPN_2026 // STREAM_A_BASELINE
       <div class="priority-led-box">Active</div>
     </div>
     <div class="pipeline-section">
@@ -693,31 +695,42 @@ function formatCode(t) { return String(t).replace(/&/g,'AND').replace(/[^A-Za-z0
 function signalHeader(s) { return `${srcId(s)} // ${regionNode(s)} // ${signalDate(s)}`; }
 function originReadout(s) { return `[${coordinates(s)}] // ${regionNode(s)} // ${formatCode(s.tradeShow||s.sourceType)}`; }
 
+function sigId(s) { return `GAP_SIG_${String(s.id).padStart(3,'0')}`; }
+function roiBlock(s) {
+  return `EST_PAYBACK: ${payoffDays(s)}D\nVOLUME_REQ: ${s.dailyVolume}/DAY\nDAILY_GROSS: $${dailyGross(s).toLocaleString()}`;
+}
+
 function cardMarkup(s, { showActions=false, selectable=false }={}) {
   const selectedClass = selectable && selectedTriageId===s.id ? ' triage-selected' : '';
   const idAttr = selectable ? ` id="card-${s.id}"` : '';
   const clickAttr = selectable ? ` onclick="toggleTriageSelect(${s.id})"` : '';
+  const sourceNode = formatCode(s.tradeShow || s.sourceType);
   return `<div class="signal-card${selectedClass}" data-origin="${s.origin}"${idAttr}${clickAttr}>
       <div class="card-header">
         <div class="card-header-left">
-          <span class="card-id">[SIGNAL_${String(s.id).padStart(3,'0')}]</span>
+          <span class="card-id">${sigId(s)}</span>
           <span class="card-stream ${streamClass(s.stream)}">${streamLabel(s.stream)}</span>
+          <span class="card-type">${formatCode(s.sourceType)}</span>
         </div>
-        <span class="card-type">${formatCode(s.sourceType)}</span>
+        <span class="card-id" style="opacity:0.5">${signalDate(s)}</span>
       </div>
       <div class="card-body">
-        <div class="card-origin">${originReadout(s)}</div>
-        <div class="card-title">${signalHeader(s)}</div>
+        <div class="card-origin">ID: ${sigId(s)} // SOURCE: ${sourceNode} // STATUS: ACTIVE</div>
         <div class="card-summary">${s.title}</div>
         <div class="card-desc">${s.desc}</div>
         <div class="roi-module">
-          <div class="roi-header"><div class="roi-led"></div>[ROI_CALC]</div>
-          <div class="roi-body"><div class="roi-text">${roiText(s)}</div></div>
+          <div class="roi-header"><div class="roi-led"></div>[ROI_CALC] // ${regionNode(s)}</div>
+          <div class="roi-body">
+            <div class="roi-row"><span class="roi-key">EST_PAYBACK</span><span class="roi-val">${payoffDays(s)}D</span></div>
+            <div class="roi-row"><span class="roi-key">VOLUME_REQ</span><span class="roi-val">${s.dailyVolume}/DAY</span></div>
+            <div class="roi-row"><span class="roi-key">DAILY_GROSS</span><span class="roi-val">$${dailyGross(s).toLocaleString()}</span></div>
+            <div class="roi-row"><span class="roi-key">SETUP_COST</span><span class="roi-val">$${s.setupCost.toLocaleString()}</span></div>
+          </div>
         </div>
       </div>
       <div class="card-footer">
-        <span class="card-source">[SRC_REF] // ${s.source}</span>
-        ${showActions ? `<div class="action-btns"><button class="key-btn key-keep" onclick="keepCard(${s.id},event)">Keep</button><button class="key-btn key-zap" onclick="zapCard(${s.id},event)">Zap</button></div>` : ''}
+        <span class="card-source">${s.source}</span>
+        ${showActions ? `<div class="action-btns"><button class="key-btn key-keep" onclick="keepCard(${s.id},event)">[EXTRACT]</button><button class="key-btn key-zap" onclick="zapCard(${s.id},event)">[DISCARD]</button></div>` : `<button class="key-btn key-keep" style="margin-left:auto" onclick="void(0)">[OPEN_SOURCE]</button>`}
       </div>
     </div>`;
 }
@@ -731,11 +744,10 @@ function renderCards(data) {
 function renderHub() {
   document.getElementById('hub-list').innerHTML = keptSignals.slice(0,10).map(s => `
     <div class="hub-item" onclick="showDetail(${s.id})" id="hub-item-${s.id}">
-      <div class="hub-item-id">[SIGNAL_${String(s.id).padStart(3,'0')}] // ${streamLabel(s.stream)} // ${formatCode(s.sourceType)}</div>
-      <div class="hub-item-title">${signalHeader(s)}</div>
-      <div class="hub-item-summary">${s.title}</div>
-      <div class="hub-item-roi">${roiText(s)}</div>
-      <div class="hub-item-source">[SRC_REF] // ${s.source} // ${regionNode(s)}</div>
+      <div class="hub-item-id">${sigId(s)} // ${streamLabel(s.stream)} // ${formatCode(s.sourceType)}</div>
+      <div class="hub-item-title">${s.title}</div>
+      <div class="hub-item-roi">EST_PAYBACK: ${payoffDays(s)}D // VOLUME_REQ: ${s.dailyVolume}/DAY</div>
+      <div class="hub-item-source">${s.source} // ${regionNode(s)}</div>
     </div>`).join('');
 }
 
@@ -749,22 +761,22 @@ function showDetail(id) {
   document.getElementById('detail-title').textContent = signalHeader(s);
   document.getElementById('detail-origin').textContent = `${originReadout(s)} // [SRC_REF]`;
   document.getElementById('detail-body').innerHTML = `
-    <div class="detail-row"><span class="detail-key">[STREAM_NODE]</span><span class="detail-val">${streamBreakdown(s)}</span></div>
-    <div class="detail-row"><span class="detail-key">[HEADLINE]</span><span class="detail-val">${s.title}</span></div>
+    <div class="detail-row"><span class="detail-key">[STREAM]</span><span class="detail-val">${streamBreakdown(s)}</span></div>
+    <div class="detail-row"><span class="detail-key">[SIG_ID]</span><span class="detail-val">${sigId(s)}</span></div>
     <div class="detail-row"><span class="detail-key">[SETUP_COST]</span><span class="detail-val">$${s.setupCost.toLocaleString()}</span></div>
     <div class="detail-row"><span class="detail-key">[UNIT_PRICE]</span><span class="detail-val">$${s.unitPrice}</span></div>
-    <div class="detail-row"><span class="detail-key">[DAILY_VOL]</span><span class="detail-val">${s.dailyVolume} UNITS_PER_DAY</span></div>
-    <div class="detail-row"><span class="detail-key">[DAILY_GROSS]</span><span class="detail-val">$${dailyGross(s).toLocaleString()}</span></div>
-    <div class="detail-row"><span class="detail-key">[ROI_CALC]</span><span class="detail-val detail-val-signal">${roiText(s)}</span></div>
-    <div class="detail-row"><span class="detail-key">[SRC_REF]</span><span class="detail-val">${s.source}</span></div>
-    ${s.tradeShow ? `<div class="detail-row"><span class="detail-key">[EVENT_NODE]</span><span class="detail-val">${s.tradeShow}</span></div>` : ''}
+    <div class="detail-row"><span class="detail-key">[VOLUME_REQ]</span><span class="detail-val detail-val-signal">${s.dailyVolume}/DAY</span></div>
+    <div class="detail-row"><span class="detail-key">[DAILY_GROSS]</span><span class="detail-val detail-val-signal">$${dailyGross(s).toLocaleString()}</span></div>
+    <div class="detail-row"><span class="detail-key">[EST_PAYBACK]</span><span class="detail-val detail-val-signal">${payoffDays(s)}D</span></div>
+    <div class="detail-row"><span class="detail-key">[SOURCE]</span><span class="detail-val">${s.source}</span></div>
+    ${s.tradeShow ? `<div class="detail-row"><span class="detail-key">[EVENT]</span><span class="detail-val">${s.tradeShow}</span></div>` : ''}
     <div class="copy-module">
       <div class="copy-module-header">[HANDOFF_COPY] // READY_STATE</div>
       <div class="copy-module-body">
-        <div class="copy-text">${signalHeader(s)}<br><br>${s.title}.<br><br>${roiText(s)}.<br><br>[SRC_REF] // ${s.source} // ${regionNode(s)}</div>
+        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>EST_PAYBACK: ${payoffDays(s)}D // VOLUME_REQ: ${s.dailyVolume}/DAY // DAILY_GROSS: $${dailyGross(s).toLocaleString()}<br><br>SOURCE: ${s.source} // ${regionNode(s)}</div>
         <div class="copy-actions">
-          <button class="btn btn-ghost" style="font-size:9px" onclick="showToast('COPIED TO CLIPBOARD')">Copy</button>
-          <button class="btn btn-signal" style="font-size:9px" onclick="showToast('QUEUED FOR POST')">Queue</button>
+          <button class="btn btn-ghost" style="font-size:9px" onclick="showToast('COPIED TO CLIPBOARD')">[COPY]</button>
+          <button class="btn btn-signal" style="font-size:9px" onclick="showToast('QUEUED FOR POST')">[OPEN_SOURCE]</button>
         </div>
       </div>
     </div>`;
