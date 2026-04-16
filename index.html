@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>GAP - Global Alpha Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --base: #000000;
+    --panel: #0A0C10;
+    --panel-alt: #06080c;
+    --module: #05070a;
+    --inset: #030405;
+    --border-inactive: #1A1A1A;
+    --border-blue: #0047FF;
+    --border-blue-soft: rgba(0, 71, 255, 0.40);
+    --signal-green: #39FF14;
+    --signal-green-soft: rgba(57, 255, 20, 0.12);
+    --text-bright: #F5F7FB;
+    --text-mid: #B9C6E4;
+    --text-dim: #7C92C6;
+    --text-ghost: #53627f;
+    --mono: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+  *::before,
+  *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+
+  html { background: var(--base); }
+
+  body {
+    font-family: var(--mono);
+    background: var(--base);
+    color: var(--text-bright);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--mono);
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 28px;
+    min-height: 62px;
+    border-bottom: 2px solid var(--border-blue);
+    background: var(--panel);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-mark {
+    width: 34px;
+    height: 34px;
+    border: 2px solid var(--border-blue);
+    background: var(--module);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--border-blue);
+    letter-spacing: 0.18em;
+  }
+
+  .logo-text {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.24em;
+    color: var(--text-bright);
+    text-transform: uppercase;
+  }
+
+  .logo-sub {
+    display: block;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .header-readout {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border: 1px solid var(--border-blue-soft);
+    background: var(--module);
+  }
+
+  .header-readout strong {
+    color: var(--border-blue);
+    font-weight: 700;
+  }
+
+  .led-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--signal-green);
+    padding: 6px 10px;
+    border: 2px solid var(--signal-green);
+    background: var(--module);
+  }
+
+  .led-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--signal-green);
+    animation: led-pulse 1.6s steps(2, end) infinite;
+  }
+
+  @keyframes led-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  nav {
+    display: flex;
+    gap: 0;
+    padding: 0 28px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border-inactive);
+  }
+
+  .nav-tab {
+    padding: 14px 18px;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-right: 1px solid var(--border-inactive);
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.12s ease, color 0.12s ease, background-color 0.12s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+    background: var(--panel);
+    white-space: nowrap;
+  }
+
+  .nav-tab:hover {
+    color: var(--text-bright);
+    border-bottom-color: var(--border-blue);
+    background: var(--module);
+  }
+
+  .nav-tab.active {
+    color: var(--border-blue);
+    border-bottom-color: var(--border-blue);
+    background: var(--module);
+  }
+
+  .nav-count {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    background: var(--inset);
+    border: 1px solid var(--border-blue-soft);
+    color: var(--border-blue);
+  }
+
+  main {
+    flex: 1;
+    padding: 28px 32px 40px;
+    max-width: 1480px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 0 0 14px;
+    border-bottom: 2px solid var(--border-inactive);
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--border-blue);
+    line-height: 1.4;
+  }
+
+  .section-subtitle {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .btn {
+    padding: 8px 14px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2px solid var(--border-inactive);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    transition: border-color 0.12s ease, background-color 0.12s ease, color 0.12s ease;
+    background: var(--module);
+    color: var(--text-bright);
+  }
+
+  .btn-signal {
+    background: var(--signal-green-soft);
+    color: var(--signal-green);
+    border-color: var(--signal-green);
+  }
+
+  .btn-signal:hover {
+    background: rgba(57, 255, 20, 0.18);
+  }
+
+  .btn-ghost {
+    background: var(--module);
+    color: var(--border-blue);
+    border-color: var(--border-blue);
+  }
+
+  .btn-ghost:hover {
+    background: rgba(46, 91, 255, 0.10);
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-module {
+    background: var(--panel);
+    border: 2px solid var(--border-inactive);
+    padding: 18px 20px;
+  }
+
+  .stat-module:hover {
+    border-color: var(--border-blue);
+  }
+
+  .stat-module-label {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--border-blue);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stat-module-label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border: 1px solid var(--border-blue);
+    background: transparent;
+  }
+
+  .stat-module-label.active::before {
+    background: var(--signal-green);
+    border-color: var(--signal-green);
+  }
+
+  .stat-val {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--text-bright);
+  }
+
+  .stat-val-lit { color: var(--signal-green); }
+
+  .stat-sub {
+    font-size: 9px;
+    color: var(--text-ghost);
+    margin-top: 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: var(--panel);
+    border: 2px solid var(--border-inactive);
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--border-blue);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
+
+  .filter-key {
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border-inactive);
+    background: var(--module);
+    color: var(--text-dim);
+    transition: border-color 0.12s ease, background-color 0.12s ease, color 0.12s ease;
+    user-select: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .filter-key:hover {
+    border-color: var(--border-blue);
+    color: var(--text-bright);
+  }
+
+  .filter-key.active {
+    background: rgba(46, 91, 255, 0.10);
+    color: var(--border-blue);
+    border-color: var(--border-blue);
+  }
+
+  .filter-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--border-inactive);
+    margin: 0 8px;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 14px;
+  }
+
+  .signal-card {
+    background: var(--panel);
+    border: 2px solid var(--border-inactive);
+    transition: border-color 0.12s ease, background-color 0.12s ease, opacity 0.12s ease;
+    position: relative;
+  }
+
+  .signal-card:hover {
+    border-color: var(--border-blue);
+    background: var(--panel-alt);
+    z-index: 1;
+  }
+
+  .signal-card[data-origin="asia"] {
+    border-color: var(--border-blue);
+  }
+
+  .signal-card.triage-selected {
+    border-color: var(--signal-green) !important;
+  }
+
+  .card-header {
+    padding: 10px 16px;
+    background: var(--module);
+    border-bottom: 1px solid var(--border-inactive);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .card-id {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--border-blue);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .card-stream,
+  .card-type {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    padding: 3px 7px;
+    text-transform: uppercase;
+    border: 1px solid var(--border-blue);
+    color: var(--border-blue);
+    background: var(--inset);
+  }
+
+  .stream-a,
+  .stream-b,
+  .stream-c {
+    border-color: var(--border-blue);
+    color: var(--border-blue);
+  }
+
+  .card-body {
+    padding: 16px 18px;
+  }
+
+  .card-origin {
+    font-size: 9px;
+    color: var(--border-blue);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    flex-wrap: wrap;
+  }
+
+  .card-origin::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border: 1px solid var(--border-blue);
+    background: transparent;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    color: var(--text-bright);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
+
+  .card-summary {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-mid);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .card-desc {
+    font-size: 11px;
+    color: var(--text-mid);
+    line-height: 1.75;
+    margin-bottom: 14px;
+    text-align: justify;
+    text-justify: inter-word;
+  }
+
+  .roi-module {
+    background: var(--module);
+    border: 2px solid var(--signal-green);
+    padding: 0;
+    margin-bottom: 14px;
+  }
+
+  .roi-header {
+    padding: 6px 10px;
+    background: rgba(57, 255, 20, 0.08);
+    border-bottom: 1px solid var(--signal-green);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--signal-green);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .roi-led {
+    width: 6px;
+    height: 6px;
+    background: var(--signal-green);
+  }
+
+  .roi-body {
+    padding: 10px;
+  }
+
+  .roi-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--signal-green);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .card-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-inactive);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--module);
+  }
+
+  .card-source {
+    font-size: 9px;
+    color: var(--border-blue);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .action-btns {
+    display: flex;
+    gap: 6px;
+  }
+
+  .key-btn {
+    padding: 6px 12px;
+    font-size: 9px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: border-color 0.12s ease, background-color 0.12s ease, color 0.12s ease;
+    border: 2px solid var(--border-inactive);
+    background: var(--module);
+  }
+
+  .key-keep {
+    background: var(--signal-green-soft);
+    color: var(--signal-green);
+    border-color: var(--signal-green);
+  }
+
+  .key-keep:hover {
+    background: rgba(57, 255, 20, 0.18);
+  }
+
+  .key-zap {
+    color: var(--border-blue);
+    border-color: var(--border-blue);
+  }
+
+  .key-zap:hover {
+    background: rgba(46, 91, 255, 0.10);
+  }
+
+  .map-container {
+    background: var(--panel);
+    border: 2px solid var(--border-inactive);
+    margin-bottom: 24px;
+  }
+
+  .map-header {
+    padding: 12px 16px;
+    background: var(--module);
+    border-bottom: 1px solid var(--border-inactive);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 10px;
+    color: var(--border-blue);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
+
+  .map-canvas {
+    width: 100%;
+    height: 400px;
+    background:
+      linear-gradient(rgba(0, 71, 255, 0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 71, 255, 0.12) 1px, transparent 1px),
+      var(--panel-alt);
+    background-size: 36px 36px, 36px 36px, auto;
+    position: relative;
+    border-bottom: 1px solid var(--border-inactive);
+    overflow: hidden;
+  }
+
+  .map-base {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    opacity: 0.94;
+  }
+
+  .map-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .map-coordinate {
+    fill: var(--border-blue);
+    font-size: 8px;
+    font-family: var(--mono);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .map-city {
+    fill: var(--text-mid);
+    font-size: 8px;
+    font-family: var(--mono);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  .map-count {
+    fill: var(--text-bright);
+    font-size: 9px;
+    font-family: var(--mono);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .region-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+
+  .region-module {
+    background: var(--panel);
+    border-right: 1px solid var(--border-inactive);
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+    border-top: 2px solid transparent;
+  }
+
+  .region-module:last-child { border-right: none; }
+
+  .region-module:hover {
+    background: var(--module);
+    border-top-color: var(--border-blue);
+  }
+
+  .region-module.active {
+    background: var(--module);
+    border-top-color: var(--signal-green);
+  }
+
+  .region-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--border-blue);
+    margin-bottom: 6px;
+  }
+
+  .region-val {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-bright);
+    letter-spacing: -0.04em;
+  }
+
+  .region-module.active .region-val { color: var(--signal-green); }
+
+  .region-sub {
+    font-size: 9px;
+    color: var(--text-ghost);
+    margin-top: 4px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .hub-grid {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 14px;
+  }
+
+  .hub-list-panel,
+  .detail-panel {
+    background: var(--panel);
+    border: 2px solid var(--border-inactive);
+  }
+
+  .hub-list-header,
+  .detail-header,
+  .copy-module-header {
+    padding: 10px 16px;
+    background: var(--module);
+    border-bottom: 1px solid var(--border-inactive);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--border-blue);
+  }
+
+  .hub-item {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-inactive);
+    cursor: pointer;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+  }
+
+  .hub-item:hover {
+    background: var(--module);
+  }
+
+  .hub-item.selected {
+    background: var(--module);
+    border-left: 2px solid var(--signal-green);
+  }
+
+  .hub-item-id,
+  .hub-item-source,
+  .detail-header-label,
+  .detail-origin,
+  .detail-key {
+    font-size: 9px;
+    color: var(--border-blue);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .hub-item-id { margin-bottom: 6px; }
+
+  .hub-item-title,
+  .detail-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+
+  .hub-item-summary {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-mid);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 8px 0 6px;
+  }
+
+  .hub-item-roi {
+    font-size: 10px;
+    color: var(--signal-green);
+    margin-bottom: 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .detail-panel {
+    position: sticky;
+    top: 96px;
+  }
+
+  .detail-header {
+    padding: 12px 16px;
+  }
+
+  .detail-header-label {
+    margin-bottom: 8px;
+  }
+
+  .detail-origin {
+    margin-top: 6px;
+  }
+
+  .detail-body {
+    padding: 16px 18px;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border-inactive);
+  }
+
+  .detail-row:last-child { border-bottom: none; }
+
+  .detail-val {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-mid);
+    text-align: right;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .detail-val-signal { color: var(--signal-green); }
+
+  .copy-module {
+    background: var(--module);
+    border: 2px solid var(--border-blue);
+    margin-top: 14px;
+  }
+
+  .copy-module-header {
+    padding: 8px 10px;
+  }
+
+  .copy-module-body { padding: 12px 10px; }
+
+  .copy-text {
+    font-size: 11px;
+    color: var(--text-mid);
+    line-height: 1.75;
+    text-align: justify;
+    text-justify: inter-word;
+  }
+
+  .copy-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .pipeline-section { margin-bottom: 24px; }
+
+  .pipeline-header-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 20px;
+    background: var(--panel);
+    border: 2px solid var(--border-inactive);
+    border-bottom: none;
+  }
+
+  .pipeline-pct {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.06em;
+    color: var(--border-blue);
+    min-width: 74px;
+  }
+
+  .pipeline-pct-lit { color: var(--signal-green); }
+
+  .pipeline-info { flex: 1; }
+
+  .pipeline-name {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--text-bright);
+  }
+
+  .pipeline-freq {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .pipeline-led,
+  .src-status,
+  .priority-led-box {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border: 2px solid var(--border-inactive);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .led-active,
+  .src-live,
+  .priority-led-box {
+    background: var(--signal-green-soft);
+    color: var(--signal-green);
+    border-color: var(--signal-green);
+  }
+
+  .led-active::before,
+  .src-live::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--signal-green);
+  }
+
+  .led-scheduled,
+  .src-pending {
+    background: rgba(46, 91, 255, 0.10);
+    color: var(--border-blue);
+    border-color: var(--border-blue);
+  }
+
+  .led-idle,
+  .src-idle {
+    background: var(--module);
+    color: var(--text-ghost);
+    border-color: var(--border-inactive);
+  }
+
+  .pipeline-bar {
+    height: 10px;
+    background: var(--module);
+    border-left: 2px solid var(--border-inactive);
+    border-right: 2px solid var(--border-inactive);
+  }
+
+  .pipeline-fill {
+    height: 100%;
+    transition: width 1s ease;
+  }
+
+  .fill-active { background: var(--signal-green); }
+  .fill-dim { background: var(--border-blue); }
+
+  .pipeline-sources {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0;
+    border: 2px solid var(--border-inactive);
+    border-top: none;
+  }
+
+  .src-card {
+    background: var(--panel);
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    border-bottom: 1px solid var(--border-inactive);
+    border-right: 1px solid var(--border-inactive);
+  }
+
+  .src-icon {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    background: var(--module);
+    border: 2px solid var(--border-blue);
+    color: var(--border-blue);
+    flex-shrink: 0;
+  }
+
+  .src-name {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-bright);
+  }
+
+  .src-desc {
+    font-size: 10px;
+    color: var(--text-mid);
+    line-height: 1.7;
+    text-align: justify;
+    text-justify: inter-word;
+  }
+
+  .src-status { margin-left: auto; }
+
+  .priority-alert {
+    background: var(--module);
+    border: 2px solid var(--signal-green);
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--text-mid);
+    text-align: justify;
+  }
+
+  .priority-alert strong {
+    color: var(--signal-green);
+    letter-spacing: 0.10em;
+  }
+
+  .priority-led-box {
+    margin-left: auto;
+  }
+
+  .antifilters {
+    background: var(--panel);
+    border: 2px solid var(--border-inactive);
+    margin-top: 8px;
+  }
+
+  .antifilters-header {
+    padding: 10px 14px;
+    background: var(--module);
+    border-bottom: 1px solid var(--border-inactive);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--border-blue);
+  }
+
+  .antifilters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0;
+    padding: 0;
+  }
+
+  .af-item {
+    padding: 10px 12px;
+    font-size: 10px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-inactive);
+    border-right: 1px solid var(--border-inactive);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .af-item::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border: 1px solid currentColor;
+    background: transparent;
+  }
+
+  .af-reject {
+    color: var(--border-blue);
+    background: rgba(46, 91, 255, 0.06);
+  }
+
+  .af-require {
+    color: var(--signal-green);
+    background: rgba(57, 255, 20, 0.06);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-dim);
+    border: 2px dashed var(--border-inactive);
+    background: var(--panel);
+  }
+
+  .empty-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--border-blue);
+    margin-bottom: 6px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
+
+  .empty-desc {
+    font-size: 10px;
+    color: var(--text-ghost);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--panel);
+    border: 2px solid var(--border-blue);
+    padding: 10px 16px;
+    font-size: 11px;
+    color: var(--text-bright);
+    z-index: 999;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    pointer-events: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .scrollable-list {
+    max-height: 560px;
+    overflow-y: auto;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--base); }
+  ::-webkit-scrollbar-thumb { background: var(--border-blue); }
+
+  @media (max-width: 1000px) {
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+    .hub-grid { grid-template-columns: 1fr; }
+    .region-strip { grid-template-columns: repeat(2, 1fr); }
+    .detail-panel { position: static; }
+  }
+
+  @media (max-width: 700px) {
+    nav { overflow-x: auto; padding: 0 16px; }
+    main { padding: 18px 16px 32px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .cards-grid { grid-template-columns: 1fr; }
+    header {
+      padding: 12px 16px;
+      align-items: flex-start;
+    }
+    .header-readout { display: none; }
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .pipeline-header-row,
+    .priority-alert {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .priority-led-box,
+    .src-status {
+      margin-left: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">G</div>
+    <div>
+      <div class="logo-text">GAP</div>
+      <span class="logo-sub">Tactical Command Interface // V1.0</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="header-readout">[SYNC_DATE] <strong>16.04.26</strong></span>
+    <span class="header-readout">[STREAM_RATIO] <strong id="ratio-display">A73 // B16 // C11</strong></span>
+    <div class="led-status">
+      <div class="led-dot"></div>
+      Active
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-tab active" data-view="triage" onclick="switchView('triage', this)">
+    Triage_Node
+    <span class="nav-count" id="triage-count">12</span>
+  </div>
+  <div class="nav-tab" data-view="map" onclick="switchView('map', this)">
+    World_Grid
+  </div>
+  <div class="nav-tab" data-view="hub" onclick="switchView('hub', this)">
+    Vault_Node
+    <span class="nav-count" id="hub-count">34</span>
+  </div>
+  <div class="nav-tab" data-view="pipeline" onclick="switchView('pipeline', this)">
+    Pipeline_Sys
+  </div>
+</nav>
+
+<main>
+
+  <!-- TRIAGE -->
+  <div class="view active" id="view-triage">
+    <div class="section-header">
+      <div>
+        <div class="section-title">TRIAGE_QUEUE // ACTIVE_NODE // 16.04.26</div>
+        <div class="section-subtitle">SELECT A RECORD TO FORCE GREEN BORDER. ASIA SIGNALS DEFAULT TO SIGNAL BLUE.</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost" onclick="zapAll()">Purge Batch</button>
+        <button class="btn btn-signal" onclick="showToast('PIPELINE REFRESHING')">Refresh</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-module">
+        <div class="stat-module-label active">[UNPROCESSED]</div>
+        <div class="stat-val stat-val-lit" id="stat-unprocessed">12</div>
+        <div class="stat-sub">Awaiting triage</div>
+      </div>
+      <div class="stat-module">
+        <div class="stat-module-label">[VAULT_COUNT]</div>
+        <div class="stat-val">34</div>
+        <div class="stat-sub">Locked records</div>
+      </div>
+      <div class="stat-module">
+        <div class="stat-module-label">[DISCARDED]</div>
+        <div class="stat-val">89</div>
+        <div class="stat-sub">Weekly purge</div>
+      </div>
+      <div class="stat-module">
+        <div class="stat-module-label active">[AVG_PAYOFF]</div>
+        <div class="stat-val stat-val-lit">18d</div>
+        <div class="stat-sub">Median payback</div>
+      </div>
+      <div class="stat-module">
+        <div class="stat-module-label">[TOP_ORIGIN]</div>
+        <div class="stat-val" style="font-size:17px">ASIA</div>
+        <div class="stat-sub">41% of intake</div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <span class="filter-label">[STREAM_NODE]</span>
+      <div class="filter-key active" onclick="filterCards('all', this)">All</div>
+      <div class="filter-key" onclick="filterCards('tech', this)">A // Tech</div>
+      <div class="filter-key" onclick="filterCards('biz', this)">B // Biz</div>
+      <div class="filter-key" onclick="filterCards('rd', this)">C // R&amp;D</div>
+      <div class="filter-sep"></div>
+      <span class="filter-label">[REGION_NODE]</span>
+      <div class="filter-key" onclick="filterCards('asia', this)">Asia</div>
+      <div class="filter-key" onclick="filterCards('europe', this)">Europe</div>
+      <div class="filter-key" onclick="filterCards('me', this)">M.East</div>
+      <div class="filter-key" onclick="filterCards('americas', this)">Americas</div>
+    </div>
+
+    <div class="cards-grid" id="cards-grid"></div>
+  </div>
+
+  <!-- MAP -->
+  <div class="view" id="view-map">
+    <div class="section-header">
+      <div>
+        <div class="section-title">GLOBAL_GRID // REGION_NODE // 16.04.26</div>
+        <div class="section-subtitle">SIGNAL BLUE COORDINATES TRACK THE SYSTEM LAYER BEHIND EACH ORIGIN NODE.</div>
+      </div>
+    </div>
+
+    <div class="map-container">
+      <div class="map-header">
+        <span>[ORIGIN_GRID] SELECT REGION NODE TO FILTER</span>
+        <span>148 SIGNALS // 4 REGIONS</span>
+      </div>
+      <div class="map-canvas">
+        <img class="map-base" src="./world.svg" alt="World map" />
+        <svg class="map-overlay" viewBox="0 0 2000 857" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="428.5" x2="2000" y2="428.5" stroke="rgba(0,71,255,0.24)" stroke-width="1"/>
+          <line x1="1000" y1="0" x2="1000" y2="857" stroke="rgba(0,71,255,0.24)" stroke-width="1"/>
+          <g class="map-dot" onclick="filterByRegion('asia')" style="cursor:pointer">
+            <circle cx="1635" cy="196" r="24" fill="rgba(0,71,255,0.12)" stroke="#0047FF" stroke-width="1.5"/>
+            <circle cx="1635" cy="196" r="6" fill="#0047FF"/>
+            <text x="1635" y="166" text-anchor="middle" class="map-coordinate">[139.6917E // 35.6895N]</text>
+            <text x="1635" y="184" text-anchor="middle" class="map-city">TOKYO_JPN</text>
+            <text x="1635" y="205" text-anchor="middle" class="map-count">51</text>
+          </g>
+          <g class="map-dot" onclick="filterByRegion('europe')" style="cursor:pointer">
+            <circle cx="1010" cy="166" r="20" fill="rgba(0,71,255,0.12)" stroke="#0047FF" stroke-width="1.5"/>
+            <circle cx="1010" cy="166" r="5" fill="#0047FF"/>
+            <text x="1010" y="136" text-anchor="middle" class="map-coordinate">[13.4050E // 52.5200N]</text>
+            <text x="1010" y="154" text-anchor="middle" class="map-city">BERLIN_DEU</text>
+            <text x="1010" y="175" text-anchor="middle" class="map-count">28</text>
+          </g>
+          <g class="map-dot" onclick="filterByRegion('me')" style="cursor:pointer">
+            <circle cx="1220" cy="286" r="18" fill="rgba(0,71,255,0.12)" stroke="#0047FF" stroke-width="1.5"/>
+            <circle cx="1220" cy="286" r="5" fill="#0047FF"/>
+            <text x="1220" y="256" text-anchor="middle" class="map-coordinate">[46.6753E // 24.7136N]</text>
+            <text x="1220" y="274" text-anchor="middle" class="map-city">RIYADH_SAU</text>
+            <text x="1220" y="295" text-anchor="middle" class="map-count">19</text>
+          </g>
+          <g class="map-dot" onclick="filterByRegion('asia')" style="cursor:pointer">
+            <circle cx="1545" cy="445" r="18" fill="rgba(0,71,255,0.12)" stroke="#0047FF" stroke-width="1.5"/>
+            <circle cx="1545" cy="445" r="5" fill="#0047FF"/>
+            <text x="1545" y="475" text-anchor="middle" class="map-coordinate">[103.8198E // 1.3521N]</text>
+            <text x="1545" y="493" text-anchor="middle" class="map-city">SINGAPORE_SGP</text>
+            <text x="1545" y="514" text-anchor="middle" class="map-count">25</text>
+          </g>
+          <g class="map-dot" onclick="filterByRegion('americas')" style="cursor:pointer">
+            <circle cx="275" cy="238" r="18" fill="rgba(0,71,255,0.12)" stroke="#0047FF" stroke-width="1.5"/>
+            <circle cx="275" cy="238" r="5" fill="#0047FF"/>
+            <text x="275" y="208" text-anchor="middle" class="map-coordinate">[118.2437W // 34.0522N]</text>
+            <text x="275" y="226" text-anchor="middle" class="map-city">LOSANGELES_USA</text>
+            <text x="275" y="247" text-anchor="middle" class="map-count">25</text>
+          </g>
+        </svg>
+      </div>
+      <div class="region-strip">
+        <div class="region-module" id="region-asia" onclick="filterByRegion('asia')">
+          <div class="region-label">[REGION_NODE] ASIA_PAC</div>
+          <div class="region-val">76</div>
+          <div class="region-sub">TOKYO_JPN // SINGAPORE_SGP</div>
+        </div>
+        <div class="region-module" id="region-europe" onclick="filterByRegion('europe')">
+          <div class="region-label">[REGION_NODE] EUROPE</div>
+          <div class="region-val">28</div>
+          <div class="region-sub">BERLIN_DEU // CENTRAL_HUB</div>
+        </div>
+        <div class="region-module" id="region-me" onclick="filterByRegion('me')">
+          <div class="region-label">[REGION_NODE] MIDDLE_EAST</div>
+          <div class="region-val">19</div>
+          <div class="region-sub">RIYADH_SAU // LEAP_NODE</div>
+        </div>
+        <div class="region-module" id="region-americas" onclick="filterByRegion('americas')">
+          <div class="region-label">[REGION_NODE] AMERICAS</div>
+          <div class="region-val">25</div>
+          <div class="region-sub">LOSANGELES_USA // NAMA_NODE</div>
+        </div>
+      </div>
+    </div>
+    <div id="map-signals-grid" class="cards-grid"></div>
+  </div>
+
+  <!-- CONTENT HUB -->
+  <div class="view" id="view-hub">
+    <div class="section-header">
+      <div>
+        <div class="section-title">VAULT_NODE // COPY_QUEUE // 16.04.26</div>
+        <div class="section-subtitle">GREEN OUTPUT IS RESERVED FOR ROI AND ACTIVE QUEUE HANDOFFS.</div>
+      </div>
+      <button class="btn btn-ghost" onclick="showToast('ALL SOCIAL COPY EXPORTED')">Export All</button>
+    </div>
+    <div class="hub-grid">
+      <div class="hub-list-panel">
+        <div class="hub-list-header">[SIGNAL_VAULT] // ACTIVE KEEP SET // 34 TOTAL</div>
+        <div class="scrollable-list" id="hub-list"></div>
+      </div>
+      <div class="detail-panel" id="hub-detail">
+        <div class="detail-header">
+          <div class="detail-header-label">[SIGNAL_DETAIL]</div>
+          <div class="detail-title" id="detail-title">NO_RECORD // WAITING_STATE // 16.04.26</div>
+          <div class="detail-origin" id="detail-origin">SELECT A VAULT ENTRY FROM THE LEFT PANEL</div>
+        </div>
+        <div class="detail-body" id="detail-body">
+          <div class="empty-state">
+            <div class="empty-title">NO RECORD LOCKED</div>
+            <div class="empty-desc">DETAIL PACKET AND HANDOFF COPY APPEAR HERE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="view" id="view-pipeline">
+    <div class="section-header">
+      <div>
+        <div class="section-title">PIPELINE_MATRIX // SYSTEM_NODE // 16.04.26</div>
+        <div class="section-subtitle">SIGNAL BLUE HANDLES METADATA. SAFETY GREEN MARKS LIVE AND ROI OUTPUT ONLY.</div>
+      </div>
+      <button class="btn btn-ghost" onclick="showToast('MAKE.COM SCENARIO OPENED')">Open Make.com</button>
+    </div>
+
+    <div class="priority-alert">
+      <strong>[PRIORITY]</strong> WIPO Patent API and RetailTech Japan 2026 feeds connected first to establish the 75% Tech baseline.
+      <div class="priority-led-box">Active</div>
+    </div>
+
+    <!-- A -->
+    <div class="pipeline-section">
+      <div class="pipeline-header-row">
+        <div class="pipeline-pct pipeline-pct-lit">75%</div>
+        <div class="pipeline-info">
+          <div class="pipeline-name">STREAM_A // INNOVATIVE_TECH // 75%</div>
+          <div class="pipeline-freq">DAILY SCAN // HARDWARE AND SYSTEMS THAT CHANGE HOW WORK IS DONE</div>
+        </div>
+        <div class="pipeline-led led-active">Live</div>
+      </div>
+      <div class="pipeline-bar"><div class="pipeline-fill fill-active" style="width:73%"></div></div>
+      <div class="pipeline-sources">
+        <div class="src-card"><div class="src-icon">W</div><div><div class="src-name">WIPO Patents via SerpApi</div><div class="src-desc">Keywords: unattended retail, autonomous service, modular business</div></div><div class="src-status src-live">Live</div></div>
+        <div class="src-card"><div class="src-icon">GP</div><div><div class="src-name">Google Patents via SerpApi</div><div class="src-desc">Mirror query - backup patent signal source</div></div><div class="src-status src-live">Live</div></div>
+        <div class="src-card"><div class="src-icon">JP</div><div><div class="src-name">RetailTech Japan 2026</div><div class="src-desc">RSS - Tokyo Big Sight - Auto-translated</div></div><div class="src-status src-live">Live</div></div>
+        <div class="src-card"><div class="src-icon">CE</div><div><div class="src-name">CES 2026 Innovation Awards</div><div class="src-desc">RSS feed - official award announcements</div></div><div class="src-status src-pending">Pending</div></div>
+        <div class="src-card"><div class="src-icon">NA</div><div><div class="src-name">NAMA Show (Los Angeles)</div><div class="src-desc">Unattended retail - vending & micro-market</div></div><div class="src-status src-pending">Pending</div></div>
+        <div class="src-card"><div class="src-icon">SA</div><div><div class="src-name">LEAP Conference (Riyadh)</div><div class="src-desc">RSS - Arabic - Auto-translated via Make.com</div></div><div class="src-status src-pending">Pending</div></div>
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="pipeline-section">
+      <div class="pipeline-header-row">
+        <div class="pipeline-pct">15%</div>
+        <div class="pipeline-info">
+          <div class="pipeline-name">STREAM_B // BUSINESS_MODELS // 15%</div>
+          <div class="pipeline-freq">BI-WEEKLY SCAN // DEPLOYABLE OR FUNDED MODELS</div>
+        </div>
+        <div class="pipeline-led led-scheduled">Scheduled</div>
+      </div>
+      <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:16%"></div></div>
+      <div class="pipeline-sources">
+        <div class="src-card"><div class="src-icon">IG</div><div><div class="src-name">Indiegogo (Innovation/Food)</div><div class="src-desc">Filter: >100% funded, Innovation or Food</div></div><div class="src-status src-pending">Pending</div></div>
+        <div class="src-card"><div class="src-icon">KS</div><div><div class="src-name">Kickstarter (Innovation/Food)</div><div class="src-desc">Cross-ref both platforms for signal strength</div></div><div class="src-status src-pending">Pending</div></div>
+      </div>
+    </div>
+
+    <!-- C -->
+    <div class="pipeline-section">
+      <div class="pipeline-header-row">
+        <div class="pipeline-pct">10%</div>
+        <div class="pipeline-info">
+          <div class="pipeline-name">STREAM_C // RD_PROTOTYPES // 10%</div>
+          <div class="pipeline-freq">WEEKLY SCAN // VISUAL SPECULATIVE DESIGN SOURCES</div>
+        </div>
+        <div class="pipeline-led led-idle">Idle</div>
+      </div>
+      <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:11%"></div></div>
+      <div class="pipeline-sources">
+        <div class="src-card"><div class="src-icon">Be</div><div><div class="src-name">Behance</div><div class="src-desc">Tags: Product Design, Retail Concept, Future of Work</div></div><div class="src-status src-idle">Idle</div></div>
+        <div class="src-card"><div class="src-icon">Dr</div><div><div class="src-name">Dribbble</div><div class="src-desc">Concept renders and speculative UX</div></div><div class="src-status src-idle">Idle</div></div>
+      </div>
+    </div>
+
+    <div class="antifilters">
+      <div class="antifilters-header">[ANTI_FILTER] // GLOBAL RULESET // ALWAYS_ON</div>
+      <div class="antifilters-grid">
+        <div class="af-item af-reject">Dropshipping</div>
+        <div class="af-item af-reject">Print on Demand (POD)</div>
+        <div class="af-item af-reject">Affiliate Marketing</div>
+        <div class="af-item af-reject">Blog / Newsletter</div>
+        <div class="af-item af-reject">SaaS (unless hw-linked)</div>
+        <div class="af-item af-reject">Forbes / BI / Entrepreneur</div>
+        <div class="af-item af-require">100% Video Required</div>
+        <div class="af-item af-require">Auto-translate non-EN</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"><span id="toast-msg"></span></div>
+
+<script>
+const signals = [
+  { id: 1, stream: 'tech', origin: 'asia', originLabel: 'Tokyo, Japan', title: 'WIPO Patent: Autonomous Micro-Fulfillment Cell', desc: 'Modular robotic unit for sub-30 sqft footprint in high-traffic corridors. Pick-pack-dispense in one sealed enclosure.', source: 'WIPO WO2025/104422', sourceType: 'Patent', setupCost: 28000, unitPrice: 8.50, dailyVolume: 90, tradeShow: 'RetailTech Japan 2026' },
+  { id: 2, stream: 'tech', origin: 'me', originLabel: 'Riyadh, Saudi Arabia', title: 'LEAP 2026: Contactless Fresh Food Kiosk', desc: 'AI-vision checkout. Camera identifies produce and applies weight-based pricing in under 1.2 seconds.', source: 'LEAP Conference 2026', sourceType: 'Trade Show', setupCost: 44000, unitPrice: 12, dailyVolume: 60, tradeShow: 'LEAP 2026' },
+  { id: 3, stream: 'biz', origin: 'europe', originLabel: 'Berlin, Germany', title: 'Kickstarter: Modular Urban Espresso Bar', desc: 'Stackable stainless modules. Each ships flat. 340% funded. Operating across 12 Berlin transit hubs.', source: 'Kickstarter - Food', sourceType: 'Crowdfunded', setupCost: 18500, unitPrice: 4.80, dailyVolume: 85, tradeShow: null },
+  { id: 4, stream: 'tech', origin: 'asia', originLabel: 'Singapore', title: 'WIPO Patent: Multi-Temp Autonomous Vending Wall', desc: 'Independent thermal zones - refrigerated, ambient, hot - one payment terminal. Cafe + pharmacy + hot food in 2m2.', source: 'WIPO WO2025/098317', sourceType: 'Patent', setupCost: 52000, unitPrice: 9, dailyVolume: 110, tradeShow: null },
+  { id: 5, stream: 'rd', origin: 'europe', originLabel: 'Berlin, Germany', title: 'Behance: "Compact Urban Barbershop Pod"', desc: 'Prefab pod with acoustic insulation, integrated chair, tool rail, booking screen. 3D render series.', source: 'Behance - Product Design', sourceType: 'R&D Concept', setupCost: 35000, unitPrice: 28, dailyVolume: 12, tradeShow: null },
+  { id: 6, stream: 'tech', origin: 'americas', originLabel: 'Los Angeles, USA', title: 'NAMA: Unattended Cocktail Dispenser', desc: 'Pre-batched cocktail-on-tap with NFC pour verification and age check camera. Hotels, stadiums, airports.', source: 'NAMA Show 2026', sourceType: 'Trade Show', setupCost: 22000, unitPrice: 14, dailyVolume: 55, tradeShow: 'NAMA 2026' },
+  { id: 7, stream: 'tech', origin: 'asia', originLabel: 'Tokyo, Japan', title: 'RetailTech: AI Autonomous Pharmacy Kiosk', desc: 'Symptom-input routes to OTC recommendation. No pharmacist. Lawson piloting across 80 locations.', source: 'RetailTech Japan 2026', sourceType: 'Trade Show', setupCost: 67000, unitPrice: 18, dailyVolume: 40, tradeShow: 'RetailTech Japan 2026' },
+  { id: 8, stream: 'biz', origin: 'americas', originLabel: 'Los Angeles, USA', title: 'Indiegogo: Mobile Dog Wash Trailer', desc: 'Sprinter van conversion, self-contained water recycling. 14 washes/day. >200% funded. Franchise model.', source: 'Indiegogo - Innovation', sourceType: 'Crowdfunded', setupCost: 48000, unitPrice: 65, dailyVolume: 14, tradeShow: null },
+  { id: 9, stream: 'rd', origin: 'asia', originLabel: 'Tokyo, Japan', title: 'Dribbble: "Modular Street Ramen Stall"', desc: 'Flat-pack stainless, assembles in 40 min. Single service umbilical. Daylight and night renders.', source: 'Dribbble - Future of Work', sourceType: 'R&D Concept', setupCost: 19000, unitPrice: 14, dailyVolume: 70, tradeShow: null },
+  { id: 10, stream: 'tech', origin: 'me', originLabel: 'Riyadh, Saudi Arabia', title: 'WIPO: Solar-Powered Hydration Station', desc: 'Off-grid vending. Roof-mounted solar powers refrigeration and payment. Construction sites, events.', source: 'WIPO WO2025/112899', sourceType: 'Patent', setupCost: 31000, unitPrice: 3.50, dailyVolume: 140, tradeShow: null },
+  { id: 11, stream: 'tech', origin: 'europe', originLabel: 'Berlin, Germany', title: 'CES 2026: Smart Locker Postal Hub', desc: 'Automated label printing, integrated scale, multi-carrier routing. Smart Cities award. 4 German cities.', source: 'CES Innovation Awards', sourceType: 'Trade Show', setupCost: 42000, unitPrice: 6, dailyVolume: 80, tradeShow: 'CES 2026' },
+  { id: 12, stream: 'biz', origin: 'asia', originLabel: 'Singapore', title: 'Indiegogo: Hydroponic Herb Station', desc: 'Counter-top, 18 herb varieties, zero soil. App-controlled lighting. 180% funded. Hotel kitchens.', source: 'Indiegogo - Innovation', sourceType: 'Crowdfunded', setupCost: 8200, unitPrice: 22, dailyVolume: 20, tradeShow: null }
+];
+
+const keptSignals = signals.map(s => ({ ...s, status: 'Kept' }));
+const signalDates = {
+  1: '16.04.26',
+  2: '16.04.26',
+  3: '15.04.26',
+  4: '15.04.26',
+  5: '14.04.26',
+  6: '14.04.26',
+  7: '13.04.26',
+  8: '13.04.26',
+  9: '12.04.26',
+  10: '12.04.26',
+  11: '11.04.26',
+  12: '11.04.26'
+};
+const nodeLookup = {
+  'Tokyo, Japan': 'TOKYO_JPN',
+  'Riyadh, Saudi Arabia': 'RIYADH_SAU',
+  'Berlin, Germany': 'BERLIN_DEU',
+  'Singapore': 'SINGAPORE_SGP',
+  'Los Angeles, USA': 'LOSANGELES_USA'
+};
+const coordinateLookup = {
+  'Tokyo, Japan': '139.6917E // 35.6895N',
+  'Riyadh, Saudi Arabia': '46.6753E // 24.7136N',
+  'Berlin, Germany': '13.4050E // 52.5200N',
+  'Singapore': '103.8198E // 1.3521N',
+  'Los Angeles, USA': '118.2437W // 34.0522N'
+};
+let selectedTriageId = null;
+
+function payoffDays(s) { return Math.round(s.setupCost / (s.unitPrice * s.dailyVolume)); }
+function dailyGross(s) { return Math.round(s.unitPrice * s.dailyVolume); }
+function roiText(s) { return `${payoffDays(s)} DAY PAYBACK // $${dailyGross(s).toLocaleString()}/DAY GROSS`; }
+function streamClass(s) { return s === 'tech' ? 'stream-a' : s === 'biz' ? 'stream-b' : 'stream-c'; }
+function streamLabel(s) { return s === 'tech' ? 'STREAM_A' : s === 'biz' ? 'STREAM_B' : 'STREAM_C'; }
+function streamBreakdown(s) { return s.stream === 'tech' ? 'STREAM_A // TECH // 75%' : s.stream === 'biz' ? 'STREAM_B // BIZ // 15%' : 'STREAM_C // RD // 10%'; }
+function signalDate(s) { return signalDates[s.id] || '16.04.26'; }
+function srcId(s) { return `GAP_${String(s.id).padStart(3, '0')}`; }
+function regionNode(s) { return nodeLookup[s.originLabel] || formatCode(s.originLabel); }
+function coordinates(s) { return coordinateLookup[s.originLabel] || '000.0000E // 00.0000N'; }
+function formatCode(text) {
+  return String(text)
+    .replace(/&/g, 'AND')
+    .replace(/[^A-Za-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toUpperCase();
+}
+function signalHeader(s) { return `${srcId(s)} // ${regionNode(s)} // ${signalDate(s)}`; }
+function originReadout(s) { return `[${coordinates(s)}] // ${regionNode(s)} // ${formatCode(s.tradeShow || s.sourceType)}`; }
+
+function cardMarkup(s, { showActions = false, selectable = false } = {}) {
+  const selectedClass = selectable && selectedTriageId === s.id ? ' triage-selected' : '';
+  const idAttr = selectable ? ` id="card-${s.id}"` : '';
+  const clickAttr = selectable ? ` onclick="toggleTriageSelect(${s.id})"` : '';
+  return `
+    <div class="signal-card${selectedClass}" data-origin="${s.origin}"${idAttr}${clickAttr}>
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-id">[SIGNAL_${String(s.id).padStart(3, '0')}]</span>
+          <span class="card-stream ${streamClass(s.stream)}">${streamLabel(s.stream)}</span>
+        </div>
+        <span class="card-type">${formatCode(s.sourceType)}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-origin">${originReadout(s)}</div>
+        <div class="card-title">${signalHeader(s)}</div>
+        <div class="card-summary">${s.title}</div>
+        <div class="card-desc">${s.desc}</div>
+        <div class="roi-module">
+          <div class="roi-header"><div class="roi-led"></div>[ROI_CALC]</div>
+          <div class="roi-body"><div class="roi-text">${roiText(s)}</div></div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-source">[SRC_REF] // ${s.source}</span>
+        ${showActions ? `
+          <div class="action-btns">
+            <button class="key-btn key-keep" onclick="keepCard(${s.id}, event)">Keep</button>
+            <button class="key-btn key-zap" onclick="zapCard(${s.id}, event)">Zap</button>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderCards(data) {
+  const grid = document.getElementById('cards-grid');
+  if (!data.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">NO SIGNALS MATCH</div><div class="empty-desc">ALTER STREAM OR REGION NODE</div></div>';
+    return;
+  }
+  grid.innerHTML = data.map(s => cardMarkup(s, { showActions: true, selectable: true })).join('');
+}
+
+function renderHub() {
+  document.getElementById('hub-list').innerHTML = keptSignals.slice(0, 10).map(s => `
+    <div class="hub-item" onclick="showDetail(${s.id})" id="hub-item-${s.id}">
+      <div class="hub-item-id">[SIGNAL_${String(s.id).padStart(3, '0')}] // ${streamLabel(s.stream)} // ${formatCode(s.sourceType)}</div>
+      <div class="hub-item-title">${signalHeader(s)}</div>
+      <div class="hub-item-summary">${s.title}</div>
+      <div class="hub-item-roi">${roiText(s)}</div>
+      <div class="hub-item-source">[SRC_REF] // ${s.source} // ${regionNode(s)}</div>
+    </div>
+  `).join('');
+}
+
+function showDetail(id) {
+  const s = keptSignals.find(x => x.id === id);
+  if (!s) return;
+  document.querySelectorAll('.hub-item').forEach(el => el.classList.remove('selected'));
+  const el = document.getElementById(`hub-item-${id}`);
+  if (el) el.classList.add('selected');
+  document.getElementById('detail-title').textContent = signalHeader(s);
+  document.getElementById('detail-origin').textContent = `${originReadout(s)} // [SRC_REF]`;
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-row"><span class="detail-key">[STREAM_NODE]</span><span class="detail-val">${streamBreakdown(s)}</span></div>
+    <div class="detail-row"><span class="detail-key">[HEADLINE]</span><span class="detail-val">${s.title}</span></div>
+    <div class="detail-row"><span class="detail-key">[SETUP_COST]</span><span class="detail-val">$${s.setupCost.toLocaleString()}</span></div>
+    <div class="detail-row"><span class="detail-key">[UNIT_PRICE]</span><span class="detail-val">$${s.unitPrice}</span></div>
+    <div class="detail-row"><span class="detail-key">[DAILY_VOL]</span><span class="detail-val">${s.dailyVolume} UNITS_PER_DAY</span></div>
+    <div class="detail-row"><span class="detail-key">[DAILY_GROSS]</span><span class="detail-val">$${dailyGross(s).toLocaleString()}</span></div>
+    <div class="detail-row"><span class="detail-key">[ROI_CALC]</span><span class="detail-val detail-val-signal">${roiText(s)}</span></div>
+    <div class="detail-row"><span class="detail-key">[SRC_REF]</span><span class="detail-val">${s.source}</span></div>
+    ${s.tradeShow ? `<div class="detail-row"><span class="detail-key">[EVENT_NODE]</span><span class="detail-val">${s.tradeShow}</span></div>` : ''}
+    <div class="copy-module">
+      <div class="copy-module-header">[HANDOFF_COPY] // READY_STATE</div>
+      <div class="copy-module-body">
+        <div class="copy-text">${signalHeader(s)}<br><br>${s.title}.<br><br>${roiText(s)}.<br><br>[SRC_REF] // ${s.source} // ${regionNode(s)}</div>
+        <div class="copy-actions">
+          <button class="btn btn-ghost" style="font-size:9px" onclick="showToast('COPIED TO CLIPBOARD')">Copy</button>
+          <button class="btn btn-signal" style="font-size:9px" onclick="showToast('QUEUED FOR POST')">Queue</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleTriageSelect(id) {
+  if (selectedTriageId !== null) {
+    const previous = document.getElementById(`card-${selectedTriageId}`);
+    if (previous) previous.classList.remove('triage-selected');
+  }
+  selectedTriageId = selectedTriageId === id ? null : id;
+  if (selectedTriageId !== null) {
+    const next = document.getElementById(`card-${selectedTriageId}`);
+    if (next) next.classList.add('triage-selected');
+  }
+}
+
+function keepCard(id, evt) {
+  if (evt) evt.stopPropagation();
+  const card = document.getElementById(`card-${id}`);
+  if (!card) return;
+  if (selectedTriageId === id) selectedTriageId = null;
+  card.style.opacity = '0.24';
+  card.style.pointerEvents = 'none';
+  showToast('SIGNAL KEPT // VAULT UPDATED');
+  updateTriageCount(-1);
+}
+
+function zapCard(id, evt) {
+  if (evt) evt.stopPropagation();
+  const card = document.getElementById(`card-${id}`);
+  if (!card) return;
+  if (selectedTriageId === id) selectedTriageId = null;
+  card.style.opacity = '0';
+  card.style.pointerEvents = 'none';
+  setTimeout(() => card.remove(), 180);
+  showToast('SIGNAL PURGED // QUEUE UPDATED');
+  updateTriageCount(-1);
+}
+
+function zapAll() {
+  selectedTriageId = null;
+  document.querySelectorAll('#cards-grid .signal-card').forEach((card, index) => {
+    setTimeout(() => {
+      card.style.opacity = '0';
+      setTimeout(() => card.remove(), 160);
+    }, index * 24);
+  });
+  document.getElementById('stat-unprocessed').textContent = '0';
+  document.getElementById('triage-count').textContent = '0';
+  showToast('TRIAGE BATCH PURGED');
+}
+
+function updateTriageCount(delta) {
+  const countEl = document.getElementById('triage-count');
+  const statEl = document.getElementById('stat-unprocessed');
+  const nextValue = Math.max(0, parseInt(countEl.textContent, 10) + delta);
+  countEl.textContent = nextValue;
+  statEl.textContent = nextValue;
+}
+
+function filterCards(type, el) {
+  document.querySelectorAll('.filter-key').forEach(node => node.classList.remove('active'));
+  if (el) el.classList.add('active');
+  let filtered = signals;
+  if (['tech', 'biz', 'rd'].includes(type)) filtered = filtered.filter(s => s.stream === type);
+  if (['asia', 'europe', 'me', 'americas'].includes(type)) filtered = filtered.filter(s => s.origin === type);
+  renderCards(filtered);
+}
+
+function filterByRegion(region) {
+  document.querySelectorAll('.region-module').forEach(node => node.classList.remove('active'));
+  const regionEl = document.getElementById(`region-${region}`);
+  if (regionEl) regionEl.classList.add('active');
+  const filtered = keptSignals.filter(s => s.origin === region);
+  const grid = document.getElementById('map-signals-grid');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">NO LOCKED SIGNALS</div><div class="empty-desc">REGION NODE RETURNED ZERO ACTIVE RECORDS</div></div>';
+    return;
+  }
+  grid.innerHTML = filtered.slice(0, 4).map(s => cardMarkup(s)).join('');
+}
+
+function switchView(view, tab) {
+  document.querySelectorAll('.view').forEach(node => node.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(node => node.classList.remove('active'));
+  document.getElementById(`view-${view}`).classList.add('active');
+  tab.classList.add('active');
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  const isGreenState = /REFRESH|KEPT|QUEUED|ACTIVE|READY/.test(msg);
+  document.getElementById('toast-msg').textContent = msg;
+  toast.style.borderColor = isGreenState ? 'var(--signal-green)' : 'var(--border-blue)';
+  toast.style.color = isGreenState ? 'var(--signal-green)' : 'var(--text-bright)';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+renderCards(signals);
+renderHub();
+filterByRegion('asia');
+</script>
+</body>
+</html>
