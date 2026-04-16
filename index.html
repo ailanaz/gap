@@ -21,7 +21,7 @@
     --blue-highlight-soft: rgba(0, 71, 255, 0.14);
     --signal-green: #39FF14;
     --signal-green-soft: rgba(57, 255, 20, 0.12);
-    --text-bright: #F5F7FB;
+    --text-bright: var(--blue-highlight);
     --text-mid: #B9C6E4;
     --text-dim: #7C92C6;
     --text-ghost: #53627f;
@@ -1285,16 +1285,16 @@
 
     <div class="filter-bar">
       <span class="filter-label">[STREAM_NODE]</span>
-      <div class="filter-key active" onclick="filterCards('all', this)">All</div>
-      <div class="filter-key" onclick="filterCards('tech', this)">A // Tech</div>
-      <div class="filter-key" onclick="filterCards('biz', this)">B // Biz</div>
-      <div class="filter-key" onclick="filterCards('rd', this)">C // R&amp;D</div>
+      <div class="filter-key active" data-filter="all" onclick="filterCards('all', this)">All</div>
+      <div class="filter-key" data-filter="tech" onclick="filterCards('tech', this)">A // Tech</div>
+      <div class="filter-key" data-filter="biz" onclick="filterCards('biz', this)">B // Biz</div>
+      <div class="filter-key" data-filter="rd" onclick="filterCards('rd', this)">C // R&amp;D</div>
       <div class="filter-sep"></div>
       <span class="filter-label">[REGION_NODE]</span>
-      <div class="filter-key" onclick="filterCards('asia', this)">Asia</div>
-      <div class="filter-key" onclick="filterCards('europe', this)">Europe</div>
-      <div class="filter-key" onclick="filterCards('me', this)">M.East</div>
-      <div class="filter-key" onclick="filterCards('americas', this)">Americas</div>
+      <div class="filter-key" data-filter="asia" onclick="filterCards('asia', this)">Asia</div>
+      <div class="filter-key" data-filter="europe" onclick="filterCards('europe', this)">Europe</div>
+      <div class="filter-key" data-filter="me" onclick="filterCards('me', this)">M.East</div>
+      <div class="filter-key" data-filter="americas" onclick="filterCards('americas', this)">Americas</div>
     </div>
 
     <div class="cards-grid" id="cards-grid"></div>
@@ -1357,22 +1357,22 @@
         </svg>
       </div>
       <div class="region-strip">
-        <div class="region-module" id="region-asia" onclick="filterByRegion('asia')">
+        <div class="region-module" id="region-asia" data-region="asia" onclick="filterByRegion('asia')">
           <div class="region-label">[REGION_NODE] ASIA_PAC</div>
           <div class="region-val">76</div>
           <div class="region-sub">TOKYO_JPN // SINGAPORE_SGP</div>
         </div>
-        <div class="region-module" id="region-europe" onclick="filterByRegion('europe')">
+        <div class="region-module" id="region-europe" data-region="europe" onclick="filterByRegion('europe')">
           <div class="region-label">[REGION_NODE] EUROPE</div>
           <div class="region-val">28</div>
           <div class="region-sub">BERLIN_DEU // CENTRAL_HUB</div>
         </div>
-        <div class="region-module" id="region-me" onclick="filterByRegion('me')">
+        <div class="region-module" id="region-me" data-region="me" onclick="filterByRegion('me')">
           <div class="region-label">[REGION_NODE] MIDDLE_EAST</div>
           <div class="region-val">19</div>
           <div class="region-sub">RIYADH_SAU // LEAP_NODE</div>
         </div>
-        <div class="region-module" id="region-americas" onclick="filterByRegion('americas')">
+        <div class="region-module" id="region-americas" data-region="americas" onclick="filterByRegion('americas')">
           <div class="region-label">[REGION_NODE] AMERICAS</div>
           <div class="region-val">25</div>
           <div class="region-sub">LOSANGELES_USA // NAMA_NODE</div>
@@ -1546,7 +1546,54 @@ const coordinateLookup = {
   'Singapore': '103.8198E // 1.3521N',
   'Los Angeles, USA': '118.2437W // 34.0522N'
 };
+const STORAGE_KEY = 'gap-ui-state-v1';
+const allowedViews = new Set(['triage', 'map', 'hub', 'pipeline']);
+const allowedFilters = new Set(['all', 'tech', 'biz', 'rd', 'asia', 'europe', 'me', 'americas']);
+const allowedRegions = new Set(['asia', 'europe', 'me', 'americas']);
+const defaultUiState = {
+  activeView: 'triage',
+  triageFilter: 'all',
+  mapRegion: 'asia',
+  hubSignalId: null
+};
 let selectedTriageId = null;
+let uiState = loadUiState();
+
+function loadUiState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    return {
+      ...defaultUiState,
+      ...saved
+    };
+  } catch (error) {
+    return { ...defaultUiState };
+  }
+}
+
+function saveUiState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(uiState));
+  } catch (error) {
+    // Ignore storage issues in restrictive file:// browser contexts.
+  }
+}
+
+function normalizeView(view) {
+  return allowedViews.has(view) ? view : defaultUiState.activeView;
+}
+
+function normalizeFilter(filter) {
+  return allowedFilters.has(filter) ? filter : defaultUiState.triageFilter;
+}
+
+function normalizeRegion(region) {
+  return allowedRegions.has(region) ? region : defaultUiState.mapRegion;
+}
+
+function normalizeHubSignalId(id) {
+  return keptSignals.some(signal => signal.id === id) ? id : null;
+}
 
 function payoffDays(s) { return Math.round(s.setupCost / (s.unitPrice * s.dailyVolume)); }
 function dailyGross(s) { return Math.round(s.unitPrice * s.dailyVolume); }
@@ -1631,6 +1678,8 @@ function showDetail(id) {
   document.querySelectorAll('.hub-item').forEach(el => el.classList.remove('selected'));
   const el = document.getElementById(`hub-item-${id}`);
   if (el) el.classList.add('selected');
+  uiState.hubSignalId = id;
+  saveUiState();
   document.getElementById('detail-title').textContent = signalHeader(s);
   document.getElementById('detail-origin').textContent = `${originReadout(s)} // [SRC_REF]`;
   document.getElementById('detail-body').innerHTML = `
@@ -1654,6 +1703,32 @@ function showDetail(id) {
       </div>
     </div>
   `;
+}
+
+function getFilteredSignals(filter) {
+  const normalizedFilter = normalizeFilter(filter);
+  let filtered = signals;
+  if (['tech', 'biz', 'rd'].includes(normalizedFilter)) filtered = filtered.filter(s => s.stream === normalizedFilter);
+  if (['asia', 'europe', 'me', 'americas'].includes(normalizedFilter)) filtered = filtered.filter(s => s.origin === normalizedFilter);
+  return filtered;
+}
+
+function syncFilterControls(filter) {
+  const normalizedFilter = normalizeFilter(filter);
+  document.querySelectorAll('.filter-key').forEach(node => {
+    node.classList.toggle('active', node.dataset.filter === normalizedFilter);
+  });
+}
+
+function setActiveView(view, persist = true) {
+  const normalizedView = normalizeView(view);
+  document.querySelectorAll('.view').forEach(node => node.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(node => node.classList.remove('active'));
+  document.getElementById(`view-${normalizedView}`).classList.add('active');
+  const activeTab = document.querySelector(`.nav-tab[data-view="${normalizedView}"]`);
+  if (activeTab) activeTab.classList.add('active');
+  uiState.activeView = normalizedView;
+  if (persist) saveUiState();
 }
 
 function toggleTriageSelect(id) {
@@ -1713,19 +1788,21 @@ function updateTriageCount(delta) {
 }
 
 function filterCards(type, el) {
-  document.querySelectorAll('.filter-key').forEach(node => node.classList.remove('active'));
-  if (el) el.classList.add('active');
-  let filtered = signals;
-  if (['tech', 'biz', 'rd'].includes(type)) filtered = filtered.filter(s => s.stream === type);
-  if (['asia', 'europe', 'me', 'americas'].includes(type)) filtered = filtered.filter(s => s.origin === type);
-  renderCards(filtered);
+  const normalizedFilter = normalizeFilter(type);
+  uiState.triageFilter = normalizedFilter;
+  syncFilterControls(normalizedFilter);
+  renderCards(getFilteredSignals(normalizedFilter));
+  saveUiState();
 }
 
 function filterByRegion(region) {
+  const normalizedRegion = normalizeRegion(region);
   document.querySelectorAll('.region-module').forEach(node => node.classList.remove('active'));
-  const regionEl = document.getElementById(`region-${region}`);
+  const regionEl = document.getElementById(`region-${normalizedRegion}`);
   if (regionEl) regionEl.classList.add('active');
-  const filtered = keptSignals.filter(s => s.origin === region);
+  uiState.mapRegion = normalizedRegion;
+  saveUiState();
+  const filtered = keptSignals.filter(s => s.origin === normalizedRegion);
   const grid = document.getElementById('map-signals-grid');
   if (!filtered.length) {
     grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">NO LOCKED SIGNALS</div><div class="empty-desc">REGION NODE RETURNED ZERO ACTIVE RECORDS</div></div>';
@@ -1735,10 +1812,7 @@ function filterByRegion(region) {
 }
 
 function switchView(view, tab) {
-  document.querySelectorAll('.view').forEach(node => node.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(node => node.classList.remove('active'));
-  document.getElementById(`view-${view}`).classList.add('active');
-  tab.classList.add('active');
+  setActiveView(view);
 }
 
 function showToast(msg) {
@@ -1751,9 +1825,21 @@ function showToast(msg) {
   setTimeout(() => toast.classList.remove('show'), 2800);
 }
 
-renderCards(signals);
-renderHub();
-filterByRegion('asia');
+function restoreUiState() {
+  uiState.activeView = normalizeView(uiState.activeView);
+  uiState.triageFilter = normalizeFilter(uiState.triageFilter);
+  uiState.mapRegion = normalizeRegion(uiState.mapRegion);
+  uiState.hubSignalId = normalizeHubSignalId(uiState.hubSignalId);
+
+  renderHub();
+  filterCards(uiState.triageFilter);
+  filterByRegion(uiState.mapRegion);
+  if (uiState.hubSignalId !== null) showDetail(uiState.hubSignalId);
+  setActiveView(uiState.activeView, false);
+  saveUiState();
+}
+
+restoreUiState();
 </script>
 </body>
 </html>
