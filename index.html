@@ -15,8 +15,10 @@
     --module: #05070a;
     --inset: #030405;
     --border-inactive: #1A1A1A;
-    --border-blue: #0047FF;
-    --border-blue-soft: rgba(0, 71, 255, 0.40);
+    --border-blue: #6E88C9;
+    --border-blue-soft: rgba(110, 136, 201, 0.38);
+    --blue-highlight: #0047FF;
+    --blue-highlight-soft: rgba(0, 71, 255, 0.14);
     --signal-green: #39FF14;
     --signal-green-soft: rgba(57, 255, 20, 0.12);
     --text-bright: #F5F7FB;
@@ -85,14 +87,14 @@
   .logo-mark {
     width: 34px;
     height: 34px;
-    border: 2px solid var(--border-blue);
+    border: 2px solid var(--blue-highlight);
     background: var(--module);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 11px;
     font-weight: 800;
-    color: var(--border-blue);
+    color: var(--blue-highlight);
     letter-spacing: 0.18em;
   }
 
@@ -132,7 +134,7 @@
   }
 
   .header-readout strong {
-    color: var(--border-blue);
+    color: var(--blue-highlight);
     font-weight: 700;
   }
 
@@ -191,13 +193,13 @@
 
   .nav-tab:hover {
     color: var(--text-bright);
-    border-bottom-color: var(--border-blue);
+    border-bottom-color: var(--blue-highlight);
     background: var(--module);
   }
 
   .nav-tab.active {
-    color: var(--border-blue);
-    border-bottom-color: var(--border-blue);
+    color: var(--blue-highlight);
+    border-bottom-color: var(--blue-highlight);
     background: var(--module);
   }
 
@@ -206,8 +208,8 @@
     font-weight: 700;
     padding: 2px 6px;
     background: var(--inset);
-    border: 1px solid var(--border-blue-soft);
-    color: var(--border-blue);
+    border: 1px solid var(--blue-highlight-soft);
+    color: var(--blue-highlight);
   }
 
   main {
@@ -380,9 +382,9 @@
   }
 
   .filter-key.active {
-    background: rgba(46, 91, 255, 0.10);
-    color: var(--border-blue);
-    border-color: var(--border-blue);
+    background: var(--blue-highlight-soft);
+    color: var(--blue-highlight);
+    border-color: var(--blue-highlight);
   }
 
   .filter-sep {
@@ -631,8 +633,8 @@
     width: 100%;
     height: 400px;
     background:
-      linear-gradient(rgba(0, 71, 255, 0.12) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 71, 255, 0.12) 1px, transparent 1px),
+      linear-gradient(rgba(110, 136, 201, 0.14) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110, 136, 201, 0.14) 1px, transparent 1px),
       var(--panel-alt);
     background-size: 36px 36px, 36px 36px, auto;
     position: relative;
@@ -674,7 +676,7 @@
   }
 
   .map-count {
-    fill: var(--text-bright);
+    fill: var(--blue-highlight);
     font-size: 9px;
     font-family: var(--mono);
     font-weight: 700;
@@ -859,7 +861,7 @@
 
   .copy-module {
     background: var(--module);
-    border: 2px solid var(--border-blue);
+    border: 2px solid var(--border-blue-soft);
     margin-top: 14px;
   }
 
@@ -1315,8 +1317,8 @@
       <div class="map-canvas">
         <img class="map-base" src="./world.svg" alt="World map" />
         <svg class="map-overlay" viewBox="0 0 2000 857" xmlns="http://www.w3.org/2000/svg">
-          <line x1="0" y1="428.5" x2="2000" y2="428.5" stroke="rgba(0,71,255,0.24)" stroke-width="1"/>
-          <line x1="1000" y1="0" x2="1000" y2="857" stroke="rgba(0,71,255,0.24)" stroke-width="1"/>
+          <line x1="0" y1="428.5" x2="2000" y2="428.5" stroke="rgba(110,136,201,0.26)" stroke-width="1"/>
+          <line x1="1000" y1="0" x2="1000" y2="857" stroke="rgba(110,136,201,0.26)" stroke-width="1"/>
           <g class="map-dot" onclick="filterByRegion('asia')" style="cursor:pointer">
             <circle cx="1635" cy="196" r="24" fill="rgba(0,71,255,0.12)" stroke="#0047FF" stroke-width="1.5"/>
             <circle cx="1635" cy="196" r="6" fill="#0047FF"/>
