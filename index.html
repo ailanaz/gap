@@ -77,6 +77,12 @@
   .logo-text { font-size: 13px; font-weight: 800; letter-spacing: 0.24em; color: var(--text-bright); text-transform: uppercase; }
 
   .logo-sub { display: block; font-size: 9px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 2px; }
+.logo-img {
+  height: 42px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
 
   .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
 
@@ -417,11 +423,7 @@
 <body>
 <header>
   <div class="logo">
-    <div class="logo-mark">G</div>
-    <div>
-      <div class="logo-text">GAP</div>
-      <span class="logo-sub">Global Alpha Pipeline</span>
-    </div>
+    <img src="./Goodbye trans.png" alt="GAP — Global Alpha Pipeline" class="logo-img" />
   </div>
   <div class="header-right">
     <div class="header-readout">Updated <strong>Apr 17, 2026</strong></div>
