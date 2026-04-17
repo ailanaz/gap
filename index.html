@@ -425,7 +425,22 @@
     .priority-led-box, .src-status { margin-left: 0; }
   }
 
-  </style>
+  
+/* ── Social Extract ── */
+.social-extract { border-top: 1px solid var(--border-inactive); margin-top: 16px; padding-top: 14px; }
+.social-extract-header { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-ghost); margin-bottom: 10px; }
+.social-format-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.fmt-tab { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 12px; border-radius: 4px; border: 1px solid var(--border-inactive); background: transparent; color: var(--text-dim); cursor: pointer; }
+.fmt-tab.active { border-color: var(--signal-green); color: var(--signal-green); background: var(--signal-green-soft); }
+.social-caption-box { background: var(--inset); border-radius: 6px; padding: 12px; margin-bottom: 10px; }
+.social-caption-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-ghost); margin-bottom: 6px; }
+.social-caption-text { font-size: 12px; line-height: 1.6; color: var(--text-bright); white-space: pre-wrap; font-family: var(--mono); }
+.social-meta { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.social-meta-item { font-size: 10px; color: var(--text-dim); background: var(--panel); border-radius: 4px; padding: 4px 8px; }
+.social-copy-btn { width: 100%; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px; border-radius: 6px; border: 1px solid var(--signal-green); background: transparent; color: var(--signal-green); cursor: pointer; transition: background 0.15s; }
+.social-copy-btn:hover { background: var(--signal-green-soft); }
+.social-copy-btn.copied { background: var(--signal-green-soft); }
+</style>
 </head>
 <body>
 <header>
@@ -781,7 +796,92 @@ function showDetail(id) {
           <button class="btn btn-signal" style="font-size:9px" onclick="showToast('Source opened')">Source This Gap</button>
         </div>
       </div>
+    <div class="social-extract" id="social-extract">
+      <div class="social-extract-header">Extract for Socials</div>
+      <div class="social-format-tabs">
+        <button class="fmt-tab active" data-fmt="tiktok">TikTok 9:16</button>
+        <button class="fmt-tab" data-fmt="reels">Reels</button>
+        <button class="fmt-tab" data-fmt="shorts">Shorts</button>
+      </div>
+      <div class="social-caption-box">
+        <div class="social-caption-label">Hook</div>
+        <div class="social-caption-text" id="social-hook"></div>
+      </div>
+      <div class="social-caption-box">
+        <div class="social-caption-label">Caption + Tags</div>
+        <div class="social-caption-text" id="social-caption"></div>
+      </div>
+      <div class="social-meta" id="social-meta"></div>
+      <button class="social-copy-btn" id="social-copy-btn">Copy Caption</button>
+    </div>
     </div>`;
+  wireSocialExtract(s);
+}
+
+function socialCaption(s, fmt) {
+  const fmtMeta = {
+    tiktok:  { label: 'TikTok 9:16', dur: '15–60s', ratio: '1080×1920' },
+    reels:   { label: 'Instagram Reels', dur: '15–90s', ratio: '1080×1920' },
+    shorts:  { label: 'YouTube Shorts', dur: '≤60s', ratio: '1080×1920' }
+  };
+  const meta = fmtMeta[fmt] || fmtMeta.tiktok;
+  const days = Math.ceil(s.setupCost / (s.unitPrice * s.dailyVolume));
+  const gross = (s.unitPrice * s.dailyVolume).toFixed(0);
+  const hooks = {
+    tiktok:  'This vending machine pays itself off in ' + days + ' days.',
+    reels:   'The business that runs while you sleep — breaks even in ' + days + ' days.',
+    shorts:  '$' + gross + '/day from one machine. Here\'s how it works.'
+  };
+  const hook = hooks[fmt] || hooks.tiktok;
+  const streamTag = s.stream === 'TECH' ? 'TechBusiness' : s.stream === 'BUSINESS' ? 'BusinessModel' : 'ConceptBiz';
+  const body = s.title + '\n\n' +
+    'Origin: ' + (s.originLabel || s.origin) + '\n' +
+    'Setup: $' + s.setupCost.toLocaleString() + '  |  ' +
+    s.dailyVolume + '/day  |  Break-even: ' + days + ' days\n\n' +
+    '#FutureOfBusiness #' + streamTag + ' #PassiveIncome #BusinessIdea #Startup';
+  return { hook, caption: body, meta };
+}
+
+function renderSocialExtract(s, fmt) {
+  const hookEl = document.getElementById('social-hook');
+  const captionEl = document.getElementById('social-caption');
+  const metaEl = document.getElementById('social-meta');
+  if (!hookEl || !captionEl || !metaEl) return;
+  const { hook, caption, meta } = socialCaption(s, fmt);
+  hookEl.textContent = hook;
+  captionEl.textContent = caption;
+  metaEl.innerHTML = '<span class="social-meta-item">' + meta.label + '</span>' +
+    '<span class="social-meta-item">' + meta.dur + '</span>' +
+    '<span class="social-meta-item">' + meta.ratio + '</span>';
+}
+
+function wireSocialExtract(s) {
+  const tabs = document.querySelectorAll('.fmt-tab');
+  let activeFmt = 'tiktok';
+  renderSocialExtract(s, activeFmt);
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tabs.forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      activeFmt = tab.dataset.fmt;
+      renderSocialExtract(s, activeFmt);
+    });
+  });
+  const copyBtn = document.getElementById('social-copy-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function() {
+      const { hook, caption } = socialCaption(s, activeFmt);
+      const fullText = hook + '\n\n' + caption;
+      navigator.clipboard.writeText(fullText).then(function() {
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.add('copied');
+        setTimeout(function() { copyBtn.textContent = 'Copy Caption'; copyBtn.classList.remove('copied'); }, 2000);
+      }).catch(function() {
+        copyBtn.textContent = 'Copy failed';
+        setTimeout(function() { copyBtn.textContent = 'Copy Caption'; }, 2000);
+      });
+    });
+  }
 }
 
 function getFilteredSignals(filter) {
