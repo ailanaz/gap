@@ -434,16 +434,14 @@
     <span class="logo-title">Global Alpha Pipeline</span>
   </div>
   <div class="header-right">
-    <div class="header-readout">Updated <strong>Apr 17, 2026</strong></div>
-    <div class="header-readout">GAP <strong>v1.0</strong></div>
-    <div class="led-status"><div class="led-dot"></div> Operational</div>
+    <div class="header-readout">Last Updated <strong>Apr 17, 2026</strong></div>
   </div>
 </header>
 <nav>
-  <div class="nav-tab active" data-view="triage" onclick="switchView('triage', this)">Pipeline Feed <span class="nav-count" id="triage-count">12</span></div>
-  <div class="nav-tab" data-view="map" onclick="switchView('map', this)">Alpha Regions</div>
-  <div class="nav-tab" data-view="hub" onclick="switchView('hub', this)">Sourced <span class="nav-count" id="hub-count">34</span></div>
-  <div class="nav-tab" data-view="pipeline" onclick="switchView('pipeline', this)">Pipeline Config</div>
+  <div class="nav-tab active" data-view="triage" onclick="switchView('triage', this)">Ready to Review <span class="nav-count" id="triage-count">12</span></div>
+  <div class="nav-tab" data-view="map" onclick="switchView('map', this)">Regions</div>
+  <div class="nav-tab" data-view="hub" onclick="switchView('hub', this)">Saved <span class="nav-count" id="hub-count">34</span></div>
+  <div class="nav-tab" data-view="pipeline" onclick="switchView('pipeline', this)">Sources</div>
 </nav>
 <main>
 <!-- TRIAGE -->
@@ -451,19 +449,11 @@
 
 
 
-<div class="pipeline-breadcrumb" id="pipeline-breadcrumb">
-  <span class="breadcrumb-step done" id="bc-input">Input</span>
-  <span class="breadcrumb-sep">//</span>
-  <span class="breadcrumb-step active" id="bc-triage">Triage</span>
-  <span class="breadcrumb-sep">//</span>
-  <span class="breadcrumb-step" id="bc-analysis">Analysis</span>
-  <span class="breadcrumb-sep">//</span>
-  <span class="breadcrumb-step" id="bc-export">Export</span>
-</div>
+
 <div class="system-overview">
-  <div class="stat-module"><div class="stat-module-label active">Pending</div><div class="stat-val stat-val-lit" id="stat-unprocessed">12</div><div class="stat-sub">Awaiting review</div></div>
-  <div class="stat-module"><div class="stat-module-label">Saved</div><div class="stat-val">34</div><div class="stat-sub">Locked records</div></div>
-  <div class="stat-module"><div class="stat-module-label">Discarded</div><div class="stat-val">89</div><div class="stat-sub">Weekly purge</div></div>
+  <div class="stat-module"><div class="stat-module-label active">To Review</div><div class="stat-val stat-val-lit" id="stat-unprocessed">12</div><div class="stat-sub">Signals found</div></div>
+  <div class="stat-module"><div class="stat-module-label">Saved</div><div class="stat-val">34</div><div class="stat-sub">Ideas saved</div></div>
+  <div class="stat-module"><div class="stat-module-label">Removed</div><div class="stat-val">89</div><div class="stat-sub">Passed on</div></div>
 </div>
 
 
@@ -573,7 +563,7 @@
     </div>
     <div class="hub-grid">
       <div class="hub-list-panel">
-        <div class="hub-list-header">Sourced Opportunities — 34 Total</div>
+        <div class="hub-list-header">Saved — 34 Ideas</div>
         <div class="scrollable-list" id="hub-list"></div>
       </div>
       <div class="detail-panel" id="hub-detail">
