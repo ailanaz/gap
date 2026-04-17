@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>GAP - Global Alpha Pipeline</title>
+<title>GAP — Global Alpha Pipeline</title>
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -415,7 +415,7 @@
     <div class="logo-mark">G</div>
     <div>
       <div class="logo-text">GAP</div>
-      <span class="logo-sub">Global Alpha Platform</span>
+      <span class="logo-sub">Global Alpha Pipeline</span>
     </div>
   </div>
   <div class="header-right">
@@ -430,16 +430,16 @@
 
 <nav>
   <div class="nav-tab active" data-view="triage" onclick="switchView('triage', this)">
-    Feed
+    Pipeline Feed
     <span class="nav-count" id="triage-count">12</span>
   </div>
-  <div class="nav-tab" data-view="map" onclick="switchView('map', this)"> Origins
+  <div class="nav-tab" data-view="map" onclick="switchView('map', this)"> Alpha Regions
   </div>
   <div class="nav-tab" data-view="hub" onclick="switchView('hub', this)">
-    Saved
+    Sourced
     <span class="nav-count" id="hub-count">34</span>
   </div>
-  <div class="nav-tab" data-view="pipeline" onclick="switchView('pipeline', this)"> Pipeline
+  <div class="nav-tab" data-view="pipeline" onclick="switchView('pipeline', this)"> Pipeline Config
   </div>
 </nav>
 
@@ -449,12 +449,12 @@
   <div class="view active" id="view-triage">
     <div class="section-header">
       <div>
-        <div class="section-title">Signal Feed</div>
-        <div class="section-subtitle">Live signals from your global source pipeline</div>
+        <div class="section-title">Triage New Alpha</div>
+        <div class="section-subtitle">Incoming signals from the global pipeline</div>
       </div>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-ghost" onclick="zapAll()">Clear All</button>
-        <button class="btn btn-signal" onclick="showToast('Pipeline refreshing')">Refresh Feed</button>
+        <button class="btn btn-ghost" onclick="zapAll()">Clear Queue</button>
+        <button class="btn btn-signal" onclick="showToast('Pulling new alpha...')">Pull New Alpha</button>
       </div>
     </div>
 
@@ -485,13 +485,13 @@
   <div class="view" id="view-map">
     <div class="section-header">
       <div>
-        <div class="section-title">Global Signal Origins</div>
-        <div class="section-subtitle">Click a region to filter signals by origin</div>
+        <div class="section-title">Source by Origin</div>
+        <div class="section-subtitle">Filter the GAP by geographic innovation hubs</div>
       </div>
     </div>
     <div class="map-container">
       <div class="map-header">
-        <span>Signal Origins ÃÂ¢ÃÂÃÂ Select a region to filter</span>
+        <span>Alpha Origins — Select a region to filter</span>
         <span>148 SIGNALS // 4 REGIONS</span>
       </div>
       <div class="map-canvas">
@@ -537,7 +537,7 @@
         </svg>
       </div>
       <div class="region-strip">
-        <div class="region-module" id="region-asia" data-region="asia" onclick="filterByRegion('asia')"><div class="region-label">Asia Pacific</div><div class="region-val">76</div><div class="region-sub">Tokyo ÃÂÃÂ· Singapore</div></div>
+        <div class="region-module" id="region-asia" data-region="asia" onclick="filterByRegion('asia')"><div class="region-label">Asia Pacific</div><div class="region-val">76</div><div class="region-sub">Tokyo ÃÂÃÂÃÂÃÂ· Singapore</div></div>
         <div class="region-module" id="region-europe" data-region="europe" onclick="filterByRegion('europe')"><div class="region-label">Europe</div><div class="region-val">28</div><div class="region-sub">Berlin</div></div>
         <div class="region-module" id="region-me" data-region="me" onclick="filterByRegion('me')"><div class="region-label">Middle East</div><div class="region-val">19</div><div class="region-sub">Riyadh</div></div>
         <div class="region-module" id="region-americas" data-region="americas" onclick="filterByRegion('americas')"><div class="region-label">Americas</div><div class="region-val">25</div><div class="region-sub">Los Angeles</div></div>
@@ -550,24 +550,24 @@
   <div class="view" id="view-hub">
     <div class="section-header">
       <div>
-        <div class="section-title">Saved Signals</div>
-        <div class="section-subtitle">Signals you've saved, ready to review and act on</div>
+        <div class="section-title">Sourced Opportunities</div>
+        <div class="section-subtitle">Extracted alpha ready for execution</div>
       </div>
-      <button class="btn btn-ghost" onclick="showToast('All signals exported')">Export All</button>
+      <button class="btn btn-ghost" onclick="showToast('All alpha exported')">Export All Alpha</button>
     </div>
     <div class="hub-grid">
       <div class="hub-list-panel">
-        <div class="hub-list-header">Saved Signals ÃÂ¢ÃÂÃÂ 34 Total</div>
+        <div class="hub-list-header">Sourced Opportunities — 34 Total</div>
         <div class="scrollable-list" id="hub-list"></div>
       </div>
       <div class="detail-panel" id="hub-detail">
         <div class="detail-header">
-          <div class="detail-header-label">Signal Detail</div>
-          <div class="detail-title" id="detail-title">Select a signal to view details</div>
-          <div class="detail-origin" id="detail-origin">Choose a saved signal from the list on the left</div>
+          <div class="detail-header-label">Alpha Detail</div>
+          <div class="detail-title" id="detail-title">Select an opportunity to view the full gap analysis</div>
+          <div class="detail-origin" id="detail-origin">Choose a sourced opportunity from the list on the left</div>
         </div>
         <div class="detail-body" id="detail-body">
-          <div class="empty-state"><div class="empty-title">No Signal Selected</div><div class="empty-desc">Select a signal from the list to see full detail and export options</div></div>
+          <div class="empty-state"><div class="empty-title">No Alpha Selected</div><div class="empty-desc">Select a sourced opportunity to see the full gap analysis and export options</div></div>
         </div>
       </div>
     </div>
@@ -577,18 +577,18 @@
   <div class="view" id="view-pipeline">
     <div class="section-header">
       <div>
-        <div class="section-title">Source Pipeline</div>
-        <div class="section-subtitle">Active data streams, scan frequency, and exclusion rules</div>
+        <div class="section-title">Pipeline Config</div>
+        <div class="section-subtitle">Configure your alpha streams, scan frequency, and exclusion rules</div>
       </div>
-      <button class="btn btn-ghost" onclick="showToast('Make.com scenario opened')">Open Make.com</button>
+      <button class="btn btn-ghost" onclick="showToast('Make.com scenario opened')">Open Pipeline Config</button>
     </div>
     <div class="priority-alert">
-      <strong>Active Priority Sources:</strong> WIPO Patents, RetailTech Japan 2026, Tech &amp; Hardware Stream
+      <strong>Priority Alpha Sources:</strong> WIPO Patents, RetailTech Japan 2026, Tech &amp; Hardware Stream
       <div class="priority-led-box">Active</div>
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">Tech &amp; Hardware</div><div class="pipeline-freq">Daily scan ÃÂÃÂ· Hardware and systems that change how work is done</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">Tech &amp; Hardware</div><div class="pipeline-freq">Daily scan ÃÂÃÂÃÂÃÂ· Hardware and systems that change how work is done</div></div>
         <div class="pipeline-led led-active">Live</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-active" style="width:73%"></div></div>
@@ -603,7 +603,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">Business Models</div><div class="pipeline-freq">Bi-weekly scan ÃÂÃÂ· Deployable or funded business models</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">Business Models</div><div class="pipeline-freq">Bi-weekly scan ÃÂÃÂÃÂÃÂ· Deployable or funded business models</div></div>
         <div class="pipeline-led led-scheduled">Scheduled</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:16%"></div></div>
@@ -614,7 +614,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">R&amp;D &amp; Concept Design</div><div class="pipeline-freq">Weekly scan ÃÂÃÂ· Visual and speculative design sources</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">R&amp;D &amp; Concept Design</div><div class="pipeline-freq">Weekly scan ÃÂÃÂÃÂÃÂ· Visual and speculative design sources</div></div>
         <div class="pipeline-led led-idle">Idle</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:11%"></div></div>
@@ -624,7 +624,7 @@
       </div>
     </div>
     <div class="antifilters">
-      <div class="antifilters-header">Exclusion Rules ÃÂ¢ÃÂÃÂ Always Active</div>
+      <div class="antifilters-header">Pipeline Exclusions — Always Active</div>
       <div class="antifilters-grid">
         <div class="af-item af-reject">Dropshipping</div>
         <div class="af-item af-reject">Print on Demand (POD)</div>
@@ -710,11 +710,11 @@ function cardMarkup(s, { showActions=false, selectable=false }={}) {
         <span class="card-id" style="opacity:0.5">${signalDate(s)}</span>
       </div>
       <div class="card-body">
-        <div class="card-origin">Source: ${sourceNode} ÃÂÃÂ· ${s.originLabel}</div>
+        <div class="card-origin">Source: ${sourceNode} ÃÂÃÂÃÂÃÂ· ${s.originLabel}</div>
         <div class="card-summary">${s.title}</div>
         <div class="card-desc">${s.desc}</div>
         <div class="roi-module">
-          <div class="roi-header"><div class="roi-led"></div>ROI Estimate ÃÂÃÂ· ${regionNode(s)}</div>
+          <div class="roi-header"><div class="roi-led"></div>Gap Analysis · ${regionNode(s)}</div>
           <div class="roi-body">
             <div class="roi-row"><span class="roi-key">Break-even</span><span class="roi-val">${payoffDays(s)} days</span></div>
             <div class="roi-row"><span class="roi-key">Daily volume</span><span class="roi-val">${s.dailyVolume}/day</span></div>
@@ -725,14 +725,14 @@ function cardMarkup(s, { showActions=false, selectable=false }={}) {
       </div>
       <div class="card-footer">
         <span class="card-source">${s.source}</span>
-        ${showActions ? `<div class="action-btns"><button class="key-btn key-keep" onclick="keepCard(${s.id},event)">Save Signal</button><button class="key-btn key-zap" onclick="zapCard(${s.id},event)">Discard</button></div>` : `<button class="key-btn key-keep" style="margin-left:auto" onclick="void(0)">View Source</button>`}
+        ${showActions ? `<div class="action-btns"><button class="key-btn key-keep" onclick="keepCard(${s.id},event)">Pipeline This</button><button class="key-btn key-zap" onclick="zapCard(${s.id},event)">Discard</button></div>` : `<button class="key-btn key-keep" style="margin-left:auto" onclick="void(0)">Source This Gap</button>`}
       </div>
     </div>`;
 }
 
 function renderCards(data) {
   const grid = document.getElementById('cards-grid');
-  if (!data.length) { grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">NO SIGNALS MATCH</div><div class="empty-desc">ALTER STREAM OR REGION NODE</div></div>'; return; }
+  if (!data.length) { grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">No Alpha Found</div><div class="empty-desc">Adjust stream or region filters</div></div>'; return; }
   grid.innerHTML = data.map(s => cardMarkup(s, { showActions:true, selectable:true })).join('');
 }
 
@@ -741,7 +741,7 @@ function renderHub() {
     <div class="hub-item" onclick="showDetail(${s.id})" id="hub-item-${s.id}">
       <div class="hub-item-id">${sigId(s)} // ${streamLabel(s.stream)} // ${formatCode(s.sourceType)}</div>
       <div class="hub-item-title">${s.title}</div>
-      <div class="hub-item-roi">Break-even: ${payoffDays(s)} days ÃÂÃÂ· ${s.dailyVolume}/day volume</div>
+      <div class="hub-item-roi">Break-even: ${payoffDays(s)} days ÃÂÃÂÃÂÃÂ· ${s.dailyVolume}/day volume</div>
       <div class="hub-item-source">${s.source} // ${regionNode(s)}</div>
     </div>`).join('');
 }
@@ -754,7 +754,7 @@ function showDetail(id) {
   if (el) el.classList.add('selected');
   uiState.hubSignalId = id; saveUiState();
   document.getElementById('detail-title').textContent = signalHeader(s);
-  document.getElementById('detail-origin').textContent = `${originReadout(s)} ÃÂÃÂ· Source`;
+  document.getElementById('detail-origin').textContent = `${originReadout(s)} ÃÂÃÂÃÂÃÂ· Source`;
   document.getElementById('detail-body').innerHTML = `
     <div class="detail-row"><span class="detail-key">Stream</span><span class="detail-val">${streamBreakdown(s)}</span></div>
     <div class="detail-row"><span class="detail-key">Signal ID</span><span class="detail-val">${sigId(s)}</span></div>
@@ -766,12 +766,12 @@ function showDetail(id) {
     <div class="detail-row"><span class="detail-key">Source</span><span class="detail-val">${s.source}</span></div>
     ${s.tradeShow ? `<div class="detail-row"><span class="detail-key">Event</span><span class="detail-val">${s.tradeShow}</span></div>` : ''}
     <div class="copy-module">
-      <div class="copy-module-header">Export Copy</div>
+      <div class="copy-module-header">Export Alpha</div>
       <div class="copy-module-body">
-        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Break-even: ${payoffDays(s)} days ÃÂÃÂ· ${s.dailyVolume}/day volume // DAILY_GROSS: $${dailyGross(s).toLocaleString()}<br><br>SOURCE: ${s.source} // ${regionNode(s)}</div>
+        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Break-even: ${payoffDays(s)} days ÃÂÃÂÃÂÃÂ· ${s.dailyVolume}/day volume // DAILY_GROSS: $${dailyGross(s).toLocaleString()}<br><br>SOURCE: ${s.source} // ${regionNode(s)}</div>
         <div class="copy-actions">
           <button class="btn btn-ghost" style="font-size:9px" onclick="showToast('Copied to clipboard')">Copy</button>
-          <button class="btn btn-signal" style="font-size:9px" onclick="showToast('Queued for post')">View Source</button>
+          <button class="btn btn-signal" style="font-size:9px" onclick="showToast('Source opened')">Source This Gap</button>
         </div>
       </div>
     </div>`;
@@ -812,7 +812,7 @@ function keepCard(id, evt) {
   if (!card) return;
   if (selectedTriageId===id) selectedTriageId=null;
   card.style.opacity='0.24'; card.style.pointerEvents='none';
-  showToast('Signal saved'); updateTriageCount(-1);
+  showToast('Alpha added to pipeline'); updateTriageCount(-1);
 }
 
 function zapCard(id, evt) {
@@ -822,7 +822,7 @@ function zapCard(id, evt) {
   if (selectedTriageId===id) selectedTriageId=null;
   card.style.opacity='0'; card.style.pointerEvents='none';
   setTimeout(() => card.remove(), 180);
-  showToast('Signal discarded'); updateTriageCount(-1);
+  showToast('Signal removed from queue'); updateTriageCount(-1);
 }
 
 function zapAll() {
@@ -830,7 +830,7 @@ function zapAll() {
   document.querySelectorAll('#cards-grid .signal-card').forEach((card,i) => { setTimeout(() => { card.style.opacity='0'; setTimeout(()=>card.remove(),160); }, i*24); });
   document.getElementById('stat-unprocessed').textContent='0';
   document.getElementById('triage-count').textContent='0';
-  showToast('All signals cleared');
+  showToast('Queue cleared');
 }
 
 function updateTriageCount(delta) {
@@ -853,7 +853,7 @@ function filterByRegion(region) {
   uiState.mapRegion=r; saveUiState();
   const filtered = keptSignals.filter(s => s.origin===r);
   const grid = document.getElementById('map-signals-grid');
-  if (!filtered.length) { grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">NO LOCKED SIGNALS</div><div class="empty-desc">REGION NODE RETURNED ZERO ACTIVE RECORDS</div></div>'; return; }
+  if (!filtered.length) { grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">No Sourced Alpha</div><div class="empty-desc">No alpha found for this region</div></div>'; return; }
   grid.innerHTML = filtered.slice(0,4).map(s => cardMarkup(s)).join('');
 }
 
