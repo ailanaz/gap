@@ -491,7 +491,7 @@
     </div>
     <div class="map-container">
       <div class="map-header">
-        <span>Signal Origins — Select a region to filter</span>
+        <span>Signal Origins â Select a region to filter</span>
         <span>148 SIGNALS // 4 REGIONS</span>
       </div>
       <div class="map-canvas">
@@ -537,7 +537,7 @@
         </svg>
       </div>
       <div class="region-strip">
-        <div class="region-module" id="region-asia" data-region="asia" onclick="filterByRegion('asia')"><div class="region-label">Asia Pacific</div><div class="region-val">76</div><div class="region-sub">Tokyo · Singapore</div></div>
+        <div class="region-module" id="region-asia" data-region="asia" onclick="filterByRegion('asia')"><div class="region-label">Asia Pacific</div><div class="region-val">76</div><div class="region-sub">Tokyo Â· Singapore</div></div>
         <div class="region-module" id="region-europe" data-region="europe" onclick="filterByRegion('europe')"><div class="region-label">Europe</div><div class="region-val">28</div><div class="region-sub">Berlin</div></div>
         <div class="region-module" id="region-me" data-region="me" onclick="filterByRegion('me')"><div class="region-label">Middle East</div><div class="region-val">19</div><div class="region-sub">Riyadh</div></div>
         <div class="region-module" id="region-americas" data-region="americas" onclick="filterByRegion('americas')"><div class="region-label">Americas</div><div class="region-val">25</div><div class="region-sub">Los Angeles</div></div>
@@ -557,7 +557,7 @@
     </div>
     <div class="hub-grid">
       <div class="hub-list-panel">
-        <div class="hub-list-header">Saved Signals — 34 Total</div>
+        <div class="hub-list-header">Saved Signals â 34 Total</div>
         <div class="scrollable-list" id="hub-list"></div>
       </div>
       <div class="detail-panel" id="hub-detail">
@@ -588,8 +588,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-pct pipeline-pct-lit">75%</div>
-        <div class="pipeline-info"><div class="pipeline-name">Tech &amp; Hardware — 75%</div><div class="pipeline-freq">Daily scan · Hardware and systems that change how work is done</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">Tech &amp; Hardware</div><div class="pipeline-freq">Daily scan Â· Hardware and systems that change how work is done</div></div>
         <div class="pipeline-led led-active">Live</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-active" style="width:73%"></div></div>
@@ -604,8 +603,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-pct">15%</div>
-        <div class="pipeline-info"><div class="pipeline-name">Business Models — 15%</div><div class="pipeline-freq">Bi-weekly scan · Deployable or funded business models</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">Business Models</div><div class="pipeline-freq">Bi-weekly scan Â· Deployable or funded business models</div></div>
         <div class="pipeline-led led-scheduled">Scheduled</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:16%"></div></div>
@@ -616,8 +614,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-pct">10%</div>
-        <div class="pipeline-info"><div class="pipeline-name">R&amp;D &amp; Concept Design — 10%</div><div class="pipeline-freq">Weekly scan · Visual and speculative design sources</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">R&amp;D &amp; Concept Design</div><div class="pipeline-freq">Weekly scan Â· Visual and speculative design sources</div></div>
         <div class="pipeline-led led-idle">Idle</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:11%"></div></div>
@@ -627,7 +624,7 @@
       </div>
     </div>
     <div class="antifilters">
-      <div class="antifilters-header">Exclusion Rules — Always Active</div>
+      <div class="antifilters-header">Exclusion Rules â Always Active</div>
       <div class="antifilters-grid">
         <div class="af-item af-reject">Dropshipping</div>
         <div class="af-item af-reject">Print on Demand (POD)</div>
@@ -684,7 +681,7 @@ function dailyGross(s) { return Math.round(s.unitPrice * s.dailyVolume); }
 function roiText(s) { return `${payoffDays(s)} DAY PAYBACK // $${dailyGross(s).toLocaleString()}/day gross`; }
 function streamClass(s) { return s==='tech'?'stream-a':s==='biz'?'stream-b':'stream-c'; }
 function streamLabel(s) { return s==='tech'?'Tech':s==='biz'?'Business':'R&D'; }
-function streamBreakdown(s) { return s.stream==='tech'?'Tech & Hardware · 75%':s.stream==='biz'?'Business Models · 15%':'R&D & Concepts · 10%'; }
+function streamBreakdown(s) { return s.stream==='tech'?'Tech & Hardware':s.stream==='biz'?'Business Models':'R&D & Concepts'; }
 function signalDate(s) { return signalDates[s.id]||'16.04.26'; }
 function srcId(s) { return `GAP_${String(s.id).padStart(3,'0')}`; }
 function regionNode(s) { return nodeLookup[s.originLabel]||formatCode(s.originLabel); }
@@ -713,11 +710,11 @@ function cardMarkup(s, { showActions=false, selectable=false }={}) {
         <span class="card-id" style="opacity:0.5">${signalDate(s)}</span>
       </div>
       <div class="card-body">
-        <div class="card-origin">Source: ${sourceNode} · ${s.originLabel}</div>
+        <div class="card-origin">Source: ${sourceNode} Â· ${s.originLabel}</div>
         <div class="card-summary">${s.title}</div>
         <div class="card-desc">${s.desc}</div>
         <div class="roi-module">
-          <div class="roi-header"><div class="roi-led"></div>ROI Estimate · ${regionNode(s)}</div>
+          <div class="roi-header"><div class="roi-led"></div>ROI Estimate Â· ${regionNode(s)}</div>
           <div class="roi-body">
             <div class="roi-row"><span class="roi-key">Break-even</span><span class="roi-val">${payoffDays(s)} days</span></div>
             <div class="roi-row"><span class="roi-key">Daily volume</span><span class="roi-val">${s.dailyVolume}/day</span></div>
@@ -744,7 +741,7 @@ function renderHub() {
     <div class="hub-item" onclick="showDetail(${s.id})" id="hub-item-${s.id}">
       <div class="hub-item-id">${sigId(s)} // ${streamLabel(s.stream)} // ${formatCode(s.sourceType)}</div>
       <div class="hub-item-title">${s.title}</div>
-      <div class="hub-item-roi">Break-even: ${payoffDays(s)} days · ${s.dailyVolume}/day volume</div>
+      <div class="hub-item-roi">Break-even: ${payoffDays(s)} days Â· ${s.dailyVolume}/day volume</div>
       <div class="hub-item-source">${s.source} // ${regionNode(s)}</div>
     </div>`).join('');
 }
@@ -757,7 +754,7 @@ function showDetail(id) {
   if (el) el.classList.add('selected');
   uiState.hubSignalId = id; saveUiState();
   document.getElementById('detail-title').textContent = signalHeader(s);
-  document.getElementById('detail-origin').textContent = `${originReadout(s)} · Source`;
+  document.getElementById('detail-origin').textContent = `${originReadout(s)} Â· Source`;
   document.getElementById('detail-body').innerHTML = `
     <div class="detail-row"><span class="detail-key">Stream</span><span class="detail-val">${streamBreakdown(s)}</span></div>
     <div class="detail-row"><span class="detail-key">Signal ID</span><span class="detail-val">${sigId(s)}</span></div>
@@ -771,7 +768,7 @@ function showDetail(id) {
     <div class="copy-module">
       <div class="copy-module-header">Export Copy</div>
       <div class="copy-module-body">
-        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Break-even: ${payoffDays(s)} days · ${s.dailyVolume}/day volume // DAILY_GROSS: $${dailyGross(s).toLocaleString()}<br><br>SOURCE: ${s.source} // ${regionNode(s)}</div>
+        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Break-even: ${payoffDays(s)} days Â· ${s.dailyVolume}/day volume // DAILY_GROSS: $${dailyGross(s).toLocaleString()}<br><br>SOURCE: ${s.source} // ${regionNode(s)}</div>
         <div class="copy-actions">
           <button class="btn btn-ghost" style="font-size:9px" onclick="showToast('Copied to clipboard')">Copy</button>
           <button class="btn btn-signal" style="font-size:9px" onclick="showToast('Queued for post')">View Source</button>
