@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>GAP Ã¢ÂÂ Global Alpha Pipeline</title>
+<title>GAP — Global Alpha Pipeline</title>
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -412,110 +412,31 @@
     .priority-led-box, .src-status { margin-left: 0; }
   }
 
-  /* ── App Shell ── */
-  body { display: block !important; }
-  .app-shell { display: flex; min-height: 100vh; }
-  .sidebar { width: 200px; min-width: 200px; background: var(--sidebar); border-right: 1px solid var(--border-inactive); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; overflow-y: auto; }
-  .sidebar-logo { display: flex; align-items: center; gap: 12px; padding: 22px 18px 18px; border-bottom: 1px solid var(--border-inactive); }
-  .sidebar-nav { flex: 1; padding: 12px 0; }
-  .sidebar-footer { padding: 14px 18px; border-top: 1px solid var(--border-inactive); display: flex; flex-direction: column; gap: 8px; }
-  .sidebar-readout { font-size: 8px; color: var(--text-ghost); letter-spacing: 0.10em; text-transform: uppercase; }
-  .sidebar-readout strong { color: var(--text-dim); font-weight: 600; }
-  .main-content { margin-left: 200px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-
-  /* ── Sidebar Nav Tabs ── */
-  .sidebar-nav .nav-tab { display: flex; align-items: center; gap: 10px; padding: 11px 18px; border-right: none; border-left: 2px solid transparent; border-bottom: none !important; width: 100%; justify-content: flex-start; font-size: 10px; }
-  .sidebar-nav .nav-tab:hover { border-bottom-color: transparent !important; border-left-color: rgba(46,232,0,0.5); background: rgba(46,232,0,0.04); }
-  .sidebar-nav .nav-tab.active { border-bottom-color: transparent !important; border-left-color: var(--signal-green); background: rgba(46,232,0,0.06); }
-  .nav-icon { font-size: 10px; opacity: 0.6; flex-shrink: 0; width: 14px; text-align: center; }
-  .nav-count { margin-left: auto; }
-
-  /* ── Pipeline Breadcrumb ── */
-  .pipeline-breadcrumb { display: flex; align-items: center; padding: 9px 32px; background: var(--panel); border-bottom: 1px solid var(--border-inactive); font-size: 9px; font-weight: 700; letter-spacing: 0.14em; color: var(--text-ghost); text-transform: uppercase; }
-  .breadcrumb-step { padding: 2px 4px; white-space: nowrap; }
-  .breadcrumb-step.active { color: var(--signal-green); }
-  .breadcrumb-step.done { color: var(--text-dim); }
-  .breadcrumb-sep { color: var(--border-inactive); margin: 0 8px; }
-
-  /* ── Card Stage Tag ── */
-  .card-stage-tag { font-size: 7px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; padding: 2px 6px; border: 1px solid var(--border-inactive); color: var(--text-ghost); background: var(--inset); }
-  .card-stage-tag.verified { color: var(--signal-green); border-color: rgba(46,232,0,0.25); background: rgba(46,232,0,0.04); }
-
-  /* ── System Overview Bar ── */
-  .system-overview { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--border-inactive); }
-  .system-overview .stat-module { border: none !important; border-right: 1px solid var(--border-inactive) !important; padding: 14px 24px; border-radius: 0; }
-  .system-overview .stat-module:last-child { border-right: none !important; }
-  .system-overview .stat-module:hover { border-color: transparent !important; background: var(--panel-alt); }
-
-  /* ── Hide old header/nav ── */
-  header { display: none !important; }
-  nav:not(.sidebar-nav) { display: none !important; }
-
-  /* ── Reduce all 2px borders to 1px ── */
-  .signal-card { border-width: 1px !important; }
-  .stat-module { border-width: 1px !important; }
-  .filter-bar { border-width: 1px !important; }
-  .map-container { border-width: 1px !important; }
-  .hub-list-panel, .detail-panel { border-width: 1px !important; }
-  .roi-module { border-width: 1px !important; }
-  .copy-module { border-width: 1px !important; }
-  .pipeline-header-row { border-width: 1px !important; }
-  .pipeline-sources { border-width: 1px !important; }
-  .antifilters { border-width: 1px !important; }
-  .priority-alert { border-width: 1px !important; }
-  .section-header { border-bottom-width: 1px !important; }
-
-  @media (max-width: 900px) {
-    .sidebar { width: 56px; min-width: 56px; }
-    .sidebar .logo-text, .sidebar .logo-sub, .sidebar-nav .nav-tab span:not(.nav-icon):not(.nav-count), .sidebar-footer { display: none; }
-    .main-content { margin-left: 56px; }
-    .sidebar-nav .nav-tab { justify-content: center; padding: 14px 0; }
-  }
-
-</style>
+  </style>
 </head>
 <body>
-
-<div class="app-shell">
-
-<aside class="sidebar">
-  <div class="sidebar-logo">
+<header>
+  <div class="logo">
     <div class="logo-mark">G</div>
     <div>
       <div class="logo-text">GAP</div>
       <span class="logo-sub">Global Alpha Pipeline</span>
     </div>
   </div>
-
-  <nav class="sidebar-nav">
-    <div class="nav-tab active" data-view="triage" onclick="switchView('triage', this)">
-      <span class="nav-icon">▸</span>
-      Pipeline Feed
-      <span class="nav-count" id="triage-count">12</span>
-    </div>
-    <div class="nav-tab" data-view="map" onclick="switchView('map', this)">
-      <span class="nav-icon">◎</span>
-      Alpha Regions
-    </div>
-    <div class="nav-tab" data-view="hub" onclick="switchView('hub', this)">
-      <span class="nav-icon">▣</span>
-      Sourced
-      <span class="nav-count" id="hub-count">34</span>
-    </div>
-    <div class="nav-tab" data-view="pipeline" onclick="switchView('pipeline', this)">
-      <span class="nav-icon">⊞</span>
-      Pipeline Config
-    </div>
-  </nav>
-
-  <div class="sidebar-footer">
-    <span class="sidebar-readout">Updated <strong>Apr 16, 2026</strong></span>
-    <span class="sidebar-readout">GAP <strong>v1.0</strong></span>
+  <div class="header-right">
+    <div class="header-readout">Updated <strong>Apr 17, 2026</strong></div>
+    <div class="header-readout">GAP <strong>v1.0</strong></div>
     <div class="led-status"><div class="led-dot"></div> Operational</div>
   </div>
-</aside>
+</header>
+<nav>
+  <div class="nav-tab active" data-view="triage" onclick="switchView('triage', this)">Pipeline Feed <span class="nav-count" id="triage-count">12</span></div>
+  <div class="nav-tab" data-view="map" onclick="switchView('map', this)">Alpha Regions</div>
+  <div class="nav-tab" data-view="hub" onclick="switchView('hub', this)">Sourced <span class="nav-count" id="hub-count">34</span></div>
+  <div class="nav-tab" data-view="pipeline" onclick="switchView('pipeline', this)">Pipeline Config</div>
+</nav>
+<main>
 
-<div class="main-content">
 
 <div class="pipeline-breadcrumb" id="pipeline-breadcrumb">
   <span class="breadcrumb-step done" id="bc-input">Input</span>
@@ -574,7 +495,7 @@
     </div>
     <div class="map-container">
       <div class="map-header">
-        <span>Alpha Origins Ã¢ÂÂ Select a region to filter</span>
+        <span>Alpha Origins — Select a region to filter</span>
         <span>148 SIGNALS // 4 REGIONS</span>
       </div>
       <div class="map-canvas">
@@ -620,7 +541,7 @@
         </svg>
       </div>
       <div class="region-strip">
-        <div class="region-module" id="region-asia" data-region="asia" onclick="filterByRegion('asia')"><div class="region-label">Asia Pacific</div><div class="region-val">76</div><div class="region-sub">Tokyo ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· Singapore</div></div>
+        <div class="region-module" id="region-asia" data-region="asia" onclick="filterByRegion('asia')"><div class="region-label">Asia Pacific</div><div class="region-val">76</div><div class="region-sub">Tokyo · Singapore</div></div>
         <div class="region-module" id="region-europe" data-region="europe" onclick="filterByRegion('europe')"><div class="region-label">Europe</div><div class="region-val">28</div><div class="region-sub">Berlin</div></div>
         <div class="region-module" id="region-me" data-region="me" onclick="filterByRegion('me')"><div class="region-label">Middle East</div><div class="region-val">19</div><div class="region-sub">Riyadh</div></div>
         <div class="region-module" id="region-americas" data-region="americas" onclick="filterByRegion('americas')"><div class="region-label">Americas</div><div class="region-val">25</div><div class="region-sub">Los Angeles</div></div>
@@ -640,7 +561,7 @@
     </div>
     <div class="hub-grid">
       <div class="hub-list-panel">
-        <div class="hub-list-header">Sourced Opportunities Ã¢ÂÂ 34 Total</div>
+        <div class="hub-list-header">Sourced Opportunities — 34 Total</div>
         <div class="scrollable-list" id="hub-list"></div>
       </div>
       <div class="detail-panel" id="hub-detail">
@@ -671,7 +592,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">Tech &amp; Hardware</div><div class="pipeline-freq">Daily scan ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· Hardware and systems that change how work is done</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">Tech &amp; Hardware</div><div class="pipeline-freq">Daily scan · Hardware and systems that change how work is done</div></div>
         <div class="pipeline-led led-active">Live</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-active" style="width:73%"></div></div>
@@ -686,7 +607,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">Business Models</div><div class="pipeline-freq">Bi-weekly scan ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· Deployable or funded business models</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">Business Models</div><div class="pipeline-freq">Bi-weekly scan · Deployable or funded business models</div></div>
         <div class="pipeline-led led-scheduled">Scheduled</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:16%"></div></div>
@@ -697,7 +618,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">R&amp;D &amp; Concept Design</div><div class="pipeline-freq">Weekly scan ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· Visual and speculative design sources</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">R&amp;D &amp; Concept Design</div><div class="pipeline-freq">Weekly scan · Visual and speculative design sources</div></div>
         <div class="pipeline-led led-idle">Idle</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:11%"></div></div>
@@ -707,7 +628,7 @@
       </div>
     </div>
     <div class="antifilters">
-      <div class="antifilters-header">Pipeline Exclusions Ã¢ÂÂ Always Active</div>
+      <div class="antifilters-header">Pipeline Exclusions — Always Active</div>
       <div class="antifilters-grid">
         <div class="af-item af-reject">Dropshipping</div>
         <div class="af-item af-reject">Print on Demand (POD)</div>
@@ -794,11 +715,11 @@ function cardMarkup(s, { showActions=false, selectable=false }={}) {
         <span class="card-id" style="opacity:0.5">${signalDate(s)}</span>
       </div>
       <div class="card-body">
-        <div class="card-origin">Source: ${sourceNode} ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· ${s.originLabel}</div>
+        <div class="card-origin">Source: ${sourceNode} · ${s.originLabel}</div>
         <div class="card-summary">${s.title}</div>
         <div class="card-desc">${s.desc}</div>
         <div class="roi-module">
-          <div class="roi-header"><div class="roi-led"></div>Gap Analysis ÃÂ· ${regionNode(s)}</div>
+          <div class="roi-header"><div class="roi-led"></div>Gap Analysis · ${regionNode(s)}</div>
           <div class="roi-body">
             <div class="roi-row"><span class="roi-key">Break-even</span><span class="roi-val">${payoffDays(s)} days</span></div>
             <div class="roi-row"><span class="roi-key">Daily volume</span><span class="roi-val">${s.dailyVolume}/day</span></div>
@@ -825,7 +746,7 @@ function renderHub() {
     <div class="hub-item" onclick="showDetail(${s.id})" id="hub-item-${s.id}">
       <div class="hub-item-id">${sigId(s)} // ${streamLabel(s.stream)} // ${formatCode(s.sourceType)}</div>
       <div class="hub-item-title">${s.title}</div>
-      <div class="hub-item-roi">Break-even: ${payoffDays(s)} days ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· ${s.dailyVolume}/day volume</div>
+      <div class="hub-item-roi">Break-even: ${payoffDays(s)} days · ${s.dailyVolume}/day volume</div>
       <div class="hub-item-source">${s.source} // ${regionNode(s)}</div>
     </div>`).join('');
 }
@@ -838,7 +759,7 @@ function showDetail(id) {
   if (el) el.classList.add('selected');
   uiState.hubSignalId = id; saveUiState();
   document.getElementById('detail-title').textContent = signalHeader(s);
-  document.getElementById('detail-origin').textContent = `${originReadout(s)} ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· Source`;
+  document.getElementById('detail-origin').textContent = `${originReadout(s)} · Source`;
   document.getElementById('detail-body').innerHTML = `
     <div class="detail-row"><span class="detail-key">Stream</span><span class="detail-val">${streamBreakdown(s)}</span></div>
     <div class="detail-row"><span class="detail-key">Signal ID</span><span class="detail-val">${sigId(s)}</span></div>
@@ -852,7 +773,7 @@ function showDetail(id) {
     <div class="copy-module">
       <div class="copy-module-header">Export Alpha</div>
       <div class="copy-module-body">
-        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Break-even: ${payoffDays(s)} days ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· ${s.dailyVolume}/day volume // DAILY_GROSS: $${dailyGross(s).toLocaleString()}<br><br>SOURCE: ${s.source} // ${regionNode(s)}</div>
+        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Break-even: ${payoffDays(s)} days · ${s.dailyVolume}/day volume // DAILY_GROSS: $${dailyGross(s).toLocaleString()}<br><br>SOURCE: ${s.source} // ${regionNode(s)}</div>
         <div class="copy-actions">
           <button class="btn btn-ghost" style="font-size:9px" onclick="showToast('Copied to clipboard')">Copy</button>
           <button class="btn btn-signal" style="font-size:9px" onclick="showToast('Source opened')">Source This Gap</button>
@@ -979,7 +900,6 @@ function restoreUiState() {
 
 restoreUiState();
 </script>
-</div>
-</div>
+</main>
 </body>
 </html>
