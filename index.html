@@ -89,11 +89,11 @@
   .led-status {
     display: flex; align-items: center; gap: 8px;
     font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--signal-green); padding: 6px 10px;
-    border: 2px solid var(--signal-green); background: var(--module);
+    color: var(--border-blue); padding: 6px 10px;
+    border: 2px solid var(--border-blue-soft); background: var(--module);
   }
 
-  .led-dot { width: 8px; height: 8px; background: var(--signal-green); animation: led-pulse 1.6s steps(2, end) infinite; }
+  .led-dot { width: 8px; height: 8px; background: var(--border-blue); animation: led-pulse 1.6s steps(2, end) infinite; }
 
   @keyframes led-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 
@@ -109,7 +109,7 @@
   }
 
   .nav-tab:hover { color: var(--text-bright); border-bottom-color: var(--blue-highlight); background: var(--module); }
-  .nav-tab.active { color: var(--blue-highlight); border-bottom-color: var(--blue-highlight); background: var(--module); }
+  .nav-tab.active { color: var(--signal-green); border-bottom-color: var(--signal-green); background: var(--module); }
 
   .nav-count { font-size: 9px; font-weight: 700; padding: 2px 6px; background: var(--inset); border: 1px solid var(--blue-highlight-soft); color: var(--blue-highlight); }
 
@@ -170,7 +170,7 @@
   }
 
   .filter-key:hover { border-color: var(--border-blue); color: var(--text-bright); }
-  .filter-key.active { background: var(--blue-highlight-soft); color: var(--blue-highlight); border-color: var(--blue-highlight); }
+  .filter-key.active { background: rgba(57,255,20,0.08); color: var(--signal-green); border-color: var(--signal-green); }
   .filter-sep { width: 1px; height: 18px; background: var(--border-inactive); margin: 0 8px; }
 
   .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 14px; }
@@ -183,7 +183,7 @@
 
   .signal-card:hover { border-color: var(--border-blue); background: var(--panel-alt); z-index: 1; }
   .signal-card[data-origin="asia"] { border-color: var(--border-blue); }
-  .signal-card.triage-selected { border-color: var(--blue-highlight) !important; }
+  .signal-card.triage-selected { border-color: var(--signal-green) !important; }
 
   .card-header {
     padding: 10px 16px; background: var(--module); border-bottom: 1px solid var(--border-inactive);
@@ -244,8 +244,8 @@
     border: 2px solid var(--border-inactive); background: var(--module);
   }
 
-  .key-keep { background: var(--blue-highlight-soft); color: var(--blue-highlight); border-color: var(--blue-highlight); }
-  .key-keep:hover { background: rgba(0, 71, 255, 0.16); }
+  .key-keep { background: rgba(57,255,20,0.08); color: var(--signal-green); border-color: var(--signal-green); }
+  .key-keep:hover { background: rgba(57,255,20,0.14); }
   .key-zap { color: var(--border-blue); border-color: var(--border-blue); }
   .key-zap:hover { background: rgba(46, 91, 255, 0.10); }
 
@@ -280,11 +280,11 @@
 
   .region-module:last-child { border-right: none; }
   .region-module:hover { background: var(--module); border-top-color: var(--border-blue); }
-  .region-module.active { background: var(--module); border-top-color: var(--blue-highlight); }
+  .region-module.active { background: var(--module); border-top-color: var(--signal-green); }
 
   .region-label { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--border-blue); margin-bottom: 6px; }
   .region-val { font-size: 28px; font-weight: 800; color: var(--text-bright); letter-spacing: -0.04em; }
-  .region-module.active .region-val { color: var(--blue-highlight); }
+  .region-module.active .region-val { color: var(--signal-green); }
   .region-sub { font-size: 9px; color: var(--text-ghost); margin-top: 4px; letter-spacing: 0.08em; text-transform: uppercase; }
 
   .hub-grid { display: grid; grid-template-columns: 1fr 420px; gap: 14px; }
@@ -298,7 +298,7 @@
 
   .hub-item { padding: 16px 18px; border-bottom: 1px solid var(--border-inactive); cursor: pointer; transition: border-color 0.12s ease, background-color 0.12s ease; }
   .hub-item:hover { background: var(--module); }
-  .hub-item.selected { background: var(--module); border-left: 2px solid var(--blue-highlight); }
+  .hub-item.selected { background: var(--module); border-left: 2px solid var(--signal-green); }
 
   .hub-item-id, .hub-item-source, .detail-header-label, .detail-origin, .detail-key { font-size: 9px; color: var(--border-blue); letter-spacing: 0.12em; text-transform: uppercase; }
   .hub-item-id { margin-bottom: 6px; }
@@ -491,7 +491,7 @@
     </div>
     <div class="map-container">
       <div class="map-header">
-        <span>Signal Origins Ã¢ÂÂ Select a region to filter</span>
+        <span>Signal Origins ÃÂ¢ÃÂÃÂ Select a region to filter</span>
         <span>148 SIGNALS // 4 REGIONS</span>
       </div>
       <div class="map-canvas">
@@ -537,7 +537,7 @@
         </svg>
       </div>
       <div class="region-strip">
-        <div class="region-module" id="region-asia" data-region="asia" onclick="filterByRegion('asia')"><div class="region-label">Asia Pacific</div><div class="region-val">76</div><div class="region-sub">Tokyo ÃÂ· Singapore</div></div>
+        <div class="region-module" id="region-asia" data-region="asia" onclick="filterByRegion('asia')"><div class="region-label">Asia Pacific</div><div class="region-val">76</div><div class="region-sub">Tokyo ÃÂÃÂ· Singapore</div></div>
         <div class="region-module" id="region-europe" data-region="europe" onclick="filterByRegion('europe')"><div class="region-label">Europe</div><div class="region-val">28</div><div class="region-sub">Berlin</div></div>
         <div class="region-module" id="region-me" data-region="me" onclick="filterByRegion('me')"><div class="region-label">Middle East</div><div class="region-val">19</div><div class="region-sub">Riyadh</div></div>
         <div class="region-module" id="region-americas" data-region="americas" onclick="filterByRegion('americas')"><div class="region-label">Americas</div><div class="region-val">25</div><div class="region-sub">Los Angeles</div></div>
@@ -557,7 +557,7 @@
     </div>
     <div class="hub-grid">
       <div class="hub-list-panel">
-        <div class="hub-list-header">Saved Signals Ã¢ÂÂ 34 Total</div>
+        <div class="hub-list-header">Saved Signals ÃÂ¢ÃÂÃÂ 34 Total</div>
         <div class="scrollable-list" id="hub-list"></div>
       </div>
       <div class="detail-panel" id="hub-detail">
@@ -588,7 +588,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">Tech &amp; Hardware</div><div class="pipeline-freq">Daily scan ÃÂ· Hardware and systems that change how work is done</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">Tech &amp; Hardware</div><div class="pipeline-freq">Daily scan ÃÂÃÂ· Hardware and systems that change how work is done</div></div>
         <div class="pipeline-led led-active">Live</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-active" style="width:73%"></div></div>
@@ -603,7 +603,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">Business Models</div><div class="pipeline-freq">Bi-weekly scan ÃÂ· Deployable or funded business models</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">Business Models</div><div class="pipeline-freq">Bi-weekly scan ÃÂÃÂ· Deployable or funded business models</div></div>
         <div class="pipeline-led led-scheduled">Scheduled</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:16%"></div></div>
@@ -614,7 +614,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">R&amp;D &amp; Concept Design</div><div class="pipeline-freq">Weekly scan ÃÂ· Visual and speculative design sources</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">R&amp;D &amp; Concept Design</div><div class="pipeline-freq">Weekly scan ÃÂÃÂ· Visual and speculative design sources</div></div>
         <div class="pipeline-led led-idle">Idle</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:11%"></div></div>
@@ -624,7 +624,7 @@
       </div>
     </div>
     <div class="antifilters">
-      <div class="antifilters-header">Exclusion Rules Ã¢ÂÂ Always Active</div>
+      <div class="antifilters-header">Exclusion Rules ÃÂ¢ÃÂÃÂ Always Active</div>
       <div class="antifilters-grid">
         <div class="af-item af-reject">Dropshipping</div>
         <div class="af-item af-reject">Print on Demand (POD)</div>
@@ -710,11 +710,11 @@ function cardMarkup(s, { showActions=false, selectable=false }={}) {
         <span class="card-id" style="opacity:0.5">${signalDate(s)}</span>
       </div>
       <div class="card-body">
-        <div class="card-origin">Source: ${sourceNode} ÃÂ· ${s.originLabel}</div>
+        <div class="card-origin">Source: ${sourceNode} ÃÂÃÂ· ${s.originLabel}</div>
         <div class="card-summary">${s.title}</div>
         <div class="card-desc">${s.desc}</div>
         <div class="roi-module">
-          <div class="roi-header"><div class="roi-led"></div>ROI Estimate ÃÂ· ${regionNode(s)}</div>
+          <div class="roi-header"><div class="roi-led"></div>ROI Estimate ÃÂÃÂ· ${regionNode(s)}</div>
           <div class="roi-body">
             <div class="roi-row"><span class="roi-key">Break-even</span><span class="roi-val">${payoffDays(s)} days</span></div>
             <div class="roi-row"><span class="roi-key">Daily volume</span><span class="roi-val">${s.dailyVolume}/day</span></div>
@@ -741,7 +741,7 @@ function renderHub() {
     <div class="hub-item" onclick="showDetail(${s.id})" id="hub-item-${s.id}">
       <div class="hub-item-id">${sigId(s)} // ${streamLabel(s.stream)} // ${formatCode(s.sourceType)}</div>
       <div class="hub-item-title">${s.title}</div>
-      <div class="hub-item-roi">Break-even: ${payoffDays(s)} days ÃÂ· ${s.dailyVolume}/day volume</div>
+      <div class="hub-item-roi">Break-even: ${payoffDays(s)} days ÃÂÃÂ· ${s.dailyVolume}/day volume</div>
       <div class="hub-item-source">${s.source} // ${regionNode(s)}</div>
     </div>`).join('');
 }
@@ -754,7 +754,7 @@ function showDetail(id) {
   if (el) el.classList.add('selected');
   uiState.hubSignalId = id; saveUiState();
   document.getElementById('detail-title').textContent = signalHeader(s);
-  document.getElementById('detail-origin').textContent = `${originReadout(s)} ÃÂ· Source`;
+  document.getElementById('detail-origin').textContent = `${originReadout(s)} ÃÂÃÂ· Source`;
   document.getElementById('detail-body').innerHTML = `
     <div class="detail-row"><span class="detail-key">Stream</span><span class="detail-val">${streamBreakdown(s)}</span></div>
     <div class="detail-row"><span class="detail-key">Signal ID</span><span class="detail-val">${sigId(s)}</span></div>
@@ -768,7 +768,7 @@ function showDetail(id) {
     <div class="copy-module">
       <div class="copy-module-header">Export Copy</div>
       <div class="copy-module-body">
-        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Break-even: ${payoffDays(s)} days ÃÂ· ${s.dailyVolume}/day volume // DAILY_GROSS: $${dailyGross(s).toLocaleString()}<br><br>SOURCE: ${s.source} // ${regionNode(s)}</div>
+        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Break-even: ${payoffDays(s)} days ÃÂÃÂ· ${s.dailyVolume}/day volume // DAILY_GROSS: $${dailyGross(s).toLocaleString()}<br><br>SOURCE: ${s.source} // ${regionNode(s)}</div>
         <div class="copy-actions">
           <button class="btn btn-ghost" style="font-size:9px" onclick="showToast('Copied to clipboard')">Copy</button>
           <button class="btn btn-signal" style="font-size:9px" onclick="showToast('Queued for post')">View Source</button>
@@ -863,8 +863,8 @@ function showToast(msg) {
   const toast = document.getElementById('toast');
   const isGreen = /REFRESH|KEPT|QUEUED|ACTIVE|READY/.test(msg);
   document.getElementById('toast-msg').textContent=msg;
-  toast.style.borderColor = isGreen ? 'var(--signal-green)' : 'var(--border-blue)';
-  toast.style.color = isGreen ? 'var(--signal-green)' : 'var(--text-bright)';
+  toast.style.borderColor = 'var(--border-blue)';
+  toast.style.color = 'var(--border-blue)';
   toast.classList.add('show');
   setTimeout(()=>toast.classList.remove('show'),2800);
 }
