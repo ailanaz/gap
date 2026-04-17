@@ -133,7 +133,7 @@
     background: var(--module); color: var(--text-bright);
   }
 
-  .btn-signal { background: var(--signal-green-soft); color: var(--signal-green); border-color: var(--signal-green); }
+  .btn-signal { background: var(--blue-highlight-soft); color: var(--border-blue); border-color: var(--border-blue); }
   .btn-signal:hover { background: rgba(210, 241, 170, 0.18); }
   .btn-ghost { background: var(--module); color: var(--border-blue); border-color: var(--border-blue); }
   .btn-ghost:hover { background: rgba(46, 91, 255, 0.10); }
@@ -149,10 +149,10 @@
   }
 
   .stat-module-label::before { content: ''; width: 6px; height: 6px; border: 1px solid var(--border-blue); background: transparent; }
-  .stat-module-label.active::before { background: var(--signal-green); border-color: var(--signal-green); }
+  .stat-module-label.active::before { background: var(--border-blue); border-color: var(--border-blue); }
 
   .stat-val { font-size: 28px; font-weight: 800; letter-spacing: -0.04em; color: var(--text-bright); }
-  .stat-val-lit { color: var(--signal-green); }
+  .stat-val-lit { color: var(--text-mid); }
   .stat-sub { font-size: 9px; color: var(--text-ghost); margin-top: 6px; letter-spacing: 0.08em; text-transform: uppercase; }
 
   .filter-bar {
@@ -183,7 +183,7 @@
 
   .signal-card:hover { border-color: var(--border-blue); background: var(--panel-alt); z-index: 1; }
   .signal-card[data-origin="asia"] { border-color: var(--border-blue); }
-  .signal-card.triage-selected { border-color: var(--signal-green) !important; }
+  .signal-card.triage-selected { border-color: var(--blue-highlight) !important; }
 
   .card-header {
     padding: 10px 16px; background: var(--module); border-bottom: 1px solid var(--border-inactive);
@@ -213,21 +213,21 @@
   .card-summary { font-size: 10px; font-weight: 700; color: var(--text-mid); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
   .card-desc { font-size: 11px; color: var(--text-mid); line-height: 1.75; margin-bottom: 14px; text-align: justify; text-justify: inter-word; }
 
-  .roi-module { background: var(--module); border: 2px solid var(--signal-green); padding: 0; margin-bottom: 14px; }
+  .roi-module { background: var(--module); border: 2px solid var(--border-blue-soft); padding: 0; margin-bottom: 14px; }
 
   .roi-header {
-    padding: 6px 10px; background: rgba(210, 241, 170, 0.08); border-bottom: 1px solid var(--signal-green);
+    padding: 6px 10px; background: rgba(110, 136, 201, 0.04); border-bottom: 1px solid var(--border-inactive);
     font-size: 8px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
-    color: var(--signal-green); display: flex; align-items: center; gap: 8px;
+    color: var(--border-blue); display: flex; align-items: center; gap: 8px;
   }
 
-  .roi-led { width: 6px; height: 6px; background: var(--signal-green); }
+  .roi-led { width: 6px; height: 6px; background: var(--border-blue); }
   .roi-body { padding: 10px; }
-  .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid rgba(57,255,20,0.1); }
+  .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid rgba(110,136,201,0.10); }
   .roi-row:last-child { border-bottom: none; }
-  .roi-key { font-size: 9px; font-weight: 700; color: rgba(57,255,20,0.55); letter-spacing: 0.12em; }
-  .roi-val { font-size: 13px; font-weight: 800; color: var(--signal-green); letter-spacing: 0.04em; }
-  .roi-text { font-size: 12px; font-weight: 700; color: var(--signal-green); letter-spacing: 0.08em; text-transform: uppercase; }
+  .roi-key { font-size: 9px; font-weight: 700; color: var(--text-ghost); letter-spacing: 0.12em; }
+  .roi-val { font-size: 13px; font-weight: 800; color: var(--text-mid); letter-spacing: 0.04em; }
+  .roi-text { font-size: 12px; font-weight: 700; color: var(--text-mid); letter-spacing: 0.08em; text-transform: uppercase; }
 
   .card-footer {
     padding: 12px 16px; border-top: 1px solid var(--border-inactive);
@@ -244,8 +244,8 @@
     border: 2px solid var(--border-inactive); background: var(--module);
   }
 
-  .key-keep { background: var(--signal-green-soft); color: var(--signal-green); border-color: var(--signal-green); }
-  .key-keep:hover { background: rgba(210, 241, 170, 0.18); }
+  .key-keep { background: var(--blue-highlight-soft); color: var(--blue-highlight); border-color: var(--blue-highlight); }
+  .key-keep:hover { background: rgba(0, 71, 255, 0.16); }
   .key-zap { color: var(--border-blue); border-color: var(--border-blue); }
   .key-zap:hover { background: rgba(46, 91, 255, 0.10); }
 
@@ -280,11 +280,11 @@
 
   .region-module:last-child { border-right: none; }
   .region-module:hover { background: var(--module); border-top-color: var(--border-blue); }
-  .region-module.active { background: var(--module); border-top-color: var(--signal-green); }
+  .region-module.active { background: var(--module); border-top-color: var(--blue-highlight); }
 
   .region-label { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--border-blue); margin-bottom: 6px; }
   .region-val { font-size: 28px; font-weight: 800; color: var(--text-bright); letter-spacing: -0.04em; }
-  .region-module.active .region-val { color: var(--signal-green); }
+  .region-module.active .region-val { color: var(--blue-highlight); }
   .region-sub { font-size: 9px; color: var(--text-ghost); margin-top: 4px; letter-spacing: 0.08em; text-transform: uppercase; }
 
   .hub-grid { display: grid; grid-template-columns: 1fr 420px; gap: 14px; }
@@ -298,14 +298,14 @@
 
   .hub-item { padding: 16px 18px; border-bottom: 1px solid var(--border-inactive); cursor: pointer; transition: border-color 0.12s ease, background-color 0.12s ease; }
   .hub-item:hover { background: var(--module); }
-  .hub-item.selected { background: var(--module); border-left: 2px solid var(--signal-green); }
+  .hub-item.selected { background: var(--module); border-left: 2px solid var(--blue-highlight); }
 
   .hub-item-id, .hub-item-source, .detail-header-label, .detail-origin, .detail-key { font-size: 9px; color: var(--border-blue); letter-spacing: 0.12em; text-transform: uppercase; }
   .hub-item-id { margin-bottom: 6px; }
 
   .hub-item-title, .detail-title { font-size: 12px; font-weight: 700; color: var(--text-bright); letter-spacing: 0.10em; text-transform: uppercase; line-height: 1.6; }
   .hub-item-summary { font-size: 10px; font-weight: 700; color: var(--text-mid); letter-spacing: 0.08em; text-transform: uppercase; margin: 8px 0 6px; }
-  .hub-item-roi { font-size: 10px; color: var(--signal-green); margin-bottom: 6px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .hub-item-roi { font-size: 10px; color: var(--text-mid); margin-bottom: 6px; letter-spacing: 0.08em; text-transform: uppercase; }
 
   .detail-panel { position: sticky; top: 96px; }
   .detail-header { padding: 12px 16px; }
@@ -317,7 +317,7 @@
   .detail-row:last-child { border-bottom: none; }
 
   .detail-val { font-size: 11px; font-weight: 600; color: var(--text-mid); text-align: right; text-transform: uppercase; letter-spacing: 0.06em; }
-  .detail-val-signal { color: var(--signal-green); }
+  .detail-val-signal { color: var(--text-mid); }
 
   .copy-module { background: var(--module); border: 2px solid var(--border-blue-soft); margin-top: 14px; }
   .copy-module-header { padding: 8px 10px; }
@@ -333,7 +333,7 @@
   }
 
   .pipeline-pct { font-size: 36px; font-weight: 800; letter-spacing: -0.06em; color: var(--border-blue); min-width: 74px; }
-  .pipeline-pct-lit { color: var(--signal-green); }
+  .pipeline-pct-lit { color: var(--border-blue); }
   .pipeline-info { flex: 1; }
   .pipeline-name { font-size: 12px; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text-bright); }
   .pipeline-freq { font-size: 10px; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; }
@@ -344,14 +344,14 @@
     display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
   }
 
-  .led-active, .src-live, .priority-led-box { background: var(--signal-green-soft); color: var(--signal-green); border-color: var(--signal-green); }
-  .led-active::before, .src-live::before { content: ''; width: 6px; height: 6px; background: var(--signal-green); }
+  .led-active, .src-live, .priority-led-box { background: var(--blue-highlight-soft); color: var(--border-blue); border-color: var(--border-blue); }
+  .led-active::before, .src-live::before { content: ''; width: 6px; height: 6px; background: var(--border-blue); }
   .led-scheduled, .src-pending { background: rgba(46, 91, 255, 0.10); color: var(--border-blue); border-color: var(--border-blue); }
   .led-idle, .src-idle { background: var(--module); color: var(--text-ghost); border-color: var(--border-inactive); }
 
   .pipeline-bar { height: 10px; background: var(--module); border-left: 2px solid var(--border-inactive); border-right: 2px solid var(--border-inactive); }
   .pipeline-fill { height: 100%; transition: width 1s ease; }
-  .fill-active { background: var(--signal-green); }
+  .fill-active { background: var(--border-blue); }
   .fill-dim { background: var(--border-blue); }
 
   .pipeline-sources { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0; border: 2px solid var(--border-inactive); border-top: none; }
@@ -363,8 +363,8 @@
   .src-desc { font-size: 10px; color: var(--text-mid); line-height: 1.7; text-align: justify; text-justify: inter-word; }
   .src-status { margin-left: auto; }
 
-  .priority-alert { background: var(--module); border: 2px solid var(--signal-green); padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; font-size: 11px; color: var(--text-mid); text-align: justify; }
-  .priority-alert strong { color: var(--signal-green); letter-spacing: 0.10em; }
+  .priority-alert { background: var(--module); border: 2px solid var(--border-inactive); padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; font-size: 11px; color: var(--text-mid); text-align: justify; }
+  .priority-alert strong { color: var(--border-blue); letter-spacing: 0.10em; }
   .priority-led-box { margin-left: auto; }
 
   .antifilters { background: var(--panel); border: 2px solid var(--border-inactive); margin-top: 8px; }
@@ -374,7 +374,7 @@
   .af-item { padding: 10px 12px; font-size: 10px; font-weight: 600; border-bottom: 1px solid var(--border-inactive); border-right: 1px solid var(--border-inactive); display: flex; align-items: center; gap: 8px; letter-spacing: 0.06em; text-transform: uppercase; }
   .af-item::before { content: ''; width: 6px; height: 6px; flex-shrink: 0; border: 1px solid currentColor; background: transparent; }
   .af-reject { color: var(--border-blue); background: rgba(46, 91, 255, 0.06); }
-  .af-require { color: var(--signal-green); background: rgba(210, 241, 170, 0.06); }
+  .af-require { color: var(--text-mid); background: rgba(110, 136, 201, 0.06); }
 
   .empty-state { text-align: center; padding: 50px 20px; color: var(--text-dim); border: 2px dashed var(--border-inactive); background: var(--panel); }
   .empty-title { font-size: 12px; font-weight: 700; color: var(--border-blue); margin-bottom: 6px; letter-spacing: 0.10em; text-transform: uppercase; }
@@ -491,7 +491,7 @@
     </div>
     <div class="map-container">
       <div class="map-header">
-        <span>Signal Origins â Select a region to filter</span>
+        <span>Signal Origins Ã¢ÂÂ Select a region to filter</span>
         <span>148 SIGNALS // 4 REGIONS</span>
       </div>
       <div class="map-canvas">
@@ -537,7 +537,7 @@
         </svg>
       </div>
       <div class="region-strip">
-        <div class="region-module" id="region-asia" data-region="asia" onclick="filterByRegion('asia')"><div class="region-label">Asia Pacific</div><div class="region-val">76</div><div class="region-sub">Tokyo Â· Singapore</div></div>
+        <div class="region-module" id="region-asia" data-region="asia" onclick="filterByRegion('asia')"><div class="region-label">Asia Pacific</div><div class="region-val">76</div><div class="region-sub">Tokyo ÃÂ· Singapore</div></div>
         <div class="region-module" id="region-europe" data-region="europe" onclick="filterByRegion('europe')"><div class="region-label">Europe</div><div class="region-val">28</div><div class="region-sub">Berlin</div></div>
         <div class="region-module" id="region-me" data-region="me" onclick="filterByRegion('me')"><div class="region-label">Middle East</div><div class="region-val">19</div><div class="region-sub">Riyadh</div></div>
         <div class="region-module" id="region-americas" data-region="americas" onclick="filterByRegion('americas')"><div class="region-label">Americas</div><div class="region-val">25</div><div class="region-sub">Los Angeles</div></div>
@@ -557,7 +557,7 @@
     </div>
     <div class="hub-grid">
       <div class="hub-list-panel">
-        <div class="hub-list-header">Saved Signals â 34 Total</div>
+        <div class="hub-list-header">Saved Signals Ã¢ÂÂ 34 Total</div>
         <div class="scrollable-list" id="hub-list"></div>
       </div>
       <div class="detail-panel" id="hub-detail">
@@ -588,7 +588,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">Tech &amp; Hardware</div><div class="pipeline-freq">Daily scan Â· Hardware and systems that change how work is done</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">Tech &amp; Hardware</div><div class="pipeline-freq">Daily scan ÃÂ· Hardware and systems that change how work is done</div></div>
         <div class="pipeline-led led-active">Live</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-active" style="width:73%"></div></div>
@@ -603,7 +603,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">Business Models</div><div class="pipeline-freq">Bi-weekly scan Â· Deployable or funded business models</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">Business Models</div><div class="pipeline-freq">Bi-weekly scan ÃÂ· Deployable or funded business models</div></div>
         <div class="pipeline-led led-scheduled">Scheduled</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:16%"></div></div>
@@ -614,7 +614,7 @@
     </div>
     <div class="pipeline-section">
       <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">R&amp;D &amp; Concept Design</div><div class="pipeline-freq">Weekly scan Â· Visual and speculative design sources</div></div>
+        <div class="pipeline-info"><div class="pipeline-name">R&amp;D &amp; Concept Design</div><div class="pipeline-freq">Weekly scan ÃÂ· Visual and speculative design sources</div></div>
         <div class="pipeline-led led-idle">Idle</div>
       </div>
       <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:11%"></div></div>
@@ -624,7 +624,7 @@
       </div>
     </div>
     <div class="antifilters">
-      <div class="antifilters-header">Exclusion Rules â Always Active</div>
+      <div class="antifilters-header">Exclusion Rules Ã¢ÂÂ Always Active</div>
       <div class="antifilters-grid">
         <div class="af-item af-reject">Dropshipping</div>
         <div class="af-item af-reject">Print on Demand (POD)</div>
@@ -710,11 +710,11 @@ function cardMarkup(s, { showActions=false, selectable=false }={}) {
         <span class="card-id" style="opacity:0.5">${signalDate(s)}</span>
       </div>
       <div class="card-body">
-        <div class="card-origin">Source: ${sourceNode} Â· ${s.originLabel}</div>
+        <div class="card-origin">Source: ${sourceNode} ÃÂ· ${s.originLabel}</div>
         <div class="card-summary">${s.title}</div>
         <div class="card-desc">${s.desc}</div>
         <div class="roi-module">
-          <div class="roi-header"><div class="roi-led"></div>ROI Estimate Â· ${regionNode(s)}</div>
+          <div class="roi-header"><div class="roi-led"></div>ROI Estimate ÃÂ· ${regionNode(s)}</div>
           <div class="roi-body">
             <div class="roi-row"><span class="roi-key">Break-even</span><span class="roi-val">${payoffDays(s)} days</span></div>
             <div class="roi-row"><span class="roi-key">Daily volume</span><span class="roi-val">${s.dailyVolume}/day</span></div>
@@ -741,7 +741,7 @@ function renderHub() {
     <div class="hub-item" onclick="showDetail(${s.id})" id="hub-item-${s.id}">
       <div class="hub-item-id">${sigId(s)} // ${streamLabel(s.stream)} // ${formatCode(s.sourceType)}</div>
       <div class="hub-item-title">${s.title}</div>
-      <div class="hub-item-roi">Break-even: ${payoffDays(s)} days Â· ${s.dailyVolume}/day volume</div>
+      <div class="hub-item-roi">Break-even: ${payoffDays(s)} days ÃÂ· ${s.dailyVolume}/day volume</div>
       <div class="hub-item-source">${s.source} // ${regionNode(s)}</div>
     </div>`).join('');
 }
@@ -754,7 +754,7 @@ function showDetail(id) {
   if (el) el.classList.add('selected');
   uiState.hubSignalId = id; saveUiState();
   document.getElementById('detail-title').textContent = signalHeader(s);
-  document.getElementById('detail-origin').textContent = `${originReadout(s)} Â· Source`;
+  document.getElementById('detail-origin').textContent = `${originReadout(s)} ÃÂ· Source`;
   document.getElementById('detail-body').innerHTML = `
     <div class="detail-row"><span class="detail-key">Stream</span><span class="detail-val">${streamBreakdown(s)}</span></div>
     <div class="detail-row"><span class="detail-key">Signal ID</span><span class="detail-val">${sigId(s)}</span></div>
@@ -768,7 +768,7 @@ function showDetail(id) {
     <div class="copy-module">
       <div class="copy-module-header">Export Copy</div>
       <div class="copy-module-body">
-        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Break-even: ${payoffDays(s)} days Â· ${s.dailyVolume}/day volume // DAILY_GROSS: $${dailyGross(s).toLocaleString()}<br><br>SOURCE: ${s.source} // ${regionNode(s)}</div>
+        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Break-even: ${payoffDays(s)} days ÃÂ· ${s.dailyVolume}/day volume // DAILY_GROSS: $${dailyGross(s).toLocaleString()}<br><br>SOURCE: ${s.source} // ${regionNode(s)}</div>
         <div class="copy-actions">
           <button class="btn btn-ghost" style="font-size:9px" onclick="showToast('Copied to clipboard')">Copy</button>
           <button class="btn btn-signal" style="font-size:9px" onclick="showToast('Queued for post')">View Source</button>
