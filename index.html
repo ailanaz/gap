@@ -490,7 +490,7 @@ html, body { font-family: var(--sans); }
 .btn-topbar:hover { border-color:var(--accent); color:var(--accent); }
 
 /* hero */
-.hero { display:flex; flex-direction:row; gap:18px; padding:18px; margin:14px 16px; border-radius:14px; align-items:flex-start; }
+.hero { display:grid; grid-template-columns:270px 1fr 1fr; gap:16px; padding:18px; margin:14px 16px; border-radius:14px; align-items:start; }
 
 .hero-left { display:flex; flex-direction:column; gap:12px; flex-shrink:0; }
 .hero-media { width:270px; aspect-ratio:9/16; background:#071018; border-radius:12px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center; cursor:pointer; background-size:cover; background-position:center; flex-shrink:0; }
@@ -498,7 +498,8 @@ html, body { font-family: var(--sans); }
 .alpha-badge { position:absolute; bottom:10px; right:10px; background:var(--accent); color:#021014; font-size:11px; font-weight:700; padding:4px 12px; border-radius:12px; font-family:var(--mono); letter-spacing:.5px; }
 .hero-meta h1 { font-size:16px; font-weight:600; color:var(--text); font-family:var(--sans); }
 .hero-meta p { color:var(--muted); font-size:12px; margin-top:5px; line-height:1.5; font-family:var(--sans); }
-.hero-workbench { width:100%; display:flex; flex-direction:row; gap:8px; flex-wrap:wrap; }
+.hero-col2 { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.hero-col3 { display:flex; flex-direction:column; gap:8px; min-width:0; }
 .wb-card { padding:12px; border-radius:8px; background:rgba(255,255,255,0.015); border:1px solid rgba(255,255,255,0.04); }
 .wb-title { font-size:10px; text-transform:uppercase; letter-spacing:1.2px; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:6px; font-family:var(--mono); }
 .wb-badge { background:var(--accent); color:#021014; padding:1px 7px; border-radius:10px; font-size:10px; font-weight:700; }
@@ -513,7 +514,6 @@ html, body { font-family: var(--sans); }
 /* main layout */
 .gap-main { display:flex; gap:16px; padding:0 16px; margin-top:14px; }
 .gap-left-col { flex:1; min-width:0; }
-.gap-right-col { width:320px; flex-shrink:0; padding:14px; position:sticky; top:90px; max-height:calc(100vh - 120px); overflow-y:auto; border-radius:10px; }
 .wb-section { margin-bottom:18px; }
 
 /* chip filters */
@@ -576,7 +576,7 @@ html, body { font-family: var(--sans); }
 .progress-bar-g { width:0%; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:5px; transition:width .4s; }
 
 /* pulse for map markers */
-@keyframes pulse { 0%{r:4;opacity:.9} 70%{r:10;opacity:0} 100%{r:12;opacity:0} }
+@keyframes pulse { 0%{r:8;opacity:.7} 70%{r:18;opacity:0} 100%{r:20;opacity:0} }
 .pulse-ring { animation:pulse 2.4s infinite; }
 
 /* modal */
@@ -624,36 +624,82 @@ body { padding-bottom: 70px; }
 
   <!-- HERO -->
   <section class="hero glass">
-    <div class="hero-left">
-      <div class="hero-media" id="heroMedia">
-        <div class="hero-placeholder" id="heroPlaceholder">Select a signal to preview</div>
-        <div class="alpha-badge" id="heroBadge" style="display:none"></div>
-      </div>
-      <div class="hero-meta">
-        <h1 id="heroTitle">Global Alpha Pipeline</h1>
-        <p id="heroInsight">Surface emerging tech from trade shows, patents, and lab footage worldwide. Score, save, and export in seconds.</p>
+  <!-- COL 1: Portrait preview -->
+  <div class="hero-left">
+    <div class="hero-media" id="heroMedia">
+      <div class="hero-placeholder" id="heroPlaceholder">Select a signal to preview</div>
+      <div class="alpha-badge" id="heroBadge" style="display:none"></div>
+    </div>
+    <div class="hero-meta">
+      <h1 id="heroTitle">Global Alpha Pipeline</h1>
+      <p id="heroInsight">Surface emerging tech from trade shows, patents, and lab footage worldwide. Score, save, and export in seconds.</p>
       <p id="meta-updated" style="font-size:10px;color:var(--muted-dim);font-family:var(--mono);margin-top:4px;letter-spacing:0.5px;"></p>
+    </div>
+  </div>
+  <!-- COL 2: Ingest + Export + Saves + Social Extract -->
+  <div class="hero-col2">
+    <div class="wb-card">
+      <div class="wb-title">Live Ingest</div>
+      <pre id="ingestLog" class="mono-log">scanning sources…</pre>
+    </div>
+    <div class="wb-card">
+      <div class="wb-title">Export</div>
+      <div class="wb-templates">
+        <button onclick="exportTemplate('TikTok')">TikTok</button>
+        <button onclick="exportTemplate('Reels')">Reels</button>
+        <button onclick="exportTemplate('Shorts')">Shorts</button>
       </div>
     </div>
-    <aside class="hero-workbench">
-      <div class="wb-card">
-        <div class="wb-title">Live Ingest</div>
-        <pre id="ingestLog" class="mono-log">scanning sources…</pre>
-      </div>
-      <div class="wb-card">
-        <div class="wb-title">Export</div>
-        <div class="wb-templates">
-          <button onclick="exportTemplate('TikTok')">TikTok</button>
-          <button onclick="exportTemplate('Reels')">Reels</button>
-          <button onclick="exportTemplate('Shorts')">Shorts</button>
+    <div class="wb-card">
+      <div class="wb-title">Recent Saves <span class="wb-badge" id="saveCount">0</span></div>
+      <div id="recentSaves" class="thumb-grid"></div>
+    </div>
+    <div class="wb-card" id="hero-social-panel">
+      <div class="social-extract">
+        <div class="social-extract-header" id="hero-social-header">Select a signal to generate caption</div>
+        <div id="hero-social-body" style="display:none">
+          <div class="social-format-tabs">
+            <button class="fmt-tab active" data-fmt="tiktok" onclick="heroFmtTab(this,'tiktok')">TikTok 9:16</button>
+            <button class="fmt-tab" data-fmt="reels" onclick="heroFmtTab(this,'reels')">Reels</button>
+            <button class="fmt-tab" data-fmt="shorts" onclick="heroFmtTab(this,'shorts')">Shorts</button>
+          </div>
+          <div class="social-caption-box">
+            <div class="social-caption-label">Hook</div>
+            <div class="social-caption-text" id="hero-social-hook"></div>
+          </div>
+          <div class="social-caption-box">
+            <div class="social-caption-label">Caption + Tags</div>
+            <div class="social-caption-text" id="hero-social-caption"></div>
+          </div>
+          <div class="social-meta" id="hero-social-meta"></div>
+          <button class="social-copy-btn" id="hero-social-copy-btn">Copy Caption</button>
         </div>
       </div>
-      <div class="wb-card">
-        <div class="wb-title">Recent Saves <span class="wb-badge" id="saveCount">0</span></div>
-        <div id="recentSaves" class="thumb-grid"></div>
+    </div>
+  </div>
+  <!-- COL 3: Queue + Financial Calc + Console -->
+  <div class="hero-col3">
+    <div class="wb-card">
+      <div class="wb-title">Queue <span class="wb-badge" id="queueCount" style="display:none">0</span></div>
+      <div id="queueList" class="wb-queue"><div class="queue-empty-g">No signals queued</div></div>
+    </div>
+    <div class="wb-card">
+      <div class="wb-title">Financial Snapshot</div>
+      <div class="wb-calc">
+        <label>Startup Cost ($)<input id="fc-cost" type="number" class="wb-calc input" placeholder="50000" /></label>
+        <label>Annual Growth (%)<input id="fc-growth" type="number" class="wb-calc input" placeholder="25" /></label>
+        <label>Revenue / Mo ($)<input id="fc-rev" type="number" class="wb-calc input" placeholder="9900" /></label>
+        <label>TAM ($)<input id="fc-tam" type="number" class="wb-calc input" placeholder="500000000" /></label>
+        <button class="wb-calc-btn" onclick="doGapCalc()">Generate Insight</button>
+        <pre id="wb-calc-out" class="wb-calc-result">—</pre>
       </div>
-    </aside>
-  </section>
+    </div>
+    <div class="wb-card">
+      <div class="wb-title">Console</div>
+      <pre id="gapConsole" class="wb-console">Ready.</pre>
+    </div>
+  </div>
+</section>
 
   <!-- MAIN FEED + RIGHT WORKBENCH -->
   <div class="gap-main">
@@ -674,30 +720,7 @@ body { padding-bottom: 70px; }
 
       <!-- SIGNAL CARD FEED -->
       <div class="media-feed" id="cards-grid"></div>
-    </div>
-
-    <!-- RIGHT WORKBENCH -->
-    <aside class="gap-right-col glass">
-      <div class="wb-section">
-        <div class="wb-title">Queue <span class="wb-badge" id="queueCount" style="display:none">0</span></div>
-        <div id="queueList" class="wb-queue"><div class="queue-empty-g">No signals queued</div></div>
-      </div>
-      <div class="wb-section">
-        <div class="wb-title">Financial Snapshot</div>
-        <div class="wb-calc">
-          <label>Startup Cost ($)<input id="fc-cost" type="number" class="wb-calc input" placeholder="50000" /></label>
-          <label>Annual Growth (%)<input id="fc-growth" type="number" class="wb-calc input" placeholder="25" /></label>
-          <label>Revenue / Mo ($)<input id="fc-rev" type="number" class="wb-calc input" placeholder="9900" /></label>
-          <label>TAM ($)<input id="fc-tam" type="number" class="wb-calc input" placeholder="500000000" /></label>
-          <button class="wb-calc-btn" onclick="doGapCalc()">Generate Insight</button>
-          <pre id="wb-calc-out" class="wb-calc-result">—</pre>
-        </div>
-      </div>
-      <div class="wb-section">
-        <div class="wb-title">Console</div>
-        <pre id="gapConsole" class="wb-console">Ready.</pre>
-      </div>
-    </aside>
+    </div
   </div>
 </main><!-- FLOATING MAP -->
 <div class="map-float glass" id="mapFloatPanel">
@@ -1205,8 +1228,53 @@ function selectSignal(id) {
   document.getElementById('footerSelected').textContent = 'Selected: ' + s.title + ' — ' + (s.source || '') + ' / ' + (s.origin || '');
   document.getElementById('footerProgress').style.width = Math.floor(Math.random()*55+20) + '%';
   gapLog('Loaded: ' + s.title);
-  // Also update hub detail if it exists
+  wireHeroSocialExtract(s);
+  highlightMapDot(s.origin);
   if (typeof showDetail === 'function') showDetail(s);
+}
+
+// Wire social extract into the hero col2 panel
+var _heroSocialSignal = null;
+var _heroSocialFmt = 'tiktok';
+function wireHeroSocialExtract(s) {
+  _heroSocialSignal = s;
+  const header = document.getElementById('hero-social-header');
+  const body = document.getElementById('hero-social-body');
+  if (header) header.style.display = 'none';
+  if (body) body.style.display = 'block';
+  renderHeroSocialExtract(s, _heroSocialFmt);
+  const copyBtn = document.getElementById('hero-social-copy-btn');
+  if (copyBtn && !copyBtn._wired) {
+    copyBtn._wired = true;
+    copyBtn.addEventListener('click', function() {
+      if (!_heroSocialSignal) return;
+      const d = socialCaption(_heroSocialSignal, _heroSocialFmt);
+      const fullText = d.hook + '\n\n' + d.caption;
+      navigator.clipboard.writeText(fullText).then(function() {
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.add('copied');
+        setTimeout(function() { copyBtn.textContent = 'Copy Caption'; copyBtn.classList.remove('copied'); }, 2000);
+      }).catch(function() {
+        copyBtn.textContent = 'Copy failed';
+        setTimeout(function() { copyBtn.textContent = 'Copy Caption'; }, 2000);
+      });
+    });
+  }
+}
+function heroFmtTab(btn, fmt) {
+  document.querySelectorAll('#hero-social-panel .fmt-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  _heroSocialFmt = fmt;
+  if (_heroSocialSignal) renderHeroSocialExtract(_heroSocialSignal, fmt);
+}
+function renderHeroSocialExtract(s, fmt) {
+  const d = socialCaption(s, fmt);
+  const hookEl = document.getElementById('hero-social-hook');
+  const capEl = document.getElementById('hero-social-caption');
+  const metaEl = document.getElementById('hero-social-meta');
+  if (hookEl) hookEl.textContent = d.hook;
+  if (capEl) capEl.textContent = d.caption;
+  if (metaEl) metaEl.innerHTML = '<span class="social-meta-item">' + d.meta.label + '</span><span class="social-meta-item">' + d.meta.dur + '</span><span class="social-meta-item">' + d.meta.ratio + '</span>';
 }
 
 // Gap queue
@@ -1394,15 +1462,26 @@ document.addEventListener('click', e => { if (e.target.id === 'modalBg') closeMo
 function renderFloatMap() {
   const g = document.getElementById('floatMarkers');
   if (!g) return;
-  const coordMap = {asia:[{x:490,y:110},{x:540,y:130},{x:520,y:105}],europe:[{x:310,y:100},{x:330,y:110}],americas:[{x:120,y:130},{x:130,y:100}],middle_east:[{x:400,y:130}]};
-  const pts = [];
-  for (const [r, coords] of Object.entries(coordMap)) {
-    for (const p of coords) pts.push({...p, r});
-  }
-  g.innerHTML = pts.map(p => `<g>
-    <circle class="pulse-ring" cx="${p.x*0.6+30}" cy="${p.y*0.55+10}" r="4" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.6"/>
-    <circle cx="${p.x*0.6+30}" cy="${p.y*0.55+10}" r="3" fill="var(--accent)" opacity="0.85"/>
-  </g>`).join('');
+  // Coordinates calibrated to 0 0 2000 857 viewBox world map
+  const dots = [
+    [1600, 340, 'asia'],     // Tokyo
+    [1545, 475, 'asia'],     // Singapore
+    [1625, 305, 'asia'],     // Seoul
+    [1560, 390, 'asia'],     // Shanghai
+    [1510, 430, 'asia'],     // Kuala Lumpur
+    [1490, 360, 'asia'],     // Guangzhou
+    [1055, 268, 'europe'],   // Berlin
+    [1015, 285, 'europe'],   // Paris
+    [275,  385, 'americas'], // Los Angeles
+    [355,  310, 'americas'], // New York
+    [1165, 428, 'middle_east'] // Riyadh
+  ];
+  g.innerHTML = dots.map(function(d) {
+    return '<g>' +
+      '<circle class="pulse-ring" cx="' + d[0] + '" cy="' + d[1] + '" r="8" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.5"/>' +
+      '<circle class="dot-main" cx="' + d[0] + '" cy="' + d[1] + '" r="8" fill="rgba(0,230,216,0.4)" opacity="1" data-region="' + d[2] + '" style="cursor:pointer"/>' +
+    '</g>';
+  }).join('');
 }
 
 function toggleFloatMap() {
@@ -1414,21 +1493,24 @@ function toggleFloatMap() {
   if (toggle) toggle.textContent = collapsed ? '▶' : '▼';
   if (body) body.style.display = collapsed ? 'none' : '';
 }
-function highlightMapDot(origin) {
+function function highlightMapDot(origin) {
   const g = document.getElementById('floatMarkers');
   if (!g) return;
-  const circles = g.querySelectorAll('circle:not(.pulse-ring)');
-  const regionMap = { asia: [0,1,2,3,4,5], europe: [6,7], americas: [8,9], middle_east: [10], me: [10] };
+  const circles = g.querySelectorAll('circle.dot-main');
+  const regionMap = {
+    asia: [0,1,2,3,4,5], europe: [6,7],
+    americas: [8,9], middle_east: [10], me: [10]
+  };
   const indices = regionMap[origin] || [];
   circles.forEach(function(c, i) {
     if (indices.includes(i)) {
-      c.setAttribute('r', '5');
+      c.setAttribute('r', '14');
       c.setAttribute('fill', 'var(--accent)');
       c.setAttribute('opacity', '1');
     } else {
-      c.setAttribute('r', '3');
-      c.setAttribute('fill', 'var(--accent)');
-      c.setAttribute('opacity', '0.45');
+      c.setAttribute('r', '8');
+      c.setAttribute('fill', 'rgba(0,230,216,0.4)');
+      c.setAttribute('opacity', '1');
     }
   });
 }
@@ -1436,13 +1518,13 @@ function highlightMapDot(origin) {
 function resetMapDots() {
   const g = document.getElementById('floatMarkers');
   if (!g) return;
-  const circles = g.querySelectorAll('circle:not(.pulse-ring)');
+  const circles = g.querySelectorAll('circle.dot-main');
   circles.forEach(function(c) {
-    c.setAttribute('r', '3');
-    c.setAttribute('opacity', '0.85');
+    c.setAttribute('r', '8');
+    c.setAttribute('fill', 'rgba(0,230,216,0.4)');
+    c.setAttribute('opacity', '1');
   });
 }
-
 
 // Ingest simulation
 var   ingestMsgs = [
