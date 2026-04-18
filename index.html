@@ -1493,7 +1493,7 @@ function toggleFloatMap() {
   if (toggle) toggle.textContent = collapsed ? '▶' : '▼';
   if (body) body.style.display = collapsed ? 'none' : '';
 }
-function function highlightMapDot(origin) {
+function highlightMapDot(origin) {
   const g = document.getElementById('floatMarkers');
   if (!g) return;
   const circles = g.querySelectorAll('circle.dot-main');
