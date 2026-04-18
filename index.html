@@ -1364,7 +1364,7 @@ function setGapFilter(btn, filter) {
   document.querySelectorAll('.chip-btn-g').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   window._gapFilter = filter;
-  renderGapCards();
+  renderGapCards();  if (filter === 'all') { resetMapDots(); } else { highlightMapDot(filter); }
 }
 
 // Override getFilteredSignals to also respect gap filter chips + topbar search/dropdowns
