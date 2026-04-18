@@ -485,6 +485,7 @@ html, body { font-family: var(--sans); }
 .topbar-logo img { height:40px !important; width:auto !important; max-height:40px !important; display:block !important; }
 
 .topbar-controls { display:flex; gap:8px; align-items:center; margin-left:auto; }
+.topbar-title { font-size:13px; font-weight:600; color:var(--text); font-family:var(--mono); letter-spacing:0.04em; opacity:0.85; white-space:nowrap; }
 
 .btn-topbar { background:transparent; border:1px solid rgba(255,255,255,0.08); color:var(--muted); padding:7px 13px; border-radius:7px; font-size:12px; cursor:pointer; transition:border-color .2s,color .2s; font-family:var(--mono); letter-spacing:0.08em; }
 .btn-topbar:hover { border-color:var(--accent); color:var(--accent); }
@@ -664,7 +665,8 @@ body { padding-bottom: 70px; }
 <header class="topbar glass">
   <div class="topbar-logo">
     <img src="./logo.png" alt="GAP" style="height:40px;width:auto;display:block;" />
-  </div>
+  </div>  <div class="topbar-title">Global Alpha Pipeline</div>
+
   <div class="topbar-controls">
     <button class="btn-topbar" onclick="openPipelineModal()" title="Pipeline Config" style="font-size:16px;padding:5px 10px;">&#9881;</button>
   </div> </div>
@@ -683,11 +685,7 @@ body { padding-bottom: 70px; }
       <div class="hero-placeholder" id="heroPlaceholder">Select a signal to preview</div>
       <div class="alpha-badge" id="heroBadge" style="display:none"></div>
     </div>
-    <div class="hero-meta">
-      <h1 id="heroTitle">Global Alpha Pipeline</h1>
-      <p id="heroInsight">Surface emerging tech from trade shows, patents, and lab footage worldwide. Score, save, and export in seconds.</p>
-      <p id="meta-updated" style="font-size:10px;color:var(--muted-dim);font-family:var(--mono);margin-top:4px;letter-spacing:0.5px;"></p>
-    </div>
+    
   </div>
   <!-- COL 2: Ingest + Export + Saves + Social Extract -->
   <div class="hero-col2">
