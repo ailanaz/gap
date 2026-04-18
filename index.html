@@ -440,6 +440,19 @@
 .social-copy-btn { width: 100%; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px; border-radius: 6px; border: 1px solid var(--signal-green); background: transparent; color: var(--signal-green); cursor: pointer; transition: background 0.15s; }
 .social-copy-btn:hover { background: var(--signal-green-soft); }
 .social-copy-btn.copied { background: var(--signal-green-soft); }
+
+/* ── Financial Insights Calc ── */
+.financial-calc { padding: 14px 0 4px; }
+.fc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.fc-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-ghost); display: flex; flex-direction: column; gap: 4px; }
+.fc-input { background: var(--inset); border: 1px solid var(--border-inactive); border-radius: 4px; padding: 7px 10px; color: var(--text-bright); font-size: 12px; font-family: var(--mono); width: 100%; }
+.fc-input:focus { outline: none; border-color: var(--signal-green); }
+.fc-output { margin-top: 12px; font-size: 11px; line-height: 1.7; color: var(--text-mid); font-family: var(--mono); }
+.fc-output .fc-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border-inactive); }
+.fc-output .fc-row-val { color: var(--signal-green); font-weight: 700; }
+.fc-output .fc-tag { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-top: 8px; letter-spacing: 0.08em; text-transform: uppercase; }
+.fc-output .fc-tag-good { background: var(--signal-green-soft); color: var(--signal-green); }
+.fc-output .fc-tag-caution { background: rgba(255,200,0,0.1); color: #ffc800; }
 </style>
 </head>
 <body>
@@ -642,7 +655,33 @@
       <div class="pipeline-sources">
         <div class="src-card"><div class="src-icon">Be</div><div><div class="src-name">Behance</div><div class="src-desc">Tags: Product Design, Retail Concept, Future of Work</div></div><div class="src-status src-idle">Idle</div></div>
         <div class="src-card"><div class="src-icon">Dr</div><div><div class="src-name">Dribbble</div><div class="src-desc">Concept renders and speculative UX</div></div><div class="src-status src-idle">Idle</div></div>
+
+    <div class="pipeline-section">
+      <div class="pipeline-header-row">
+        <div class="pipeline-info">
+          <div class="pipeline-name">Financial Insights</div>
+          <div class="pipeline-freq">Market sizing · growth modeling</div>
+        </div>
       </div>
+      <div class="financial-calc">
+        <div class="fc-grid">
+          <label class="fc-label">Startup Cost
+            <input id="fc-cost" class="fc-input" type="number" placeholder="50000" />
+          </label>
+          <label class="fc-label">Annual Growth %
+            <input id="fc-growth" class="fc-input" type="number" placeholder="25" />
+          </label>
+          <label class="fc-label">Revenue / Month
+            <input id="fc-revenue" class="fc-input" type="number" placeholder="8000" />
+          </label>
+          <label class="fc-label">Total Addressable Market
+            <input id="fc-tam" class="fc-input" type="number" placeholder="500000000" />
+          </label>
+        </div>
+        <button class="btn btn-signal" onclick="doFinancialCalc()">Generate Insights</button>
+        <div id="fc-out" class="fc-output"></div>
+      </div>
+    </div>      </div>
     </div>
     <div class="antifilters">
       <div class="antifilters-header">Pipeline Exclusions — Always Active</div>
@@ -697,10 +736,22 @@ function normalizeView(v) { return allowedViews.has(v) ? v : defaultUiState.acti
 function normalizeFilter(f) { return allowedFilters.has(f) ? f : defaultUiState.triageFilter; }
 function normalizeRegion(r) { return allowedRegions.has(r) ? r : defaultUiState.mapRegion; }
 function normalizeHubSignalId(id) { return keptSignals.some(s => s.id === id) ? id : null; }
-function payoffDays(s) { return Math.round(s.setupCost / (s.unitPrice * s.dailyVolume)); }
-function dailyGross(s) { return Math.round(s.unitPrice * s.dailyVolume); }
-function roiText(s) { return `${payoffDays(s)} DAY PAYBACK // $${dailyGross(s).toLocaleString()}/day gross`; }
-function streamClass(s) { return s==='tech'?'stream-a':s==='biz'?'stream-b':'stream-c'; }
+function monthlyRevEst(s) { return Math.round(s.unitPrice * s.dailyVolume * 30); }
+function marketGrowth(s) {
+  if (s.stream === 'TECH') return '18% CAGR';
+  if (s.stream === 'BUSINESS') return '12% CAGR';
+  return '22% CAGR';
+}
+function benefitTags(s) {
+  const tags = [];
+  if (s.sourceType === 'PATENT') tags.push('IP-Protected');
+  if (s.sourceType === 'TRADE_SHOW') tags.push('Market-Validated');
+  if (s.sourceType === 'CROWDFUNDED') tags.push('Demand-Proven');
+  if (s.stream === 'TECH') tags.push('Automation Play');
+  if (s.stream === 'BUSINESS') tags.push('Scalable Model');
+  tags.push('Low Overhead');
+  return tags.slice(0, 3);
+}
 function streamLabel(s) { return s==='tech'?'Tech':s==='biz'?'Business':'R&D'; }
 function streamBreakdown(s) { return s.stream==='tech'?'Tech & Hardware':s.stream==='biz'?'Business Models':'R&D & Concepts'; }
 function signalDate(s) { return signalDates[s.id]||'16.04.26'; }
@@ -712,10 +763,13 @@ function signalHeader(s) { return `${srcId(s)} // ${regionNode(s)} // ${signalDa
 function originReadout(s) { return `[${coordinates(s)}] // ${regionNode(s)} // ${formatCode(s.tradeShow||s.sourceType)}`; }
 
 function sigId(s) { return `GAP_SIG_${String(s.id).padStart(3,'0')}`; }
-function roiBlock(s) {
-  return `Break-even: ${payoffDays(s)} days\nVolume: ${s.dailyVolume}/day\nDaily gross: $${dailyGross(s).toLocaleString()}`;
+function marketBlock(s) {
+  const monthly = monthlyRevEst(s).toLocaleString();
+  const growth = marketGrowth(s);
+  return `<div class="roi-row"><span class="roi-key">Avg setup</span><span class="roi-val">$${s.setupCost.toLocaleString()}</span></div>
+      <div class="roi-row"><span class="roi-key">Monthly est.</span><span class="roi-val">~$${monthly}</span></div>
+      <div class="roi-row"><span class="roi-key">Market growth</span><span class="roi-val">${growth}</span></div>`;
 }
-
 function cardMarkup(s, { showActions=false, selectable=false }={}) {
   const selectedClass = selectable && selectedTriageId===s.id ? ' triage-selected' : '';
   const idAttr = selectable ? ` id="card-${s.id}"` : '';
@@ -738,9 +792,8 @@ function cardMarkup(s, { showActions=false, selectable=false }={}) {
         <div class="roi-module">
           <div class="roi-header"><div class="roi-led"></div>Gap Analysis · ${regionNode(s)}</div>
           <div class="roi-body">
-            <div class="roi-row"><span class="roi-key">Break-even</span><span class="roi-val">${payoffDays(s)} days</span></div>
-            <div class="roi-row"><span class="roi-key">Daily volume</span><span class="roi-val">${s.dailyVolume}/day</span></div>
-            <div class="roi-row"><span class="roi-key">Daily gross</span><span class="roi-val">$${dailyGross(s).toLocaleString()}</span></div>
+            <div class="roi-row"><span class="roi-key">Monthly est.</span><span class="roi-val">~$${monthlyRevEst(s).toLocaleString()}</span></div>
+            <div class="roi-row"><span class="roi-key">Market growth</span><span class="roi-val">${marketGrowth(s)}</span></div>
             <div class="roi-row"><span class="roi-key">Setup cost</span><span class="roi-val">$${s.setupCost.toLocaleString()}</span></div>
           </div>
         </div>
@@ -763,7 +816,7 @@ function renderHub() {
     <div class="hub-item" onclick="showDetail(${s.id})" id="hub-item-${s.id}">
       <div class="hub-item-id">${sigId(s)} // ${streamLabel(s.stream)} // ${formatCode(s.sourceType)}</div>
       <div class="hub-item-title">${s.title}</div>
-      <div class="hub-item-roi">Break-even: ${payoffDays(s)} days · ${s.dailyVolume}/day volume</div>
+      `<div class="hub-item-roi">Monthly est. ~$${monthlyRevEst(s).toLocaleString()} · ${marketGrowth(s)}</div>` +
       <div class="hub-item-source">${s.source} // ${regionNode(s)}</div>
     </div>`).join('');
 }
@@ -782,15 +835,15 @@ function showDetail(id) {
     <div class="detail-row"><span class="detail-key">Signal ID</span><span class="detail-val">${sigId(s)}</span></div>
     <div class="detail-row"><span class="detail-key">Setup Cost</span><span class="detail-val">$${s.setupCost.toLocaleString()}</span></div>
     <div class="detail-row"><span class="detail-key">Unit Price</span><span class="detail-val">$${s.unitPrice}</span></div>
-    <div class="detail-row"><span class="detail-key">Daily Volume</span><span class="detail-val detail-val-signal">${s.dailyVolume}/day</span></div>
-    <div class="detail-row"><span class="detail-key">Daily Gross</span><span class="detail-val detail-val-signal">$${dailyGross(s).toLocaleString()}</span></div>
-    <div class="detail-row"><span class="detail-key">Break-even</span><span class="detail-val detail-val-signal">${payoffDays(s)} days</span></div>
+    <div class="detail-row"><span class="detail-key">Monthly est.</span><span class="detail-val">~$${monthlyRevEst(s).toLocaleString()}</span></div>
+    <div class="detail-row"><span class="detail-key">Market growth</span><span class="detail-val">${marketGrowth(s)}</span></div>
+    <div class="detail-row"><span class="detail-key">Key benefits</span><span class="detail-val">${benefitTags(s).join(' · ')}</span></div>
     <div class="detail-row"><span class="detail-key">Source</span><span class="detail-val">${s.source}</span></div>
     ${s.tradeShow ? `<div class="detail-row"><span class="detail-key">Event</span><span class="detail-val">${s.tradeShow}</span></div>` : ''}
     <div class="copy-module">
       <div class="copy-module-header">Export Alpha</div>
       <div class="copy-module-body">
-        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Break-even: ${payoffDays(s)} days · ${s.dailyVolume}/day volume // DAILY_GROSS: $${dailyGross(s).toLocaleString()}<br><br>SOURCE: ${s.source} // ${regionNode(s)}</div>
+        <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Avg setup: $${s.setupCost.toLocaleString()} // Monthly est. ~$${monthlyRevEst(s).toLocaleString()} // Market growth: ${marketGrowth(s)}<br>Benefits: ${benefitTags(s).join(' · ')}</div>
         <div class="copy-actions">
           <button class="btn btn-ghost" style="font-size:9px" onclick="showToast('Copied to clipboard')">Copy</button>
           <button class="btn btn-signal" style="font-size:9px" onclick="showToast('Source opened')">Source This Gap</button>
@@ -825,19 +878,22 @@ function socialCaption(s, fmt) {
     shorts:  { label: 'YouTube Shorts', dur: '≤60s', ratio: '1080×1920' }
   };
   const meta = fmtMeta[fmt] || fmtMeta.tiktok;
-  const days = Math.ceil(s.setupCost / (s.unitPrice * s.dailyVolume));
-  const gross = (s.unitPrice * s.dailyVolume).toFixed(0);
+  const monthly = monthlyRevEst(s).toLocaleString();
+  const growth = marketGrowth(s);
+  const benefits = benefitTags(s).join(' · ');
   const hooks = {
-    tiktok:  'This vending machine pays itself off in ' + days + ' days.',
-    reels:   'The business that runs while you sleep — breaks even in ' + days + ' days.',
-    shorts:  '$' + gross + '/day from one machine. Here\'s how it works.'
+    tiktok:  'This type of business typically generates ~$' + monthly + '/month.',
+    reels:   'A ' + (s.stream === 'TECH' ? 'tech-enabled' : 'scalable') + ' business with ' + growth + ' market growth potential.',
+    shorts:  'Avg setup: $' + s.setupCost.toLocaleString() + '. Market growing at ' + growth + '.'
   };
   const hook = hooks[fmt] || hooks.tiktok;
   const streamTag = s.stream === 'TECH' ? 'TechBusiness' : s.stream === 'BUSINESS' ? 'BusinessModel' : 'ConceptBiz';
   const body = s.title + '\n\n' +
     'Origin: ' + (s.originLabel || s.origin) + '\n' +
-    'Setup: $' + s.setupCost.toLocaleString() + '  |  ' +
-    s.dailyVolume + '/day  |  Break-even: ' + days + ' days\n\n' +
+    'Avg setup: $' + s.setupCost.toLocaleString() + '\n' +
+    'Monthly est.: ~$' + monthly + '\n' +
+    'Market growth: ' + growth + '\n' +
+    'Benefits: ' + benefits + '\n\n' +
     '#FutureOfBusiness #' + streamTag + ' #PassiveIncome #BusinessIdea #Startup';
   return { hook, caption: body, meta };
 }
@@ -1001,6 +1057,29 @@ function restoreUiState() {
 }
 
 restoreUiState();
+
+function doFinancialCalc() {
+  const cost = Number(document.getElementById('fc-cost').value) || 50000;
+  const growth = Number(document.getElementById('fc-growth').value) || 25;
+  const revenue = Number(document.getElementById('fc-revenue').value) || 8000;
+  const tam = Number(document.getElementById('fc-tam').value) || 500000000;
+  const out = document.getElementById('fc-out');
+  if(!out) return;
+  const annualRev = revenue * 12;
+  const yr3Rev = Math.round(annualRev * Math.pow(1 + growth/100, 3));
+  const yr5Rev = Math.round(annualRev * Math.pow(1 + growth/100, 5));
+  const tamPct = ((annualRev / tam) * 100).toFixed(4);
+  const paybackMonths = Math.ceil(cost / revenue);
+  const grade = paybackMonths <= 12 ? 'Strong Signal' : paybackMonths <= 24 ? 'Moderate' : 'Long Horizon';
+  const gradeClass = paybackMonths <= 12 ? 'fc-tag-good' : 'fc-tag-caution';
+  out.innerHTML =
+    '<div class="fc-row"><span>Est. Annual Revenue</span><span class="fc-row-val">$' + annualRev.toLocaleString() + '</span></div>' +
+    '<div class="fc-row"><span>Year 3 Projection</span><span class="fc-row-val">$' + yr3Rev.toLocaleString() + '</span></div>' +
+    '<div class="fc-row"><span>Year 5 Projection</span><span class="fc-row-val">$' + yr5Rev.toLocaleString() + '</span></div>' +
+    '<div class="fc-row"><span>TAM Capture (Yr 1)</span><span class="fc-row-val">' + tamPct + '%</span></div>' +
+    '<div class="fc-row"><span>Capital Recovery</span><span class="fc-row-val">~' + paybackMonths + ' months</span></div>' +
+    '<br><span class="fc-tag ' + gradeClass + '">' + grade + '</span>';
+}
 </script>
 </main>
 </body>
