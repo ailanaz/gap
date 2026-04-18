@@ -1908,9 +1908,8 @@ function setGapFilter(btn, filter) {
 window._gapFilter = 'all';
 
 // Override getFilteredSignals to also respect gap filter chips + topbar search/dropdowns
-const _origGetFiltered = getFilteredSignals;
 function getFilteredSignals() {
-  let results = _origGetFiltered ? _origGetFiltered() : signals;
+  let results = signals.filter(s => !s._removed);
   const gf = window._gapFilter || 'all';
   if (gf !== 'all') {
     const regionFilters = ['asia','europe','middle_east','americas'];
@@ -2010,18 +2009,19 @@ setInterval(() => {
 }, 3200);
 
 // Patch keepCard to also refresh saves grid
-const _origKeepCard = keepCard;
 function keepCard(id) {
-  _origKeepCard(id);
+  const sToKeep = signals.find(x => x.id === id);
+  if(sToKeep) sToKeep._removed = false;
+  if(typeof saveUiState==='function') saveUiState();
+  if(typeof updateTriageCount==='function') updateTriageCount();
   const s = signals.find(x => x.id === id);
   if (s) s._saved = true;
   renderGapSaves();
 }
 
 // Init gap features after existing restoreUiState
-const _origRestoreUi = restoreUiState;
 function restoreUiState() {
-  if (_origRestoreUi) _origRestoreUi();
+  try { if(typeof loadUiState==='function') loadUiState(); } catch(e) {}
   renderGapCards();
   renderGapQueue();
   renderFloatMap();
