@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -817,7 +818,7 @@ function renderHub() {
     <div class="hub-item" onclick="showDetail(${s.id})" id="hub-item-${s.id}">
       <div class="hub-item-id">${sigId(s)} // ${streamLabel(s.stream)} // ${formatCode(s.sourceType)}</div>
       <div class="hub-item-title">${s.title}</div>
-      `<div class="hub-item-roi">Monthly est. ~$${monthlyRevEst(s).toLocaleString()} · ${marketGrowth(s)}</div>` +
+      <div class="hub-item-roi">Monthly est. ~$${monthlyRevEst(s).toLocaleString()} · ${marketGrowth(s)}</div>
       <div class="hub-item-source">${s.source} // ${regionNode(s)}</div>
     </div>`).join('');
 }
