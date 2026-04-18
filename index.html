@@ -483,11 +483,9 @@ html, body { font-family: var(--sans); }
 .topbar { display:flex; align-items:center; gap:14px; padding:10px 20px; position:sticky; top:10px; z-index:50; margin:10px 16px 0; }
 .topbar-logo { font-weight:700; color:var(--accent); letter-spacing:3px; font-size:16px; white-space:nowrap; flex-shrink:0; display:flex; align-items:center; gap:10px; }
 .topbar-logo img { height:40px !important; width:auto !important; max-height:40px !important; display:block !important; }
-.topbar-search { flex:1; max-width:380px; background:rgba(0,0,0,0.35); border:1px solid rgba(0,230,216,0.12); padding:9px 14px; color:var(--text); border-radius:8px; font-size:13px; font-family:var(--sans); outline:none; transition:border-color .2s; }
-.topbar-search:focus { border-color:rgba(0,230,216,0.35); }
-.topbar-search::placeholder { color:var(--muted-dim); }
+
 .topbar-controls { display:flex; gap:8px; align-items:center; margin-left:auto; }
-.topbar-controls select { background:rgba(0,0,0,0.35); border:1px solid rgba(0,230,216,0.1); color:var(--muted); padding:7px 10px; border-radius:7px; font-size:12px; cursor:pointer; outline:none; }
+
 .btn-topbar { background:transparent; border:1px solid rgba(255,255,255,0.08); color:var(--muted); padding:7px 13px; border-radius:7px; font-size:12px; cursor:pointer; transition:border-color .2s,color .2s; font-family:var(--mono); letter-spacing:0.08em; }
 .btn-topbar:hover { border-color:var(--accent); color:var(--accent); }
 
@@ -614,25 +612,9 @@ body { padding-bottom: 70px; }
   <div class="topbar-logo">
     <img src="./logo.png" alt="GAP" style="height:40px;width:auto;display:block;" />
   </div>
-  <input id="topbar-search" class="topbar-search" placeholder="Search sources, creators, patents…" oninput="filterCards()" />
   <div class="topbar-controls">
-    <select id="sourceFilter" onchange="syncFilterControls()">
-      <option value="all">All Sources</option>
-      <option value="WIPO">WIPO Patents</option>
-      <option value="trade_show">Trade Shows</option>
-      <option value="kickstarter">Crowdfunded</option>
-      <option value="youtube">YouTube</option>
-    </select>
-    <select id="regionFilterTop" onchange="syncFilterControls()">
-      <option value="all">All Regions</option>
-      <option value="asia">Asia</option>
-      <option value="europe">Europe</option>
-      <option value="middle_east">Middle East</option>
-      <option value="americas">Americas</option>
-    </select>
-    <button class="btn-topbar" onclick="showToast('Pulling new alpha…')">⟳ Refresh</button>
-    <button class="btn-topbar" onclick="openPipelineModal()" title="Pipeline Config" style="font-size:16px;padding:5px 10px;">⚙</button>
-  </div>
+    <button class="btn-topbar" onclick="openPipelineModal()" title="Pipeline Config" style="font-size:16px;padding:5px 10px;">&#9881;</button>
+  </div> </div>
 </header>
 
 
@@ -687,7 +669,8 @@ body { padding-bottom: 70px; }
         <button class="chip-btn-g" data-filter="europe" onclick="setGapFilter(this,'europe')">Europe</button>
         <button class="chip-btn-g" data-filter="middle_east" onclick="setGapFilter(this,'middle_east')">Middle East</button>
         <button class="chip-btn-g" data-filter="americas" onclick="setGapFilter(this,'americas')">Americas</button>
-      </div>
+      
+        <button class="chip-btn-g" style="margin-left:auto;border-radius:20px;" onclick="showToast('Pulling new alpha…');renderGapCards();">&#8635; Refresh</button></div>
 
       <!-- SIGNAL CARD FEED -->
       <div class="media-feed" id="cards-grid"></div>
@@ -1282,8 +1265,6 @@ function getFilteredSignals() {
       results = results.filter(s => (s.stream||'').toLowerCase() === gf || (s.type||'').toLowerCase() === gf);
     }
   }
-  const search = (document.getElementById('topbar-search') || {}).value || '';
-  if (search) results = results.filter(s => s.title.toLowerCase().includes(search.toLowerCase()) || (s.desc||'').toLowerCase().includes(search.toLowerCase()));
   return results;
 }
 
