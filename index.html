@@ -576,8 +576,40 @@ html, body { font-family: var(--sans); }
 .progress-bar-g { width:0%; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:5px; transition:width .4s; }
 
 /* pulse for map markers */
-@keyframes pulse { 0%{r:8;opacity:.7} 70%{r:18;opacity:0} 100%{r:20;opacity:0} }
-.pulse-ring { animation:pulse 2.4s infinite; }
+/* region zone base */
+@keyframes zone-breathe {
+  0%,100% { opacity:.18; }
+  50%      { opacity:.32; }
+}
+@keyframes zone-active-pulse {
+  0%,100% { opacity:.72; }
+  50%      { opacity:1; }
+}
+.zone-fill {
+  fill: var(--accent);
+  opacity: .18;
+  animation: zone-breathe 3.6s ease-in-out infinite;
+}
+.zone-border {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  opacity: .35;
+  animation: zone-breathe 3.6s ease-in-out infinite;
+}
+.region-zone.zone-active .zone-fill {
+  fill: var(--accent);
+  opacity: .72;
+  animation: zone-active-pulse 1.8s ease-in-out infinite;
+}
+.region-zone.zone-active .zone-border {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  opacity: 1;
+  animation: zone-active-pulse 1.8s ease-in-out infinite;
+}
+.region-zone.zone-dim .zone-fill  { opacity: .07; animation: none; }
+.region-zone.zone-dim .zone-border { opacity: .14; animation: none; }
 
 /* modal */
 .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:80; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s; }
@@ -1458,71 +1490,41 @@ function getPipelineConfigHTML() {
 function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
 document.addEventListener('click', e => { if (e.target.id === 'modalBg') closeModal(); });
 
-// Float map markers
+// Float map — region highlight zones
 function renderFloatMap() {
   const g = document.getElementById('floatMarkers');
   if (!g) return;
-  // Coordinates calibrated to 0 0 2000 857 viewBox world map
-  const dots = [
-    [1600, 340, 'asia'],     // Tokyo
-    [1545, 475, 'asia'],     // Singapore
-    [1625, 305, 'asia'],     // Seoul
-    [1560, 390, 'asia'],     // Shanghai
-    [1510, 430, 'asia'],     // Kuala Lumpur
-    [1490, 360, 'asia'],     // Guangzhou
-    [1055, 268, 'europe'],   // Berlin
-    [1015, 285, 'europe'],   // Paris
-    [275,  385, 'americas'], // Los Angeles
-    [355,  310, 'americas'], // New York
-    [1165, 428, 'middle_east'] // Riyadh
+  const zones = [
+    { key:'asia',        cx:1560, cy:390, rx:280, ry:200 },
+    { key:'europe',      cx:1050, cy:270, rx:160, ry:130 },
+    { key:'americas',    cx:310,  cy:400, rx:210, ry:270 },
+    { key:'middle_east', cx:1165, cy:430, rx:130, ry:100 }
   ];
-  g.innerHTML = dots.map(function(d) {
-    return '<g>' +
-      '<circle class="pulse-ring" cx="' + d[0] + '" cy="' + d[1] + '" r="8" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.5"/>' +
-      '<circle class="dot-main" cx="' + d[0] + '" cy="' + d[1] + '" r="8" fill="rgba(0,230,216,0.4)" opacity="1" data-region="' + d[2] + '" style="cursor:pointer"/>' +
+  g.innerHTML = zones.map(function(z) {
+    return '<g class="region-zone" data-region="' + z.key + '">' +
+      '<ellipse class="zone-fill" cx="' + z.cx + '" cy="' + z.cy + '" rx="' + z.rx + '" ry="' + z.ry + '" />' +
+      '<ellipse class="zone-border" cx="' + z.cx + '" cy="' + z.cy + '" rx="' + z.rx + '" ry="' + z.ry + '" />' +
     '</g>';
   }).join('');
 }
 
-function toggleFloatMap() {
-  const panel = document.getElementById('mapFloatPanel');
-  const toggle = document.getElementById('mapFloatToggle');
-  const body = document.getElementById('mapFloatBody');
-  panel.classList.toggle('collapsed');
-  const collapsed = panel.classList.contains('collapsed');
-  if (toggle) toggle.textContent = collapsed ? '▶' : '▼';
-  if (body) body.style.display = collapsed ? 'none' : '';
-}
 function highlightMapDot(origin) {
   const g = document.getElementById('floatMarkers');
   if (!g) return;
-  const circles = g.querySelectorAll('circle.dot-main');
-  const regionMap = {
-    asia: [0,1,2,3,4,5], europe: [6,7],
-    americas: [8,9], middle_east: [10], me: [10]
-  };
-  const indices = regionMap[origin] || [];
-  circles.forEach(function(c, i) {
-    if (indices.includes(i)) {
-      c.setAttribute('r', '14');
-      c.setAttribute('fill', 'var(--accent)');
-      c.setAttribute('opacity', '1');
-    } else {
-      c.setAttribute('r', '8');
-      c.setAttribute('fill', 'rgba(0,230,216,0.4)');
-      c.setAttribute('opacity', '1');
-    }
+  const norm = (origin || '').toLowerCase().replace(/[^a-z_]/g,'');
+  g.querySelectorAll('.region-zone').forEach(function(zone) {
+    const r = zone.dataset.region;
+    const active = (r === norm) || (r === 'middle_east' && norm === 'me');
+    zone.classList.toggle('zone-active', active);
+    zone.classList.toggle('zone-dim', !active);
   });
 }
 
 function resetMapDots() {
   const g = document.getElementById('floatMarkers');
   if (!g) return;
-  const circles = g.querySelectorAll('circle.dot-main');
-  circles.forEach(function(c) {
-    c.setAttribute('r', '8');
-    c.setAttribute('fill', 'rgba(0,230,216,0.4)');
-    c.setAttribute('opacity', '1');
+  g.querySelectorAll('.region-zone').forEach(function(zone) {
+    zone.classList.remove('zone-active','zone-dim');
   });
 }
 
