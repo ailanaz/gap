@@ -553,6 +553,27 @@ html, body { font-family: var(--sans); }
 .wb-calc-btn { background:var(--accent); border:none; color:#021014; padding:9px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer; transition:opacity .2s; font-family:var(--mono); letter-spacing:0.08em; }
 .wb-calc-btn:hover { opacity:.85; }
 .wb-calc-result { background:rgba(0,0,0,0.35); padding:10px; border-radius:6px; font-size:11px; line-height:1.8; margin-top:2px; min-height:40px; font-family:var(--mono); color:var(--accent); }
+
+/* signal insight panel */
+.signal-insight-wrap { display:flex; flex-direction:column; gap:8px; }
+.insight-placeholder { font-size:11px; color:var(--muted); font-family:var(--mono); padding:10px; text-align:center; border:1px dashed rgba(0,230,216,0.15); border-radius:6px; }
+.insight-row { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+.insight-row:last-child { border-bottom:none; }
+.insight-icon { font-size:15px; width:20px; text-align:center; flex-shrink:0; margin-top:1px; }
+.insight-body { flex:1; min-width:0; }
+.insight-label { font-size:10px; color:var(--muted); font-family:var(--mono); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:3px; }
+.insight-val { font-size:12px; color:var(--text); line-height:1.5; }
+.insight-thesis { color:rgba(0,230,216,0.85); font-style:italic; }
+.insight-gauge-wrap { display:flex; flex-direction:column; gap:4px; }
+.insight-gauge-track { height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+.insight-gauge-fill { height:100%; background:linear-gradient(90deg,#00e6d8,#ff6b6b); border-radius:3px; transition:width .5s ease; }
+.insight-diff-num { font-size:11px; color:var(--text); font-family:var(--mono); }
+/* region highlight on signal cards */
+.signal-card.region-highlight { box-shadow:0 0 0 2px var(--accent), 0 0 12px rgba(0,230,216,0.25); }
+.signal-card.region-dim { opacity:0.35; }
+/* region zone active glow override */
+.region-zone.zone-active .zone-fill { animation:zone-active-pulse 1.8s ease-in-out infinite; filter:drop-shadow(0 0 12px rgba(0,230,216,0.9)); }
+.region-zone.zone-active .zone-border { stroke:var(--accent); stroke-width:3; opacity:1; }
 .wb-console { max-height:100px; overflow-y:auto; background:#05080a; padding:10px; border-radius:6px; font-size:11px; line-height:1.6; font-family:var(--mono); color:var(--accent); }
 
 /* queue */
@@ -716,14 +737,9 @@ body { padding-bottom: 70px; }
       <div id="queueList" class="wb-queue"><div class="queue-empty-g">No signals queued</div></div>
     </div>
     <div class="wb-card">
-      <div class="wb-title">Financial Snapshot</div>
-      <div class="wb-calc">
-        <label>Startup Cost ($)<input id="fc-cost" type="number" class="wb-calc input" placeholder="50000" /></label>
-        <label>Annual Growth (%)<input id="fc-growth" type="number" class="wb-calc input" placeholder="25" /></label>
-        <label>Revenue / Mo ($)<input id="fc-rev" type="number" class="wb-calc input" placeholder="9900" /></label>
-        <label>TAM ($)<input id="fc-tam" type="number" class="wb-calc input" placeholder="500000000" /></label>
-        <button class="wb-calc-btn" onclick="doGapCalc()">Generate Insight</button>
-        <pre id="wb-calc-out" class="wb-calc-result">—</pre>
+      <div class="wb-title">Signal Insight</div>
+      <div id="signal-insight-panel" class="signal-insight-wrap">
+        <div class="insight-placeholder">Select a signal to generate insight</div>
       </div>
     </div>
     <div class="wb-card">
@@ -1261,6 +1277,7 @@ function selectSignal(id) {
   document.getElementById('footerProgress').style.width = Math.floor(Math.random()*55+20) + '%';
   gapLog('Loaded: ' + s.title);
   wireHeroSocialExtract(s);
+  renderSignalInsight(s);
   highlightMapDot(s.origin);
   if (typeof showDetail === 'function') showDetail(s);
 }
@@ -1374,25 +1391,26 @@ function syncFilterControls() {
 }
 
 // Financial calc for workbench
-function doGapCalc() {
-  const cost = parseFloat(document.getElementById('fc-cost').value) || 50000;
-  const growth = parseFloat(document.getElementById('fc-growth').value) || 25;
-  const rev = parseFloat(document.getElementById('fc-rev').value) || 9900;
-  const tam = parseFloat(document.getElementById('fc-tam').value) || 500000000;
-  const annualRev = rev * 12;
-  const yr3 = annualRev * Math.pow(1 + growth/100, 3);
-  const yr5 = annualRev * Math.pow(1 + growth/100, 5);
-  const tamPct = (yr3 / tam * 100).toFixed(2);
-  const payback = (cost / annualRev * 12).toFixed(1);
-  const grade = yr3 > 500000 ? 'STRONG' : yr3 > 200000 ? 'VIABLE' : 'EARLY';
-  document.getElementById('wb-calc-out').textContent =
-    'Annual Rev:  $' + annualRev.toLocaleString() + '\n' +
-    'Yr-3 Rev:    $' + Math.round(yr3).toLocaleString() + '\n' +
-    'Yr-5 Rev:    $' + Math.round(yr5).toLocaleString() + '\n' +
-    'TAM Capture: ' + tamPct + '%\n' +
-    'Payback:     ~' + payback + ' mo\n' +
-    'Grade:       ' + grade;
-  gapLog('Financial snapshot — ' + grade);
+function renderSignalInsight(s) {
+  const panel = document.getElementById('signal-insight-panel');
+  if (!panel) return;
+  const monthly = Math.round(s.unitPrice * s.dailyVolume * 30);
+  const marketRef = '$' + monthly.toLocaleString() + '/mo';
+  const costLow = Math.round(s.setupCost * 0.8);
+  const costHigh = Math.round(s.setupCost * 1.4);
+  const costStr = '$' + (costLow >= 1000 ? (costLow/1000).toFixed(0) + 'k' : costLow) +
+    '–$' + (costHigh >= 1000 ? (costHigh/1000).toFixed(0) + 'k' : costHigh);
+  const diff = Math.min(10, Math.max(1, Math.round(1 + (s.setupCost / 15000) * 4 + (s.dailyVolume / 200) * 3)));
+  const diffLabel = diff <= 2 ? 'Passive' : diff <= 4 ? 'Low Effort' : diff <= 6 ? 'Moderate' : diff <= 8 ? 'Active' : 'Full-time Op';
+  const region = (s.originLabel || s.origin || '').replace(/_/g,' ');
+  const stream = (s.stream || '').toUpperCase();
+  const thesis = 'This ' + stream + ' opportunity targets the “' + (s.title || 'gap').split(' ').slice(0,4).join(' ') + '” gap in ' + region + '.';
+  panel.innerHTML =
+    '<div class="insight-row"><span class="insight-icon">💰</span><div class="insight-body"><div class="insight-label">Market Reference</div><div class="insight-val">Similar units est. ' + marketRef + ' avg. monthly</div></div></div>' +
+    '<div class="insight-row"><span class="insight-icon">🚨</span><div class="insight-body"><div class="insight-label">Cost of Entry</div><div class="insight-val">Est. startup cost: ' + costStr + '</div></div></div>' +
+    '<div class="insight-row"><span class="insight-icon">⚡</span><div class="insight-body"><div class="insight-label">Difficulty Score</div><div class="insight-gauge-wrap"><div class="insight-gauge-track"><div class="insight-gauge-fill" style="width:' + (diff * 10) + '%"></div></div><span class="insight-diff-num">' + diff + '/10 &mdash; ' + diffLabel + '</span></div></div></div>' +
+    '<div class="insight-row"><span class="insight-icon">🔭</span><div class="insight-body"><div class="insight-label">Gap Thesis</div><div class="insight-val insight-thesis">' + thesis + '</div></div></div>';
+  gapLog('Signal insight: ' + (s.title || s.id));
 }
 
 // Export template
@@ -1501,19 +1519,19 @@ function renderFloatMap() {
     { key:'middle_east', cx:1165, cy:430, rx:130, ry:100 }
   ];
   g.innerHTML = zones.map(function(z) {
-    return '<g class="region-zone" data-region="' + z.key + '">' +
+    return '<g class="region-zone" data-region="' + z.key + '" onclick="selectRegion(\'' + z.key + '\')" style="cursor:pointer">' +
       '<ellipse class="zone-fill" cx="' + z.cx + '" cy="' + z.cy + '" rx="' + z.rx + '" ry="' + z.ry + '" />' +
       '<ellipse class="zone-border" cx="' + z.cx + '" cy="' + z.cy + '" rx="' + z.rx + '" ry="' + z.ry + '" />' +
     '</g>';
   }).join('');
-}
+}}
 
 function highlightMapDot(origin) {
   const g = document.getElementById('floatMarkers');
   if (!g) return;
   const norm = (origin || '').toLowerCase().replace(/[^a-z_]/g,'');
   g.querySelectorAll('.region-zone').forEach(function(zone) {
-    const r = zone.dataset.region;
+    const r = zone.dataset.origin;
     const active = (r === norm) || (r === 'middle_east' && norm === 'me');
     zone.classList.toggle('zone-active', active);
     zone.classList.toggle('zone-dim', !active);
@@ -1528,6 +1546,25 @@ function resetMapDots() {
   });
 }
 
+function selectRegion(key) {
+  if (window._activeRegion === key) { clearRegionSelect(); return; }
+  highlightMapDot(key);
+  const allCards = document.querySelectorAll('.signal-card');
+  allCards.forEach(function(card) {
+    const reg = (card.dataset.origin || '').toLowerCase();
+    const match = reg === key || (key === 'middle_east' && reg === 'me');
+    card.classList.toggle('region-highlight', match);
+    card.classList.toggle('region-dim', !match);
+  });
+  window._activeRegion = key;
+}
+function clearRegionSelect() {
+  resetMapDots();
+  document.querySelectorAll('.signal-card').forEach(function(card) {
+    card.classList.remove('region-highlight', 'region-dim');
+  });
+  window._activeRegion = null;
+}
 // Ingest simulation
 var   ingestMsgs = [
   '• scanning SeoulExpo feed…','• new signal detected: α87','• indexing WIPO patent…',
