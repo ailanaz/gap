@@ -1399,6 +1399,8 @@ var THUMB_MAP = {
   'RSS': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=60',
   'DEFAULT': 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400&q=60'
 };
+var gapQueue = [];
+window._gapFilter = 'all';
 
 
 const signals = [
@@ -1863,7 +1865,6 @@ function selectSignal(id) {
 }
 
 // Gap queue
-let gapQueue = [];
 function addToGapQueue(id) {
   const s = signals.find(x => x.id === id);
   if (!s || gapQueue.includes(id)) return;
@@ -1906,7 +1907,6 @@ function setGapFilter(btn, filter) {
   window._gapFilter = filter;
   renderGapCards();
 }
-window._gapFilter = 'all';
 
 // Override getFilteredSignals to also respect gap filter chips + topbar search/dropdowns
 function getFilteredSignals() {
