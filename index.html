@@ -1566,6 +1566,9 @@ function renderFloatMap() {
     <circle class="pulse-ring" cx="${p.x*0.6+30}" cy="${p.y*0.55+10}" r="4" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.6"/>
     <circle cx="${p.x*0.6+30}" cy="${p.y*0.55+10}" r="3" fill="var(--accent)" opacity="0.85"/>
   </g>`).join('
+');
+}
+
 function toggleFloatMap() {
   const panel = document.getElementById('mapFloatPanel');
   const toggle = document.getElementById('mapFloatToggle');
@@ -1574,7 +1577,6 @@ function toggleFloatMap() {
   const collapsed = panel.classList.contains('collapsed');
   if (toggle) toggle.textContent = collapsed ? '▶' : '▼';
   if (body) body.style.display = collapsed ? 'none' : '';
-}');
 }
 
 // Ingest simulation
