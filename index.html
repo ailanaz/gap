@@ -740,10 +740,7 @@ body { padding-bottom: 70px; }
         <div class="insight-placeholder">Select a signal to generate insight</div>
       </div>
     </div>
-    <div class="wb-card">
-      <div class="wb-title">Console</div>
-      <pre id="gapConsole" class="wb-console">Ready.</pre>
-    </div>
+    
   </div>
 </section>
 
@@ -1262,8 +1259,10 @@ function selectSignal(id) {
   const thumb = getThumb(s);
   const alpha = getAlphaScore(s);
   document.getElementById('heroPlaceholder').style.display = 'none';
-  document.getElementById('heroTitle').textContent = s.title;
-  document.getElementById('heroInsight').textContent = (s.desc || '') + ' · ' + (s.originLabel || s.origin || '') + ' · Alpha ' + alpha;
+  const _ht = document.getElementById('heroTitle');
+  const _hi = document.getElementById('heroInsight');
+  if (_ht) _ht.textContent = s.title;
+  if (_hi) _hi.textContent = (s.desc || '') + ' · ' + (s.originLabel || s.origin || '') + ' · Alpha ' + alpha;
   const badge = document.getElementById('heroBadge');
   badge.textContent = 'Alpha ' + alpha;
   badge.style.display = 'block';
@@ -1563,6 +1562,14 @@ function clearRegionSelect() {
   });
   window._activeRegion = null;
 }
+function toggleFloatMap() {
+  const panel = document.getElementById('mapFloatPanel');
+  const toggle = document.getElementById('mapFloatToggle');
+  if (!panel) return;
+  const isCollapsed = panel.classList.toggle('collapsed');
+  if (toggle) toggle.textContent = isCollapsed ? '\u25bc' : '\u25b2';
+}
+
 // Ingest simulation
 var   ingestMsgs = [
   '• scanning SeoulExpo feed…','• new signal detected: α87','• indexing WIPO patent…',
