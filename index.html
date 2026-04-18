@@ -1531,7 +1531,7 @@ function highlightMapDot(origin) {
   if (!g) return;
   const norm = (origin || '').toLowerCase().replace(/[^a-z_]/g,'');
   g.querySelectorAll('.region-zone').forEach(function(zone) {
-    const r = zone.dataset.origin;
+    const r = zone.dataset.region;
     const active = (r === norm) || (r === 'middle_east' && norm === 'me');
     zone.classList.toggle('zone-active', active);
     zone.classList.toggle('zone-dim', !active);
