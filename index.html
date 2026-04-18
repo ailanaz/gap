@@ -10,31 +10,45 @@
 <title>GAP — Global Alpha Pipeline</title>
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-root {
-    --base: #060608;
-    --panel: #0C0E14;
-    --panel-alt: #080A0F;
-    --module: #0A0C12;
-    --inset: #06080C;
+:root {
+    --base: #0B0F14;
+    --bg: #0B0F14;
+    --panel: rgba(255,255,255,0.03);
+    --panel-alt: rgba(255,255,255,0.05);
+    --module: rgba(0,230,216,0.04);
+    --inset: rgba(0,0,0,0.32);
     --sidebar: #090B10;
-    --border-inactive: #1E2028;
+    --border-inactive: rgba(255,255,255,0.08);
     --border-blue: #5C7AB8;
-    --border-blue-soft: rgba(92, 122, 184, 0.32);
-    --blue-highlight: #1A5FE8;
-    --blue-highlight-soft: rgba(26, 95, 232, 0.12);
+    --border-blue-soft: rgba(92,122,184,0.28);
+    --blue-highlight: #00E6D8;
+    --blue-highlight-soft: rgba(0,230,216,0.12);
     --signal-green: #00E6D8;
-    --signal-green-soft: rgba(0, 230, 216, 0.10);
-    --text-bright: var(--blue-highlight);
-    --text-mid: #A8BCDA;
-    --text-dim: #6B82A8;
-    --text-ghost: #445068;
+    --signal-green-soft: rgba(0,230,216,0.10);
+    --accent: #00E6D8;
+    --accent2: #FF6EC7;
+    --accent3: #7C3AED;
+    --glass-bg: rgba(255,255,255,0.03);
+    --glass-border: rgba(0,230,216,0.08);
+    --glass-hover: rgba(0,230,216,0.15);
+    --glass-blur: blur(12px);
+    --radius-card: 10px;
+    --text-bright: #00E6D8;
+    --text-mid: #9aa7b2;
+    --text-dim: #5a6a7a;
+    --text-ghost: #2e3d4d;
+    --text: #cfeeea;
+    --muted: #9aa7b2;
+    --muted-dim: #5a6a72;
+    --card: #0e1114;
     --mono: 'Geist Mono', monospace;
+    --sans: Inter, system-ui;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; box-shadow: none !important; text-shadow: none !important; filter: none !important; }
   *::before, *::after { box-shadow: none !important; text-shadow: none !important; filter: none !important; }
 
-  html { background: var(--base); }
+  html, body { background: #0B0F14; background: var(--bg, #0B0F14); }
 
   body {
     font-family: var(--mono);
@@ -455,40 +469,7 @@ root {
 .fc-output .fc-tag { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-top: 8px; letter-spacing: 0.08em; text-transform: uppercase; }
 .fc-output .fc-tag-good { background: var(--signal-green-soft); color: var(--signal-green); }
 .fc-output .fc-tag-caution { background: rgba(255,200,0,0.1); color: #f
-  :root {
-    --base: #0B0F14;
-    --bg: #0B0F14;
-    --panel: rgba(255,255,255,0.03);
-    --panel-alt: rgba(255,255,255,0.05);
-    --module: rgba(0,230,216,0.04);
-    --inset: rgba(0,0,0,0.32);
-    --sidebar: #090B10;
-    --border-inactive: rgba(255,255,255,0.08);
-    --border-blue: #5C7AB8;
-    --border-blue-soft: rgba(92,122,184,0.28);
-    --blue-highlight: #00E6D8;
-    --blue-highlight-soft: rgba(0,230,216,0.12);
-    --signal-green: #00E6D8;
-    --signal-green-soft: rgba(0,230,216,0.10);
-    --accent: #00E6D8;
-    --accent2: #FF6EC7;
-    --accent3: #7C3AED;
-    --glass-bg: rgba(255,255,255,0.03);
-    --glass-border: rgba(0,230,216,0.08);
-    --glass-hover: rgba(0,230,216,0.15);
-    --glass-blur: blur(12px);
-    --radius-card: 10px;
-    --text-bright: #00E6D8;
-    --text-mid: #9aa7b2;
-    --text-dim: #5a6a7a;
-    --text-ghost: #2e3d4d;
-    --text: #cfeeea;
-    --muted: #9aa7b2;
-    --muted-dim: #5a6a72;
-    --card: #0e1114;
-    --mono: 'Geist Mono', monospace;
-    --sans: Inter, system-ui;
-  }
+  
 
   * { box-sizing: border-box; margin: 0; padding: 0; box-shadow: none !important; text-shadow: none !important; filter: none !important; }
   *::before, *::after { box-shadow: none !important; text-shadow: none !important; filter: none !important; }
