@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -753,6 +754,11 @@ function benefitTags(s) {
   if (s.stream === 'BUSINESS') tags.push('Scalable Model');
   tags.push('Low Overhead');
   return tags.slice(0, 3);
+}
+function streamClass(s) {
+  if (s.stream === 'TECH') return 'stream-a';
+  if (s.stream === 'BUSINESS') return 'stream-b';
+  return 'stream-c';
 }
 function streamLabel(s) { return s==='tech'?'Tech':s==='biz'?'Business':'R&D'; }
 function streamBreakdown(s) { return s.stream==='tech'?'Tech & Hardware':s.stream==='biz'?'Business Models':'R&D & Concepts'; }
