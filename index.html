@@ -492,14 +492,15 @@ html, body { font-family: var(--sans); }
 .btn-topbar:hover { border-color:var(--accent); color:var(--accent); }
 
 /* hero */
-.hero { display:flex; gap:18px; padding:18px; margin:14px 16px; border-radius:14px; min-height:260px; }
-.hero-left { flex:1; display:flex; flex-direction:column; gap:12px; min-width:0; }
-.hero-media { height:180px; background:#071018; border-radius:10px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center; cursor:pointer; background-size:cover; background-position:center; }
+.hero { display:flex; flex-direction:column; gap:18px; padding:18px; margin:14px 16px; border-radius:14px; }
+
+.hero-left { width:100%; display:flex; flex-direction:column; gap:12px; min-width:0; }
+.hero-media { height:320px; max-height:320px; aspect-ratio:16/9; width:100%; background:#071018; border-radius:10px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center; cursor:pointer; background-size:cover; background-position:center; }
 .hero-placeholder { color:var(--muted-dim); font-size:13px; position:absolute; pointer-events:none; font-family:var(--mono); }
 .alpha-badge { position:absolute; bottom:10px; right:10px; background:var(--accent); color:#021014; font-size:11px; font-weight:700; padding:4px 12px; border-radius:12px; font-family:var(--mono); letter-spacing:.5px; }
 .hero-meta h1 { font-size:16px; font-weight:600; color:var(--text); font-family:var(--sans); }
 .hero-meta p { color:var(--muted); font-size:12px; margin-top:5px; line-height:1.5; font-family:var(--sans); }
-.hero-workbench { width:300px; display:flex; flex-direction:column; gap:8px; flex-shrink:0; }
+.hero-workbench { width:100%; display:flex; flex-direction:row; gap:8px; flex-wrap:wrap; }
 .wb-card { padding:12px; border-radius:8px; background:rgba(255,255,255,0.015); border:1px solid rgba(255,255,255,0.04); }
 .wb-title { font-size:10px; text-transform:uppercase; letter-spacing:1.2px; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:6px; font-family:var(--mono); }
 .wb-badge { background:var(--accent); color:#021014; padding:1px 7px; border-radius:10px; font-size:10px; font-weight:700; }
@@ -588,13 +589,6 @@ html, body { font-family: var(--sans); }
 .modal-box p { font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:8px; font-family:var(--sans); }
 .modal-close-btn { margin-top:16px; background:var(--accent); border:none; color:#021014; padding:8px 20px; border-radius:7px; font-weight:600; cursor:pointer; font-family:var(--mono); }
 
-/* section tabs (kept from existing nav) */
-.view-tabs { display:flex; gap:0; padding:0 16px; margin-bottom:0; border-bottom:1px solid rgba(255,255,255,0.06); }
-.view-tab { padding:10px 18px; cursor:pointer; color:rgba(0,230,216,0.5); font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; border-bottom:2px solid transparent; transition:all .18s; display:flex; align-items:center; gap:8px; font-family:var(--mono); white-space:nowrap; }
-.view-tab:hover { color:rgba(0,230,216,0.85); border-bottom-color:rgba(0,230,216,0.4); }
-.view-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-.view-tab-count { background:rgba(0,230,216,0.12); color:var(--accent); font-size:9px; font-weight:700; padding:2px 6px; border-radius:3px; }
-
 /* stat modules for existing triage stats */
 .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:rgba(255,255,255,0.04); border-radius:8px; overflow:hidden; margin-bottom:16px; }
 .stat-module { background:var(--card); padding:14px 16px; }
@@ -637,21 +631,14 @@ body { padding-bottom: 70px; }
       <option value="americas">Americas</option>
     </select>
     <button class="btn-topbar" onclick="showToast('Pulling new alpha…')">⟳ Refresh</button>
+    <button class="btn-topbar" onclick="openPipelineModal()" title="Pipeline Config" style="font-size:16px;padding:5px 10px;">⚙</button>
   </div>
 </header>
 
-<!-- VIEW TABS -->
-<nav class="view-tabs">
-  <div class="view-tab active" data-view="triage" onclick="switchView('triage', this)">Ready to Review <span class="view-tab-count" id="triage-count">12</span></div>
-  <div class="view-tab" data-view="map" onclick="switchView('map', this)">Regions</div>
-  <div class="view-tab" data-view="hub" onclick="switchView('hub', this)">Saved <span class="view-tab-count" id="hub-count">34</span></div>
-  <div class="view-tab" data-view="pipeline" onclick="switchView('pipeline', this)">Sources</div>
-</nav>
 
-<main>
 
 <!-- ── TRIAGE VIEW ── -->
-<div class="view active" id="view-triage">
+
 
   <!-- HERO -->
   <section class="hero glass">
@@ -729,203 +716,6 @@ body { padding-bottom: 70px; }
       </div>
     </aside>
   </div>
-</div>
-
-<!-- ── MAP VIEW ── -->
-<div class="view" id="view-map">
-    <div class="section-header">
-      <div>
-        <div class="section-title">Source by Origin</div>
-        <div class="section-subtitle">Filter the GAP by geographic innovation hubs</div>
-      </div>
-    </div>
-    <div class="map-container">
-      <div class="map-header">
-        <span>Alpha Origins — Select a region to filter</span>
-        <span>148 SIGNALS // 4 REGIONS</span>
-      </div>
-      <div class="map-canvas">
-        <img class="map-base" src="./world.svg" alt="World map" />
-        <svg class="map-overlay" viewBox="0 0 2000 857" xmlns="http://www.w3.org/2000/svg">
-          <line x1="0" y1="428.5" x2="2000" y2="428.5" stroke="rgba(110,136,201,0.26)" stroke-width="1"/>
-          <line x1="1000" y1="0" x2="1000" y2="857" stroke="rgba(110,136,201,0.26)" stroke-width="1"/>
-          <g class="map-dot" onclick="filterByRegion('asia')" style="cursor:pointer">
-            <circle cx="1635" cy="196" r="24" fill="rgba(0,71,255,0.12)" stroke="#0047FF" stroke-width="1.5"/>
-            <circle cx="1635" cy="196" r="6" fill="#0047FF"/>
-            <text x="1635" y="166" text-anchor="middle" class="map-coordinate">[139.6917E // 35.6895N]</text>
-            <text x="1635" y="184" text-anchor="middle" class="map-city">TOKYO_JPN</text>
-            <text x="1635" y="205" text-anchor="middle" class="map-count">51</text>
-          </g>
-          <g class="map-dot" onclick="filterByRegion('europe')" style="cursor:pointer">
-            <circle cx="1010" cy="166" r="20" fill="rgba(0,71,255,0.12)" stroke="#0047FF" stroke-width="1.5"/>
-            <circle cx="1010" cy="166" r="5" fill="#0047FF"/>
-            <text x="1010" y="136" text-anchor="middle" class="map-coordinate">[13.4050E // 52.5200N]</text>
-            <text x="1010" y="154" text-anchor="middle" class="map-city">BERLIN_DEU</text>
-            <text x="1010" y="175" text-anchor="middle" class="map-count">28</text>
-          </g>
-          <g class="map-dot" onclick="filterByRegion('me')" style="cursor:pointer">
-            <circle cx="1220" cy="286" r="18" fill="rgba(0,71,255,0.12)" stroke="#0047FF" stroke-width="1.5"/>
-            <circle cx="1220" cy="286" r="5" fill="#0047FF"/>
-            <text x="1220" y="256" text-anchor="middle" class="map-coordinate">[46.6753E // 24.7136N]</text>
-            <text x="1220" y="274" text-anchor="middle" class="map-city">RIYADH_SAU</text>
-            <text x="1220" y="295" text-anchor="middle" class="map-count">19</text>
-          </g>
-          <g class="map-dot" onclick="filterByRegion('asia')" style="cursor:pointer">
-            <circle cx="1545" cy="445" r="18" fill="rgba(0,71,255,0.12)" stroke="#0047FF" stroke-width="1.5"/>
-            <circle cx="1545" cy="445" r="5" fill="#0047FF"/>
-            <text x="1545" y="475" text-anchor="middle" class="map-coordinate">[103.8198E // 1.3521N]</text>
-            <text x="1545" y="493" text-anchor="middle" class="map-city">SINGAPORE_SGP</text>
-            <text x="1545" y="514" text-anchor="middle" class="map-count">25</text>
-          </g>
-          <g class="map-dot" onclick="filterByRegion('americas')" style="cursor:pointer">
-            <circle cx="275" cy="238" r="18" fill="rgba(0,71,255,0.12)" stroke="#0047FF" stroke-width="1.5"/>
-            <circle cx="275" cy="238" r="5" fill="#0047FF"/>
-            <text x="275" y="208" text-anchor="middle" class="map-coordinate">[118.2437W // 34.0522N]</text>
-            <text x="275" y="226" text-anchor="middle" class="map-city">LOSANGELES_USA</text>
-            <text x="275" y="247" text-anchor="middle" class="map-count">25</text>
-          </g>
-        </svg>
-      </div>
-      <div class="region-strip">
-        <div class="region-module" id="region-asia" data-region="asia" onclick="filterByRegion('asia')"><div class="region-label">Asia Pacific</div><div class="region-val">76</div><div class="region-sub">Tokyo · Singapore</div></div>
-        <div class="region-module" id="region-europe" data-region="europe" onclick="filterByRegion('europe')"><div class="region-label">Europe</div><div class="region-val">28</div><div class="region-sub">Berlin</div></div>
-        <div class="region-module" id="region-me" data-region="me" onclick="filterByRegion('me')"><div class="region-label">Middle East</div><div class="region-val">19</div><div class="region-sub">Riyadh</div></div>
-        <div class="region-module" id="region-americas" data-region="americas" onclick="filterByRegion('americas')"><div class="region-label">Americas</div><div class="region-val">25</div><div class="region-sub">Los Angeles</div></div>
-      </div>
-    </div>
-    <div id="map-signals-grid" class="cards-grid"></div>
-  </div>
-
-  <!-- CONTENT HUB -->
-  <div class="view" 
-
-<!-- ── HUB VIEW ── -->
-<div class="view" id="view-hub">
-    <div class="section-header">
-      <div>
-        <div class="section-title">Sourced Opportunities</div>
-        <div class="section-subtitle">Extracted alpha ready for execution</div>
-        
-      </div>
-      <button class="btn btn-ghost" onclick="showToast('All alpha exported')">Export All Alpha</button>
-    </div>
-    <div class="hub-grid">
-      <div class="hub-list-panel">
-        <div class="hub-list-header">Saved — 34 Ideas</div>
-        <div class="scrollable-list" id="hub-list"></div>
-      </div>
-      <div class="detail-panel" id="hub-detail">
-        <div class="detail-header">
-          <div class="detail-header-label">Alpha Detail</div>
-          <div class="detail-title" id="detail-title">Select an opportunity to view the full gap analysis</div>
-          <div class="detail-origin" id="detail-origin">Choose a sourced opportunity from the list on the left</div>
-        </div>
-        <div class="detail-body" id="detail-body">
-          <div class="empty-state"><div class="empty-title">No Alpha Selected</div><div class="empty-desc">Select a sourced opportunity to see the full gap analysis and export options</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PIPELINE -->
-  <div class="view" 
-
-<!-- ── PIPELINE VIEW ── -->
-<div class="view" id="view-pipeline">
-    <div class="section-header">
-      <div>
-        <div class="section-title">Pipeline Config</div>
-        <div class="section-subtitle">Configure your alpha streams, scan frequency, and exclusion rules</div>
-      </div>
-      <button class="btn btn-ghost" onclick="showToast('Make.com scenario opened')">Open Pipeline Config</button>
-    </div>
-    <div class="priority-alert">
-      <strong>Priority Alpha Sources:</strong> WIPO Patents, RetailTech Japan 2026, Tech &amp; Hardware Stream
-      <div class="priority-led-box">Active</div>
-    </div>
-    <div class="pipeline-section">
-      <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">Tech &amp; Hardware</div><div class="pipeline-freq">Daily scan · Hardware and systems that change how work is done</div></div>
-        <div class="pipeline-led led-active">Live</div>
-      </div>
-      <div class="pipeline-bar"><div class="pipeline-fill fill-active" style="width:73%"></div></div>
-      <div class="pipeline-sources">
-        <div class="src-card"><div class="src-icon">W</div><div><div class="src-name">WIPO Patents via SerpApi</div><div class="src-desc">Keywords: unattended retail, autonomous service, modular business</div></div><div class="src-status src-live">Live</div></div>
-        <div class="src-card"><div class="src-icon">GP</div><div><div class="src-name">Google Patents via SerpApi</div><div class="src-desc">Mirror query - backup patent signal source</div></div><div class="src-status src-live">Live</div></div>
-        <div class="src-card"><div class="src-icon">JP</div><div><div class="src-name">RetailTech Japan 2026</div><div class="src-desc">RSS - Tokyo Big Sight - Auto-translated</div></div><div class="src-status src-live">Live</div></div>
-        <div class="src-card"><div class="src-icon">CE</div><div><div class="src-name">CES 2026 Innovation Awards</div><div class="src-desc">RSS feed - official award announcements</div></div><div class="src-status src-pending">Pending</div></div>
-        <div class="src-card"><div class="src-icon">NA</div><div><div class="src-name">NAMA Show (Los Angeles)</div><div class="src-desc">Unattended retail - vending & micro-market</div></div><div class="src-status src-pending">Pending</div></div>
-        <div class="src-card"><div class="src-icon">SA</div><div><div class="src-name">LEAP Conference (Riyadh)</div><div class="src-desc">RSS - Arabic - Auto-translated via Make.com</div></div><div class="src-status src-pending">Pending</div></div>
-      </div>
-    </div>
-    <div class="pipeline-section">
-      <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">Business Models</div><div class="pipeline-freq">Bi-weekly scan · Deployable or funded business models</div></div>
-        <div class="pipeline-led led-scheduled">Scheduled</div>
-      </div>
-      <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:16%"></div></div>
-      <div class="pipeline-sources">
-        <div class="src-card"><div class="src-icon">IG</div><div><div class="src-name">Indiegogo (Innovation/Food)</div><div class="src-desc">Filter: >100% funded, Innovation or Food</div></div><div class="src-status src-pending">Pending</div></div>
-        <div class="src-card"><div class="src-icon">KS</div><div><div class="src-name">Kickstarter (Innovation/Food)</div><div class="src-desc">Cross-ref both platforms for signal strength</div></div><div class="src-status src-pending">Pending</div></div>
-      </div>
-    </div>
-    <div class="pipeline-section">
-      <div class="pipeline-header-row">
-        <div class="pipeline-info"><div class="pipeline-name">R&amp;D &amp; Concept Design</div><div class="pipeline-freq">Weekly scan · Visual and speculative design sources</div></div>
-        <div class="pipeline-led led-idle">Idle</div>
-      </div>
-      <div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:11%"></div></div>
-      <div class="pipeline-sources">
-        <div class="src-card"><div class="src-icon">Be</div><div><div class="src-name">Behance</div><div class="src-desc">Tags: Product Design, Retail Concept, Future of Work</div></div><div class="src-status src-idle">Idle</div></div>
-        <div class="src-card"><div class="src-icon">Dr</div><div><div class="src-name">Dribbble</div><div class="src-desc">Concept renders and speculative UX</div></div><div class="src-status src-idle">Idle</div></div>
-
-    <div class="pipeline-section">
-      <div class="pipeline-header-row">
-        <div class="pipeline-info">
-          <div class="pipeline-name">Financial Insights</div>
-          <div class="pipeline-freq">Market sizing · growth modeling</div>
-        </div>
-      </div>
-      <div class="financial-calc">
-        <div class="fc-grid">
-          <label class="fc-label">Startup Cost
-            <input id="fc-cost" class="fc-input" type="number" placeholder="50000" />
-          </label>
-          <label class="fc-label">Annual Growth %
-            <input id="fc-growth" class="fc-input" type="number" placeholder="25" />
-          </label>
-          <label class="fc-label">Revenue / Month
-            <input id="fc-revenue" class="fc-input" type="number" placeholder="8000" />
-          </label>
-          <label class="fc-label">Total Addressable Market
-            <input id="fc-tam" class="fc-input" type="number" placeholder="500000000" />
-          </label>
-        </div>
-        <button class="btn btn-signal" onclick="doFinancialCalc()">Generate Insights</button>
-        <div id="fc-out" class="fc-output"></div>
-      </div>
-    </div>      </div>
-    </div>
-    <div class="antifilters">
-      <div class="antifilters-header">Pipeline Exclusions — Always Active</div>
-      <div class="antifilters-grid">
-        <div class="af-item af-reject">Dropshipping</div>
-        <div class="af-item af-reject">Print on Demand (POD)</div>
-        <div class="af-item af-reject">Affiliate Marketing</div>
-        <div class="af-item af-reject">Blog / Newsletter</div>
-        <div class="af-item af-reject">SaaS (unless hw-linked)</div>
-        <div class="af-item af-reject">Forbes / BI / Entrepreneur</div>
-        <div class="af-item af-require">100% Video Required</div>
-        <div class="af-item af-require">Auto-translate non-EN</div>
-      </div>
-    </div>
-  </div>
-
-
-
-<div class="toast" id="toast"><span id="toast-msg"></span></div>
-
-
 </main><!-- FLOATING MAP -->
 <div class="map-float glass" id="mapFloatPanel">
   <div class="map-float-header" onclick="toggleFloatMap()">
@@ -955,6 +745,28 @@ body { padding-bottom: 70px; }
     <button class="modal-close-btn" onclick="closeModal()">Close</button>
   </div>
 </div>
+
+<!-- PIPELINE MODAL -->
+<div class="modal-bg" id="pipelineModalBg">
+  <div class="modal-box" style="width:700px;max-width:96vw;max-height:85vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h2 style="margin:0;">&#9881; Pipeline Config</h2>
+      <button class="modal-close-btn" onclick="closePipelineModal()" style="margin:0;">&#10005;</button>
+    </div>
+    <div id="pipelineModalContent"></div>
+  </div>
+</div>
+
+<!-- SAVE MODAL -->
+<div class="modal-bg" id="saveModalBg">
+  <div class="modal-box" style="width:520px;max-width:96vw;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h2 id="saveModalTitle" style="margin:0;font-size:13px;"></h2>
+      <button class="modal-close-btn" onclick="closeSaveModal()" style="margin:0;">&#10005;</button>
+    </div>
+    <div id="saveModalBody"></div>
+  </div>
+</div></div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -1215,13 +1027,7 @@ function syncFilterControls(filter) {
 }
 
 function setActiveView(view, persist=true) {
-  const v = normalizeView(view);
-  document.querySelectorAll('.view').forEach(n => n.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
-  document.getElementById(`view-${v}`).classList.add('active');
-  const tab = document.querySelector(`.nav-tab[data-view="${v}"]`);
-  if (tab) tab.classList.add('active');
-  uiState.activeView = v;
+  uiState.activeView = 'triage';
   if (persist) saveUiState();
 }
 
@@ -1283,8 +1089,7 @@ function filterByRegion(region) {
 }
 
 function switchView(view) {
-  setActiveView(view);
-  updateBreadcrumb(view);
+  // Single view mode
 }
 function updateBreadcrumb(view) {
   const steps = ['bc-input','bc-triage','bc-analysis','bc-export'];
@@ -1529,12 +1334,77 @@ function openModal(id) {
   if (!s) return;
   const alpha = getAlphaScore(s);
   document.getElementById('modalTitle').textContent = s.title;
-  document.getElementById('modalBody').innerHTML =
-    '<strong style="color:var(--accent)">Alpha Score: ' + alpha + '</strong><br>' +
-    'Region: ' + (s.originLabel || s.origin || '') + ' &nbsp;|&nbsp; Stream: ' + (s.stream || '') + '<br>' +
-    'Source: ' + (s.source || '') + '<br><br>' + (s.desc || '');
+  document.getElementById('modalBody').innerHTML = '<strong style="color:var(--accent)">Alpha Score: ' + alpha + '</strong><br>Region: ' + (s.originLabel || s.origin || '') + ' | Stream: ' + (s.stream || '') + '<br>Source: ' + (s.source || '') + '<br><br>' + (s.desc || '');
   document.getElementById('modalBg').classList.add('open');
   gapLog('Analyzed: ' + s.title);
+}
+
+function openSaveModal(id) {
+  const s = keptSignals.find(x => x.id === id) || signals.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('saveModalTitle').textContent = sigId(s) + ' — ' + s.title;
+  const monthly = monthlyRevEst(s).toLocaleString();
+  const growth = marketGrowth(s);
+  const benefits = benefitTags(s).join(' · ');
+  document.getElementById('saveModalBody').innerHTML = '<div style="margin-bottom:14px;"><div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase;">Gap Analysis Summary</div><div style="font-size:11px;color:var(--text);line-height:1.7;">' + s.desc + '</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;"><div style="background:rgba(0,0,0,0.3);padding:8px;border-radius:6px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;">MONTHLY EST.</div><div style="font-size:14px;font-weight:700;color:var(--accent);">~$' + monthly + '</div></div><div style="background:rgba(0,0,0,0.3);padding:8px;border-radius:6px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;">MARKET GROWTH</div><div style="font-size:14px;font-weight:700;color:var(--accent);">' + growth + '</div></div><div style="background:rgba(0,0,0,0.3);padding:8px;border-radius:6px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;">SETUP COST</div><div style="font-size:14px;font-weight:700;color:var(--text);">$' + s.setupCost.toLocaleString() + '</div></div><div style="background:rgba(0,0,0,0.3);padding:8px;border-radius:6px;"><div style="font-size:9px;color:var(--muted);margin-bottom:3px;">BENEFITS</div><div style="font-size:11px;color:var(--text);">' + benefits + '</div></div></div></div><div class="social-extract" id="save-social-extract" style="border-top:1px solid rgba(255,255,255,0.06);padding-top:14px;margin-top:4px;"><div class="social-extract-header">Extract for Socials</div><div class="social-format-tabs"><button class="fmt-tab active" data-fmt="tiktok">TikTok 9:16</button><button class="fmt-tab" data-fmt="reels">Reels</button><button class="fmt-tab" data-fmt="shorts">Shorts</button></div><div class="social-caption-box"><div class="social-caption-label">Hook</div><div class="social-caption-text" id="save-social-hook"></div></div><div class="social-caption-box"><div class="social-caption-label">Caption + Tags</div><div class="social-caption-text" id="save-social-caption"></div></div><div class="social-meta" id="save-social-meta"></div><button class="social-copy-btn" id="save-social-copy-btn">Copy Caption</button></div>';
+  wireSaveModalSocial(s);
+  document.getElementById('saveModalBg').classList.add('open');
+  highlightMapDot(s.origin);
+  gapLog('Saved: ' + s.title);
+}
+
+function wireSaveModalSocial(s) {
+  const tabs = document.querySelectorAll('#save-social-extract .fmt-tab');
+  let activeFmt = 'tiktok';
+  function renderSave(fmt) {
+    const d = socialCaption(s, fmt);
+    const hookEl = document.getElementById('save-social-hook');
+    const captionEl = document.getElementById('save-social-caption');
+    const metaEl = document.getElementById('save-social-meta');
+    if (hookEl) hookEl.textContent = d.hook;
+    if (captionEl) captionEl.textContent = d.caption;
+    if (metaEl) metaEl.innerHTML = '<span class="social-meta-item">' + d.meta.label + '</span><span class="social-meta-item">' + d.meta.dur + '</span><span class="social-meta-item">' + d.meta.ratio + '</span>';
+  }
+  renderSave(activeFmt);
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tabs.forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      activeFmt = tab.dataset.fmt;
+      renderSave(activeFmt);
+    });
+  });
+  const copyBtn = document.getElementById('save-social-copy-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function() {
+      const d = socialCaption(s, activeFmt);
+      const fullText = d.hook + '\n\n' + d.caption;
+      navigator.clipboard.writeText(fullText).then(function() {
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.add('copied');
+        setTimeout(function() { copyBtn.textContent = 'Copy Caption'; copyBtn.classList.remove('copied'); }, 2000);
+      }).catch(function() { copyBtn.textContent = 'Copy failed'; setTimeout(function() { copyBtn.textContent = 'Copy Caption'; }, 2000); });
+    });
+  }
+}
+
+function closeSaveModal() {
+  document.getElementById('saveModalBg').classList.remove('open');
+  resetMapDots();
+}
+
+function openPipelineModal() {
+  const content = document.getElementById('pipelineModalContent');
+  if (content && !content.innerHTML.trim()) { content.innerHTML = getPipelineConfigHTML(); }
+  document.getElementById('pipelineModalBg').classList.add('open');
+}
+
+function closePipelineModal() {
+  document.getElementById('pipelineModalBg').classList.remove('open');
+}
+
+function getPipelineConfigHTML() {
+  return '<div class="priority-alert" style="margin-bottom:16px;"><strong>Priority Alpha Sources:</strong> WIPO Patents, RetailTech Japan 2026, Tech &amp; Hardware Stream<div class="priority-led-box">Active</div></div><div class="pipeline-section"><div class="pipeline-header-row"><div class="pipeline-info"><div class="pipeline-name">Tech &amp; Hardware</div><div class="pipeline-freq">Daily scan</div></div><div class="pipeline-led led-active">Live</div></div><div class="pipeline-bar"><div class="pipeline-fill fill-active" style="width:73%"></div></div><div class="pipeline-sources"><div class="src-card"><div class="src-icon">W</div><div><div class="src-name">WIPO Patents via SerpApi</div><div class="src-desc">Keywords: unattended retail, autonomous service, modular business</div></div><div class="src-status src-live">Live</div></div><div class="src-card"><div class="src-icon">JP</div><div><div class="src-name">RetailTech Japan 2026</div><div class="src-desc">RSS - Tokyo Big Sight - Auto-translated</div></div><div class="src-status src-live">Live</div></div><div class="src-card"><div class="src-icon">CE</div><div><div class="src-name">CES 2026 Innovation Awards</div><div class="src-desc">RSS feed - official award announcements</div></div><div class="src-status src-pending">Pending</div></div><div class="src-card"><div class="src-icon">SA</div><div><div class="src-name">LEAP Conference (Riyadh)</div><div class="src-desc">RSS - Arabic - Auto-translated via Make.com</div></div><div class="src-status src-pending">Pending</div></div></div></div><div class="pipeline-section" style="margin-top:12px;"><div class="pipeline-header-row"><div class="pipeline-info"><div class="pipeline-name">Business Models</div><div class="pipeline-freq">Bi-weekly scan</div></div><div class="pipeline-led led-scheduled">Scheduled</div></div><div class="pipeline-bar"><div class="pipeline-fill fill-dim" style="width:16%"></div></div><div class="pipeline-sources"><div class="src-card"><div class="src-icon">IG</div><div><div class="src-name">Indiegogo (Innovation/Food)</div><div class="src-desc">Filter: &gt;100% funded</div></div><div class="src-status src-pending">Pending</div></div><div class="src-card"><div class="src-icon">KS</div><div><div class="src-name">Kickstarter (Innovation/Food)</div><div class="src-desc">Cross-ref for signal strength</div></div><div class="src-status src-pending">Pending</div></div></div></div><div class="antifilters" style="margin-top:12px;"><div class="antifilters-header">Pipeline Exclusions</div><div class="antifilters-grid"><div class="af-item af-reject">Dropshipping</div><div class="af-item af-reject">Print on Demand</div><div class="af-item af-reject">Affiliate Marketing</div><div class="af-item af-reject">SaaS (unless hw-linked)</div><div class="af-item af-require">100% Video Required</div><div class="af-item af-require">Auto-translate non-EN</div></div></div>';
 }
 function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
 document.addEventListener('click', e => { if (e.target.id === 'modalBg') closeModal(); });
@@ -1563,6 +1433,35 @@ function toggleFloatMap() {
   if (toggle) toggle.textContent = collapsed ? '▶' : '▼';
   if (body) body.style.display = collapsed ? 'none' : '';
 }
+function highlightMapDot(origin) {
+  const g = document.getElementById('floatMarkers');
+  if (!g) return;
+  const circles = g.querySelectorAll('circle:not(.pulse-ring)');
+  const regionMap = { asia: [0,1,2,3,4,5], europe: [6,7], americas: [8,9], middle_east: [10], me: [10] };
+  const indices = regionMap[origin] || [];
+  circles.forEach(function(c, i) {
+    if (indices.includes(i)) {
+      c.setAttribute('r', '5');
+      c.setAttribute('fill', 'var(--accent)');
+      c.setAttribute('opacity', '1');
+    } else {
+      c.setAttribute('r', '3');
+      c.setAttribute('fill', 'var(--accent)');
+      c.setAttribute('opacity', '0.45');
+    }
+  });
+}
+
+function resetMapDots() {
+  const g = document.getElementById('floatMarkers');
+  if (!g) return;
+  const circles = g.querySelectorAll('circle:not(.pulse-ring)');
+  circles.forEach(function(c) {
+    c.setAttribute('r', '3');
+    c.setAttribute('opacity', '0.85');
+  });
+}
+
 
 // Ingest simulation
 var   ingestMsgs = [
@@ -1578,13 +1477,10 @@ setInterval(() => {
 
 // Patch keepCard to also refresh saves grid
 function keepCard(id) {
-  const sToKeep = signals.find(x => x.id === id);
-  if(sToKeep) sToKeep._removed = false;
-  if(typeof saveUiState==='function') saveUiState();
-  if(typeof updateTriageCount==='function') updateTriageCount();
   const s = signals.find(x => x.id === id);
-  if (s) s._saved = true;
+  if (s) { s._saved = true; }
   renderGapSaves();
+  openSaveModal(id);
 }
 
 // Init gap features after existing restoreUiState
