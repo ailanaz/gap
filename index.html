@@ -609,15 +609,15 @@ html, body { font-family: var(--sans); }
 }
 .zone-fill {
   fill: var(--accent);
-  opacity: .18;
-  animation: zone-breathe 3.6s ease-in-out infinite;
+  opacity: 0;
+  animation: none;
 }
 .zone-border {
   fill: none;
   stroke: var(--accent);
   stroke-width: 1.5;
-  opacity: .35;
-  animation: zone-breathe 3.6s ease-in-out infinite;
+  opacity: 0;
+  animation: none;
 }
 .region-zone.zone-active .zone-fill {
   fill: var(--accent);
@@ -682,7 +682,7 @@ body { padding-bottom: 70px; }
   <!-- COL 1: Portrait preview -->
   <div class="hero-left">
     <div class="hero-media" id="heroMedia">
-      <div class="hero-placeholder" id="heroPlaceholder">Select a signal to preview</div>
+      <div class="hero-placeholder" id="heroPlaceholder">Select to preview</div>
       <div class="alpha-badge" id="heroBadge" style="display:none"></div>
     </div>
     
@@ -690,7 +690,7 @@ body { padding-bottom: 70px; }
   <!-- COL 2: Ingest + Export + Saves + Social Extract -->
   <div class="hero-col2">
     <div class="wb-card">
-      <div class="wb-title">Live Ingest</div>
+      <div class="wb-title">Live Feed</div>
       <pre id="ingestLog" class="mono-log">scanning sources…</pre>
     </div>
     <div class="wb-card">
@@ -707,7 +707,7 @@ body { padding-bottom: 70px; }
     </div>
     <div class="wb-card" id="hero-social-panel">
       <div class="social-extract">
-        <div class="social-extract-header" id="hero-social-header">Select a signal to generate caption</div>
+        <div class="social-extract-header" id="hero-social-header">Select to summarize</div>
         <div id="hero-social-body" style="display:none">
           <div class="social-format-tabs">
             <button class="fmt-tab active" data-fmt="tiktok" onclick="heroFmtTab(this,'tiktok')">TikTok 9:16</button>
@@ -732,12 +732,12 @@ body { padding-bottom: 70px; }
   <div class="hero-col3">
     <div class="wb-card">
       <div class="wb-title">Queue <span class="wb-badge" id="queueCount" style="display:none">0</span></div>
-      <div id="queueList" class="wb-queue"><div class="queue-empty-g">No signals queued</div></div>
+      <div id="queueList" class="wb-queue"><div class="queue-empty-g">No items in queue</div></div>
     </div>
     <div class="wb-card">
-      <div class="wb-title">Signal Insight</div>
+      <div class="wb-title">Analysis</div>
       <div id="signal-insight-panel" class="signal-insight-wrap">
-        <div class="insight-placeholder">Select a signal to generate insight</div>
+        <div class="insight-placeholder">Select for analysis</div>
       </div>
     </div>
     
@@ -759,7 +759,7 @@ body { padding-bottom: 70px; }
         <button class="chip-btn-g" data-filter="middle_east" onclick="setGapFilter(this,'middle_east')">Middle East</button>
         <button class="chip-btn-g" data-filter="americas" onclick="setGapFilter(this,'americas')">Americas</button>
       
-        <button class="chip-btn-g" style="margin-left:auto;border-radius:20px;" onclick="showToast('Pulling new alpha…');renderGapCards();">&#8635; Refresh</button></div>
+        <button class="chip-btn-g" style="margin-left:auto;border-radius:20px;" onclick="showToast('Pulling new alpha…');renderGapCards();">Refresh</button></div>
 
       <!-- SIGNAL CARD FEED -->
       <div class="media-feed" id="cards-grid"></div>
@@ -776,7 +776,7 @@ body { padding-bottom: 70px; }
       <g id="floatMarkers"></g>
     </svg>
   </div>
-</div>/div>
+</div>
 
 
 
@@ -1239,7 +1239,7 @@ function renderGapCards() {
       <div class="card-chips-g">
         <span class="chip-g ${originClass}">${s.origin || ''}</span>
         <span class="chip-g">${s.stream || ''}</span>
-        <span class="chip-g alpha">Alpha ${alpha}</span>
+        <span class="chip-g alpha">${alpha}</span>
         ${isPatent ? '<span class="chip-g patent">Patent</span>' : ''}
       </div>
       <div class="card-desc-g">${(s.desc || '').slice(0,100)}${s.desc && s.desc.length > 100 ? '…' : ''}</div>
@@ -1336,7 +1336,7 @@ function renderGapQueue() {
   const cnt = document.getElementById('queueCount');
   if (!el) return;
   if (!gapQueue.length) {
-    el.innerHTML = '<div class="queue-empty-g">No signals queued</div>';
+    el.innerHTML = '<div class="queue-empty-g">No items in queue</div>';
     if (cnt) cnt.style.display = 'none';
     return;
   }
