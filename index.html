@@ -1376,15 +1376,16 @@ function updateBreadcrumb(view) {
 
 function showToast(msg) {
   const toast = document.getElementById('toast');
+  if (!toast) return;
   const isGreen = /REFRESH|KEPT|QUEUED|ACTIVE|READY/.test(msg);
-  document.getElementById('toast-msg').textContent=msg;
+  toast.textContent = msg;
   toast.style.borderColor = 'var(--border-blue)';
   toast.style.color = 'var(--border-blue)';
   toast.classList.add('show');
   setTimeout(()=>toast.classList.remove('show'),2800);
 }
 
-function restoreUiState() {
+function restoreLegacyUiState() {
   uiState.activeView=normalizeView(uiState.activeView);
   uiState.triageFilter=normalizeFilter(uiState.triageFilter);
   uiState.mapRegion=normalizeRegion(uiState.mapRegion);
@@ -1393,8 +1394,6 @@ function restoreUiState() {
   if (uiState.hubSignalId!==null) showDetail(uiState.hubSignalId);
   setActiveView(uiState.activeView, false); saveUiState();
 }
-
-restoreUiState();
 
 function doFinancialCalc() {
   const cost = Number(document.getElementById('fc-cost').value) || 50000;
@@ -1954,6 +1953,8 @@ function refreshSignalFeed() {
 function restoreUiState() {
   refreshSignalFeed();
 }
+
+restoreUiState();
 </script>
 </body>
 </html>
