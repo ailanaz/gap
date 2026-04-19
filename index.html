@@ -597,12 +597,6 @@ html, body { font-family: var(--sans); }
 
 
 
-/* footer strip */
-.footer-strip { position:fixed; left:16px; right:16px; bottom:10px; height:44px; display:flex; align-items:center; gap:12px; padding:6px 14px; z-index:40; }
-.footer-playback { font-size:11px; color:var(--muted); min-width:220px; font-family:var(--mono); }
-.progress-wrap-g { flex:1; height:5px; background:#0b0e12; border-radius:5px; overflow:hidden; cursor:pointer; }
-.progress-bar-g { width:0%; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:5px; transition:width .4s; }
-
 /* pulse for map markers */
 /* region zone base */
 @keyframes zone-breathe {
@@ -660,7 +654,7 @@ html, body { font-family: var(--sans); }
 /* ingest log */
 #ingestLog { max-height:52px; overflow:hidden; }
 
-body { padding-bottom: 70px; }
+body { padding-bottom: 0; }
 
 </style>
 </head>
@@ -779,15 +773,6 @@ body { padding-bottom: 70px; }
     </svg>
   </div>
 </div>
-
-
-
-<!-- FOOTER STRIP -->
-<footer class="footer-strip glass">
-  <div class="footer-playback" id="footerSelected">Selected: —</div>
-  <div class="progress-wrap-g"><div class="progress-bar-g" id="footerProgress"></div></div>
-</footer>
-
 <!-- MODAL -->
 <div class="modal-bg" id="modalBg">
   <div class="modal-box">
@@ -1572,8 +1557,6 @@ function selectSignal(id) {
     badge.textContent = 'Alpha ' + gapScore;
     badge.style.display = 'block';
   }
-  document.getElementById('footerSelected').textContent = 'Selected: ' + s.title + ' — ' + (s.source || '') + ' / ' + (s.origin || '');
-  document.getElementById('footerProgress').style.width = Math.floor(Math.random()*55+20) + '%';
   gapLog('Loaded: ' + s.title);
   wireHeroSocialExtract(s);
   renderSignalInsight(s);
