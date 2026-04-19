@@ -1666,20 +1666,21 @@ function renderSignalInsight(s) {
   if (!panel) return;
   const monthly = Math.round(s.unitPrice * s.dailyVolume * 30);
   const marketRef = '$' + monthly.toLocaleString() + '/mo';
+  const avgEarnings = '$' + monthly.toLocaleString() + '/mo avg.';
   const costLow = Math.round(s.setupCost * 0.8);
   const costHigh = Math.round(s.setupCost * 1.4);
-  const costStr = '$' + (costLow >= 1000 ? (costLow/1000).toFixed(0) + 'k' : costLow) +
-    '–$' + (costHigh >= 1000 ? (costHigh/1000).toFixed(0) + 'k' : costHigh);
-  const diff = Math.min(10, Math.max(1, Math.round(1 + (s.setupCost / 15000) * 4 + (s.dailyVolume / 200) * 3)));
-  const diffLabel = diff <= 2 ? 'Passive' : diff <= 4 ? 'Low Effort' : diff <= 6 ? 'Moderate' : diff <= 8 ? 'Active' : 'Full-time Op';
+  const costStr = '$' + (costLow >= 1000 ? (costLow/1000).toFixed(0) + 'k' : costLow) + '-$' + (costHigh >= 1000 ? (costHigh/1000).toFixed(0) + 'k' : costHigh);
+  const gapScore = Math.min(10, Math.max(1, Math.round(1 + (s.setupCost / 15000) * 4 + (s.dailyVolume / 200) * 3)));
+  const gapLabel = gapScore <= 2 ? 'Passive - Easy Entry' : gapScore <= 4 ? 'Low Effort' : gapScore <= 6 ? 'Moderate' : gapScore <= 8 ? 'Active' : 'Full-time Operation';
   const region = (s.originLabel || s.origin || '').replace(/_/g,' ');
-  const stream = (s.stream || '').toUpperCase();
-  const thesis = 'This ' + stream + ' opportunity targets the “' + (s.title || 'gap').split(' ').slice(0,4).join(' ') + '” gap in ' + region + '.';
+  const titleClean = (s.title || 'opportunity').replace(/^(WIPO|Patent|Kickstarter|Indiegogo|LEAP|Behance|Dribbble|NAMA|RetailTech)\s*[:|-]\s*/i, '');
+  const thesis = 'A ' + (s.stream || 'business') + ' opportunity in ' + region + '. ' + titleClean + ' could generate estimated earnings of ' + marketRef + '.';
   panel.innerHTML =
-    '<div class="insight-row"><span class="insight-icon">💰</span><div class="insight-body"><div class="insight-label">Market Reference</div><div class="insight-val">Similar units est. ' + marketRef + ' avg. monthly</div></div></div>' +
-    '<div class="insight-row"><span class="insight-icon">🚨</span><div class="insight-body"><div class="insight-label">Cost of Entry</div><div class="insight-val">Est. startup cost: ' + costStr + '</div></div></div>' +
-    '<div class="insight-row"><span class="insight-icon">⚡</span><div class="insight-body"><div class="insight-label">Difficulty Score</div><div class="insight-gauge-wrap"><div class="insight-gauge-track"><div class="insight-gauge-fill" style="width:' + (diff * 10) + '%"></div></div><span class="insight-diff-num">' + diff + '/10 &mdash; ' + diffLabel + '</span></div></div></div>' +
-    '<div class="insight-row"><span class="insight-icon">🔭</span><div class="insight-body"><div class="insight-label">Gap Thesis</div><div class="insight-val insight-thesis">' + thesis + '</div></div></div>';
+    '<div class="insight-row"><div class="insight-body"><div class="insight-label">Market Reference</div><div class="insight-val">Projected growth: ' + marketRef + ' potential</div></div></div>' +
+    '<div class="insight-row"><div class="insight-body"><div class="insight-label">Average Earnings</div><div class="insight-val">' + avgEarnings + '</div></div></div>' +
+    '<div class="insight-row"><div class="insight-body"><div class="insight-label">Average Cost of Entry</div><div class="insight-val">Est. startup cost: ' + costStr + '</div></div></div>' +
+    '<div class="insight-row"><div class="insight-body"><div class="insight-label">GAP Score</div><div class="insight-gauge-wrap"><div class="insight-gauge-track"><div class="insight-gauge-fill" style="width:' + (gapScore * 10) + '%"></div></div><span class="insight-diff-num">' + gapScore + '/10 — ' + gapLabel + '</span></div></div></div>' +
+    '<div class="insight-row"><div class="insight-body"><div class="insight-label">Gap Thesis</div><div class="insight-val insight-thesis">' + thesis + '</div></div></div>';
   gapLog('Signal insight: ' + (s.title || s.id));
 }
 
