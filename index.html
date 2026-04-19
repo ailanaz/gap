@@ -1529,7 +1529,7 @@ function renderGapCards() {
   }
   grid.innerHTML = filtered.map(s => {
     const thumb = getThumb(s);
-    const alpha = getAlphaScore(s);
+    const gapScore = getGapScore(s);
     const originClass = normalizeOrigin(s.origin).replace(/[^a-z]/g, '-').replace(/^me$/, 'middle-east');
     const isPatent = normalizeSourceType(s.sourceType) === 'PATENT' || (s.source || '').toLowerCase().includes('patent');
     return `<article class="media-card-g" data-origin="${normalizeOrigin(s.origin)}" onclick="selectSignal(${s.id})">
@@ -1562,7 +1562,8 @@ function selectSignal(id) {
   const s = signals.find(x => x.id === id);
   if (!s) return;
   activeSignalId = id;
-  const alpha = getAlphaScore(s);
+  const gapScore = getGapScore(s);
+
   const _ht = document.getElementById('heroTitle');
   const _hi = document.getElementById('heroInsight');
   if (_ht) _ht.textContent = s.title;
