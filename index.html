@@ -1435,7 +1435,7 @@ function getThumb(s) {
  return THUMB_MAP.DEFAULT;
 }
 
-function getAlphaScore(s) {
+function getGapScore(s) {
   const base = { tech: 85, business: 72, concepts: 68 };
   const stream = normalizeStream(s.stream);
   const score = base[stream === 'tech' ? 'tech' : stream === 'biz' ? 'business' : 'concepts'] || 75;
