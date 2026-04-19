@@ -573,8 +573,10 @@ html, body { font-family: var(--sans); }
 .insight-gauge-fill { height:100%; background:linear-gradient(90deg,#00e6d8,#ff6b6b); border-radius:3px; transition:width .5s ease; }
 .insight-diff-num { font-size:11px; color:var(--text); font-family:var(--mono); }
 /* region highlight on signal cards */
-.signal-card.region-highlight { box-shadow:0 0 0 2px var(--accent), 0 0 12px rgba(0,230,216,0.25); }
-.signal-card.region-dim { opacity:0.35; }
+.signal-card.region-highlight,
+.media-card-g.region-highlight { border-color: var(--accent); background: rgba(0,230,216,0.05); }
+.signal-card.region-dim,
+.media-card-g.region-dim { opacity:0.35; }
 /* region zone active glow override */
 .region-zone.zone-active .zone-fill { animation:zone-active-pulse 1.8s ease-in-out infinite; filter:drop-shadow(0 0 12px rgba(0,230,216,0.9)); }
 .region-zone.zone-active .zone-border { stroke:var(--accent); stroke-width:3; opacity:1; }
@@ -1141,7 +1143,9 @@ function renderCards(data) {
 }
 
 function renderHub() {
-  document.getElementById('hub-list').innerHTML = keptSignals.slice(0,10).map(s => `
+  const hubList = document.getElementById('hub-list');
+  if (!hubList) return;
+  hubList.innerHTML = keptSignals.slice(0,10).map(s => `
     <div class="hub-item" onclick="showDetail(${s.id})" id="hub-item-${s.id}">
       <div class="hub-item-id">${sigId(s)} // ${streamLabel(s.stream)} // ${formatCode(s.sourceType)}</div>
       <div class="hub-item-title">${s.title}</div>
@@ -1154,13 +1158,17 @@ function showDetail(id) {
   const s = keptSignals.find(x => x.id===id);
   if (!s) return;
   activeSignalId = id;
+  const detailTitle = document.getElementById('detail-title');
+  const detailOrigin = document.getElementById('detail-origin');
+  const detailBody = document.getElementById('detail-body');
+  if (!detailTitle || !detailOrigin || !detailBody) return;
   document.querySelectorAll('.hub-item').forEach(el => el.classList.remove('selected'));
   const el = document.getElementById(`hub-item-${id}`);
   if (el) el.classList.add('selected');
   uiState.hubSignalId = id; saveUiState();
-  document.getElementById('detail-title').textContent = signalHeader(s);
-  document.getElementById('detail-origin').textContent = `${originReadout(s)} · Source`;
-  document.getElementById('detail-body').innerHTML = `
+  detailTitle.textContent = signalHeader(s);
+  detailOrigin.textContent = `${originReadout(s)} · Source`;
+  detailBody.innerHTML = `
     <div class="detail-row"><span class="detail-key">Stream</span><span class="detail-val">${streamBreakdown(s)}</span></div>
     <div class="detail-row"><span class="detail-key">Signal ID</span><span class="detail-val">${sigId(s)}</span></div>
     <div class="detail-row"><span class="detail-key">Setup Cost</span><span class="detail-val">$${s.setupCost.toLocaleString()}</span></div>
@@ -1340,6 +1348,7 @@ function filterByRegion(region) {
   uiState.mapRegion=r; saveUiState();
   const filtered = keptSignals.filter(s => s.origin===r);
   const grid = document.getElementById('map-signals-grid');
+  if (!grid) return;
   if (!filtered.length) { grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-title">No Sourced Alpha</div><div class="empty-desc">No alpha found for this region</div></div>'; return; }
   grid.innerHTML = filtered.slice(0,4).map(s => cardMarkup(s)).join('');
 }
@@ -1473,7 +1482,7 @@ function renderGapCards() {
     const alpha = getAlphaScore(s);
     const originClass = normalizeOrigin(s.origin).replace(/[^a-z]/g, '-').replace(/^me$/, 'middle-east');
     const isPatent = normalizeSourceType(s.sourceType) === 'PATENT' || (s.source || '').toLowerCase().includes('patent');
-    return `<article class="media-card-g" onclick="selectSignal(${s.id})">
+    return `<article class="media-card-g" data-origin="${normalizeOrigin(s.origin)}" onclick="selectSignal(${s.id})">
       <div class="card-thumb-g">
         <img src="${thumb}" alt="${s.title}" loading="lazy" onerror="this.style.display='none'"/>
         <div class="thumb-overlay-g"><span class="play-icon-g">▶</span></div>
@@ -1803,7 +1812,7 @@ function resetMapDots() {
 function selectRegion(key) {
   if (window._activeRegion === key) { clearRegionSelect(); return; }
   highlightMapDot(key);
-  const allCards = document.querySelectorAll('.signal-card');
+  const allCards = document.querySelectorAll('#cards-grid .signal-card, #cards-grid .media-card-g');
   allCards.forEach(function(card) {
     const reg = (card.dataset.origin || '').toLowerCase();
     const match = reg === key || (key === 'middle_east' && reg === 'me');
@@ -1814,7 +1823,7 @@ function selectRegion(key) {
 }
 function clearRegionSelect() {
   resetMapDots();
-  document.querySelectorAll('.signal-card').forEach(function(card) {
+  document.querySelectorAll('#cards-grid .signal-card, #cards-grid .media-card-g').forEach(function(card) {
     card.classList.remove('region-highlight', 'region-dim');
   });
   window._activeRegion = null;
