@@ -1728,7 +1728,7 @@ function gapLog(msg) {
 function openModal(id) {
   const s = signals.find(x => x.id === id);
   if (!s) return;
-  const alpha = getAlphaScore(s);
+  const gapScore = getGapScore(s);
   document.getElementById('modalTitle').textContent = s.title;
   document.getElementById('modalBody').innerHTML = '<strong style="color:var(--accent)">Alpha Score: ' + alpha + '</strong><br>Region: ' + (s.originLabel || s.origin || '') + ' | Stream: ' + (s.stream || '') + '<br>Source: ' + (s.source || '') + '<br><br>' + (s.desc || '');
   document.getElementById('modalBg').classList.add('open');
