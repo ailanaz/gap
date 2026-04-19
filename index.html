@@ -495,6 +495,9 @@ html, body { font-family: var(--sans); }
 
 .hero-left { display:flex; flex-direction:column; gap:12px; flex-shrink:0; }
 .hero-media { width:270px; aspect-ratio:9/16; background:#071018; border-radius:12px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center; cursor:pointer; background-size:cover; background-position:center; flex-shrink:0; }
+.hero-media iframe,
+.hero-media img,
+.hero-media video { width:100%; height:100%; border:0; object-fit:cover; display:block; background:#05070b; }
 .hero-placeholder { color:var(--muted-dim); font-size:13px; position:absolute; pointer-events:none; font-family:var(--mono); }
 .alpha-badge { position:absolute; bottom:10px; right:10px; background:var(--accent); color:#021014; font-size:11px; font-weight:700; padding:4px 12px; border-radius:12px; font-family:var(--mono); letter-spacing:.5px; }
 .hero-meta h1 { font-size:16px; font-weight:600; color:var(--text); font-family:var(--sans); }
@@ -668,7 +671,7 @@ body { padding-bottom: 70px; }
   </div>  <div class="topbar-title">Global Alpha Pipeline</div>
 
   <div class="topbar-controls">
-    <button class="chip-btn-g" style="margin-left:auto;border-radius:20px;" onclick="showToast('Pulling new alpha…');renderGapCards();">Refresh</button>
+    <button class="chip-btn-g" style="margin-left:auto;border-radius:20px;" onclick="refreshSignalFeed();">Refresh</button>
 
   </div> </div>
 </header>
@@ -836,6 +839,7 @@ window._gapFilter = 'all';
 
 
 let signals = [];
+let activeSignalId = null;
 
 let keptSignals = signals.map(s => ({ ...s, status: 'Kept' }));
 const signalDates = { 1:'16.04.26',2:'16.04.26',3:'15.04.26',4:'15.04.26',5:'14.04.26',6:'14.04.26',7:'13.04.26',8:'13.04.26',9:'12.04.26',10:'12.04.26',11:'11.04.26',12:'11.04.26' };
@@ -848,6 +852,203 @@ const allowedRegions = new Set(['asia','europe','me','americas']);
 const defaultUiState = { activeView:'triage', triageFilter:'all', mapRegion:'asia', hubSignalId:null };
 let selectedTriageId = null;
 let uiState = loadUiState();
+const DEFAULT_FEED_URL = './data.json';
+
+function normalizeStream(value) {
+  const v = String(value || '').trim().toLowerCase();
+  if (['tech', 'a', 'hardware', 'technology'].includes(v)) return 'tech';
+  if (['business', 'biz', 'b', 'ideas', 'idea', 'model', 'models'].includes(v)) return 'biz';
+  return 'rd';
+}
+
+function normalizeOrigin(value) {
+  const v = String(value || '').trim().toLowerCase();
+  if (!v) return 'asia';
+  if (v.includes('middle') || v === 'me' || v.includes('uae') || v.includes('saudi') || v.includes('gulf')) return 'me';
+  if (v.includes('asia') || v.includes('japan') || v.includes('singapore') || v.includes('turkey')) return 'asia';
+  if (v.includes('europe') || v.includes('france') || v.includes('switzerland') || v.includes('germany')) return 'europe';
+  if (v.includes('america') || v.includes('usa') || v.includes('united states') || v.includes('canada')) return 'americas';
+  return v.replace(/[^a-z]/g, '') || 'asia';
+}
+
+function normalizeSourceType(value) {
+  const v = String(value || '').trim().toLowerCase();
+  if (v.includes('patent')) return 'PATENT';
+  if (v.includes('trade') || v.includes('expo') || v.includes('show') || v.includes('conference')) return 'TRADE_SHOW';
+  if (v.includes('kickstarter') || v.includes('crowd') || v.includes('indiegogo')) return 'CROWDFUNDED';
+  if (v.includes('news') || v.includes('press') || v.includes('rss')) return 'NEWS_SIGNAL';
+  if (v.includes('concept') || v.includes('r&d') || v.includes('research')) return 'R&D_CONCEPT';
+  return formatCode(value || 'SOURCE');
+}
+
+function sourceTypeLabel(value) {
+  return normalizeSourceType(value).replace(/_/g, ' ');
+}
+
+function prettyOriginLabel(origin, raw) {
+  if (raw && String(raw).trim()) return String(raw).trim();
+  const map = {
+    asia: 'Asia',
+    europe: 'Europe',
+    me: 'Middle East',
+    americas: 'Americas'
+  };
+  return map[normalizeOrigin(origin)] || 'Global';
+}
+
+function formatIncomingDate(value, fallbackId) {
+  if (!value) return signalDates[fallbackId] || '16.04.26';
+  const raw = String(value).trim();
+  if (/^\d{2}\.\d{2}\.\d{2}$/.test(raw)) return raw;
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return raw.slice(0, 8);
+  const dd = String(parsed.getUTCDate()).padStart(2, '0');
+  const mm = String(parsed.getUTCMonth() + 1).padStart(2, '0');
+  const yy = String(parsed.getUTCFullYear()).slice(-2);
+  return dd + '.' + mm + '.' + yy;
+}
+
+function looksLikeYouTube(url) {
+  return /youtube\.com|youtu\.be/.test(String(url || ''));
+}
+
+function toYouTubeEmbed(url) {
+  const raw = String(url || '');
+  if (!raw) return '';
+  if (raw.includes('/embed/')) return raw;
+  const watchMatch = raw.match(/[?&]v=([^&]+)/);
+  if (watchMatch) return 'https://www.youtube.com/embed/' + watchMatch[1];
+  const shortMatch = raw.match(/youtu\.be\/([^?&/]+)/);
+  if (shortMatch) return 'https://www.youtube.com/embed/' + shortMatch[1];
+  return raw;
+}
+
+function toYouTubeWatch(url) {
+  const embed = toYouTubeEmbed(url);
+  const match = embed.match(/\/embed\/([^?&/]+)/);
+  return match ? 'https://www.youtube.com/watch?v=' + match[1] : String(url || '');
+}
+
+function escapeHtml(text) {
+  return String(text || '').replace(/[&<>"']/g, function(ch) {
+    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+  });
+}
+
+function estimateMetrics(stream, sourceType) {
+  const s = normalizeStream(stream);
+  const t = normalizeSourceType(sourceType);
+  if (s === 'tech') {
+    return t === 'PATENT'
+      ? { setupCost: 28000, unitPrice: 11, dailyVolume: 85 }
+      : { setupCost: 22000, unitPrice: 10, dailyVolume: 70 };
+  }
+  if (s === 'biz') {
+    return t === 'CROWDFUNDED'
+      ? { setupCost: 9000, unitPrice: 24, dailyVolume: 22 }
+      : { setupCost: 12000, unitPrice: 18, dailyVolume: 28 };
+  }
+  return { setupCost: 16000, unitPrice: 8, dailyVolume: 45 };
+}
+
+function normalizeSignal(raw, index) {
+  const sourceUrl = raw.url || raw.sourceUrl || raw.link || raw.pageUrl || '';
+  const stream = normalizeStream(raw.stream || raw.category);
+  const sourceType = normalizeSourceType(raw.sourceType || raw.category || raw.source);
+  const origin = normalizeOrigin(raw.origin || raw.region || raw.country || raw.originLabel);
+  const fallbackMetrics = estimateMetrics(stream, sourceType);
+  const mediaUrl = raw.mediaUrl || raw.videoUrl || raw.image || raw.imageUrl || raw.thumbnail || raw.thumbUrl || sourceUrl || '';
+  const thumbUrl = raw.thumbUrl || raw.thumbnail || raw.image || raw.imageUrl || (looksLikeYouTube(mediaUrl) ? 'https://img.youtube.com/vi/' + (toYouTubeEmbed(mediaUrl).match(/\/embed\/([^?&/]+)/) || [])[1] + '/hqdefault.jpg' : '');
+  const mediaType = String(raw.mediaType || '').toLowerCase() || (looksLikeYouTube(mediaUrl) ? 'video' : /\.(mp4|mov|webm)(\?|$)/i.test(mediaUrl) ? 'video' : 'image');
+  return {
+    id: Number(raw.id) || index + 1,
+    stream,
+    origin,
+    originLabel: prettyOriginLabel(origin, raw.originLabel || raw.region || raw.country),
+    title: raw.title || raw.name || 'Untitled Signal',
+    desc: raw.desc || raw.description || raw.snippet || '',
+    source: raw.source || sourceTypeLabel(sourceType),
+    sourceType,
+    setupCost: Number(raw.setupCost) || fallbackMetrics.setupCost,
+    unitPrice: Number(raw.unitPrice) || fallbackMetrics.unitPrice,
+    dailyVolume: Number(raw.dailyVolume) || fallbackMetrics.dailyVolume,
+    tradeShow: raw.tradeShow || raw.event || '',
+    date: formatIncomingDate(raw.date || raw.pubDate || raw.priority_date || raw.publication_date, Number(raw.id) || index + 1),
+    mediaType,
+    mediaUrl: looksLikeYouTube(mediaUrl) ? toYouTubeEmbed(mediaUrl) : mediaUrl,
+    thumbUrl: thumbUrl && thumbUrl.includes('undefined') ? '' : thumbUrl,
+    mediaOrigin: raw.mediaOrigin || formatCode(origin),
+    url: sourceUrl || (looksLikeYouTube(mediaUrl) ? toYouTubeWatch(mediaUrl) : mediaUrl)
+  };
+}
+
+function scoreSignalPriority(signal) {
+  const regionScore = { asia: 40, europe: 35, me: 30, americas: 10 };
+  const sourceScore = { PATENT: 12, TRADE_SHOW: 10, CROWDFUNDED: 8, NEWS_SIGNAL: 6, 'R&D_CONCEPT': 7 };
+  const freshness = /^\d{2}\.\d{2}\.\d{2}$/.test(signal.date || '') ? Number((signal.date || '').slice(0, 2)) : 0;
+  return (regionScore[normalizeOrigin(signal.origin)] || 5) + (sourceScore[normalizeSourceType(signal.sourceType)] || 0) + freshness;
+}
+
+function normalizeIncomingFeed(payload) {
+  const rawSignals = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload && payload.signals)
+      ? payload.signals
+      : Array.isArray(payload && payload.array)
+        ? payload.array
+        : Array.isArray(payload && payload.data)
+          ? payload.data
+          : [];
+  const normalizedSignals = rawSignals
+    .map(function(item, index) { return normalizeSignal(item || {}, index); })
+    .sort(function(a, b) { return scoreSignalPriority(b) - scoreSignalPriority(a); });
+  return {
+    meta: payload && payload.meta ? payload.meta : { last_updated: new Date().toLocaleString() },
+    signals: normalizedSignals
+  };
+}
+
+function getFeedEndpoint() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('feed') || window.GAP_FEED_URL || DEFAULT_FEED_URL;
+}
+
+function copyToClipboardSafe(text, onDone) {
+  navigator.clipboard.writeText(String(text || '')).then(function() {
+    if (typeof onDone === 'function') onDone(true);
+  }).catch(function() {
+    if (typeof onDone === 'function') onDone(false);
+  });
+}
+
+function openSignalSource(id) {
+  const s = signals.find(function(item) { return item.id === id; }) || keptSignals.find(function(item) { return item.id === id; });
+  if (!s) return;
+  const target = s.url || (looksLikeYouTube(s.mediaUrl) ? toYouTubeWatch(s.mediaUrl) : s.mediaUrl) || s.thumbUrl;
+  if (!target) {
+    showToast('No source available');
+    return;
+  }
+  window.open(target, '_blank', 'noopener');
+  gapLog('Source opened: ' + s.title);
+}
+
+function downloadOrOpenMedia(signal, label) {
+  const target = signal.mediaUrl || signal.thumbUrl || signal.url;
+  if (!target) {
+    showToast('No media available');
+    return;
+  }
+  const href = looksLikeYouTube(target) ? toYouTubeWatch(target) : target;
+  const link = document.createElement('a');
+  link.href = href;
+  link.target = '_blank';
+  link.rel = 'noopener';
+  link.download = (signal.title || 'gap-signal').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') + '-' + String(label || 'export').toLowerCase() + (signal.mediaType === 'image' ? '.jpg' : '');
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
 
 function loadUiState() { try { return { ...defaultUiState, ...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}') }; } catch(e) { return { ...defaultUiState }; } }
 function saveUiState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(uiState)); } catch(e) {} }
@@ -855,30 +1056,34 @@ function normalizeView(v) { return allowedViews.has(v) ? v : defaultUiState.acti
 function normalizeFilter(f) { return allowedFilters.has(f) ? f : defaultUiState.triageFilter; }
 function normalizeRegion(r) { return allowedRegions.has(r) ? r : defaultUiState.mapRegion; }
 function normalizeHubSignalId(id) { return keptSignals.some(s => s.id === id) ? id : null; }
-function monthlyRevEst(s) { return Math.round(s.unitPrice * s.dailyVolume * 30); }
+function monthlyRevEst(s) { return Math.round((Number(s.unitPrice) || 0) * (Number(s.dailyVolume) || 0) * 30); }
 function marketGrowth(s) {
-  if (s.stream === 'TECH') return '18% CAGR';
-  if (s.stream === 'BUSINESS') return '12% CAGR';
+  const stream = normalizeStream(s.stream);
+  if (stream === 'tech') return '18% CAGR';
+  if (stream === 'biz') return '12% CAGR';
   return '22% CAGR';
 }
 function benefitTags(s) {
   const tags = [];
-  if (s.sourceType === 'PATENT') tags.push('IP-Protected');
-  if (s.sourceType === 'TRADE_SHOW') tags.push('Market-Validated');
-  if (s.sourceType === 'CROWDFUNDED') tags.push('Demand-Proven');
-  if (s.stream === 'TECH') tags.push('Automation Play');
-  if (s.stream === 'BUSINESS') tags.push('Scalable Model');
+  const sourceType = normalizeSourceType(s.sourceType);
+  const stream = normalizeStream(s.stream);
+  if (sourceType === 'PATENT') tags.push('IP-Protected');
+  if (sourceType === 'TRADE_SHOW') tags.push('Market-Validated');
+  if (sourceType === 'CROWDFUNDED') tags.push('Demand-Proven');
+  if (stream === 'tech') tags.push('Automation Play');
+  if (stream === 'biz') tags.push('Scalable Model');
   tags.push('Low Overhead');
   return tags.slice(0, 3);
 }
 function streamClass(s) {
-  if (s.stream === 'TECH') return 'stream-a';
-  if (s.stream === 'BUSINESS') return 'stream-b';
+  const stream = normalizeStream(s && s.stream ? s.stream : s);
+  if (stream === 'tech') return 'stream-a';
+  if (stream === 'biz') return 'stream-b';
   return 'stream-c';
 }
-function streamLabel(s) { return s==='tech'?'Tech':s==='biz'?'Business':'R&D'; }
-function streamBreakdown(s) { return s.stream==='tech'?'Tech & Hardware':s.stream==='biz'?'Business Models':'R&D & Concepts'; }
-function signalDate(s) { return signalDates[s.id]||'16.04.26'; }
+function streamLabel(s) { return normalizeStream(s)==='tech'?'Tech':normalizeStream(s)==='biz'?'Business':'Concepts'; }
+function streamBreakdown(s) { return normalizeStream(s.stream)==='tech'?'Tech & Hardware':normalizeStream(s.stream)==='biz'?'Business Models':'R&D & Concepts'; }
+function signalDate(s) { return s.date || signalDates[s.id] || '16.04.26'; }
 function srcId(s) { return `GAP_${String(s.id).padStart(3,'0')}`; }
 function regionNode(s) { return nodeLookup[s.originLabel]||formatCode(s.originLabel); }
 function coordinates(s) { return coordinateLookup[s.originLabel]||'000.0000E // 00.0000N'; }
@@ -898,14 +1103,14 @@ function cardMarkup(s, { showActions=false, selectable=false }={}) {
   const selectedClass = selectable && selectedTriageId===s.id ? ' triage-selected' : '';
   const idAttr = selectable ? ` id="card-${s.id}"` : '';
   const clickAttr = selectable ? ` onclick="toggleTriageSelect(${s.id})"` : '';
-  const sourceNode = formatCode(s.tradeShow || s.sourceType);
+  const sourceNode = formatCode(s.tradeShow || normalizeSourceType(s.sourceType));
   return `<div class="signal-card${selectedClass}" data-origin="${s.origin}"${idAttr}${clickAttr}>
       <div class="card-header">
         <div class="card-header-left">
           <span class="card-id">${sigId(s)}</span>
-          <span class="card-stage-tag${s.stream==='tech'?' verified':''}">${s.stream==='tech'?'Alpha Verified':'Signal In Progress'}</span>
+          <span class="card-stage-tag${normalizeStream(s.stream)==='tech'?' verified':''}">${normalizeStream(s.stream)==='tech'?'Alpha Verified':'Signal In Progress'}</span>
           <span class="card-stream ${streamClass(s.stream)}">${streamLabel(s.stream)}</span>
-          <span class="card-type">${formatCode(s.sourceType)}</span>
+          <span class="card-type">${formatCode(normalizeSourceType(s.sourceType))}</span>
         </div>
         <span class="card-id" style="opacity:0.5">${signalDate(s)}</span>
       </div>
@@ -924,7 +1129,7 @@ function cardMarkup(s, { showActions=false, selectable=false }={}) {
       </div>
       <div class="card-footer">
         <span class="card-source">${s.source}</span>
-        ${showActions ? `<div class="action-btns"><button class="key-btn key-keep" onclick="keepCard(${s.id},event)">Pipeline This</button><button class="key-btn key-zap" onclick="zapCard(${s.id},event)">Discard</button></div>` : `<button class="key-btn key-keep" style="margin-left:auto" onclick="void(0)">Source This Gap</button>`}
+        ${showActions ? `<div class="action-btns"><button class="key-btn key-keep" onclick="keepCard(${s.id},event)">Pipeline This</button><button class="key-btn key-zap" onclick="zapCard(${s.id},event)">Discard</button></div>` : `<button class="key-btn key-keep" style="margin-left:auto" onclick="event.stopPropagation();openSignalSource(${s.id})">Source This Gap</button>`}
       </div>
     </div>`;
 }
@@ -948,6 +1153,7 @@ function renderHub() {
 function showDetail(id) {
   const s = keptSignals.find(x => x.id===id);
   if (!s) return;
+  activeSignalId = id;
   document.querySelectorAll('.hub-item').forEach(el => el.classList.remove('selected'));
   const el = document.getElementById(`hub-item-${id}`);
   if (el) el.classList.add('selected');
@@ -969,8 +1175,8 @@ function showDetail(id) {
       <div class="copy-module-body">
         <div class="copy-text">${sigId(s)} // ${regionNode(s)} // ${signalDate(s)}<br><br>${s.title}<br><br>Avg setup: $${s.setupCost.toLocaleString()} // Monthly est. ~$${monthlyRevEst(s).toLocaleString()} // Market growth: ${marketGrowth(s)}<br>Benefits: ${benefitTags(s).join(' · ')}</div>
         <div class="copy-actions">
-          <button class="btn btn-ghost" style="font-size:9px" onclick="showToast('Copied to clipboard')">Copy</button>
-          <button class="btn btn-signal" style="font-size:9px" onclick="showToast('Source opened')">Source This Gap</button>
+          <button class="btn btn-ghost" style="font-size:9px" onclick="copySignalSummary(${s.id})">Copy</button>
+          <button class="btn btn-signal" style="font-size:9px" onclick="openSignalSource(${s.id})">Source This Gap</button>
         </div>
       </div>
     <div class="social-extract" id="social-extract">
@@ -1204,6 +1410,8 @@ function doFinancialCalc() {
 // Signal image thumbnails (mapped by stream/source type for visual richness)
 
 function getThumb(s) {
+  if (s.thumbUrl) return s.thumbUrl;
+  if (s.mediaType === 'image' && s.mediaUrl) return s.mediaUrl;
   const src = (s.source || '').toUpperCase();
   for (const key of Object.keys(THUMB_MAP)) {
     if (src.includes(key)) return THUMB_MAP[key];
@@ -1213,8 +1421,42 @@ function getThumb(s) {
 
 function getAlphaScore(s) {
   const base = { tech: 85, business: 72, concepts: 68 };
-  const score = base[s.stream] || 75;
+  const stream = normalizeStream(s.stream);
+  const score = base[stream === 'tech' ? 'tech' : stream === 'biz' ? 'business' : 'concepts'] || 75;
   return Math.min(99, score + (s.id % 15));
+}
+
+function renderHeroMedia(s) {
+  const media = document.getElementById('heroMedia');
+  if (!media) return;
+  const title = escapeHtml(s.title || 'Selected signal');
+  const thumb = getThumb(s);
+  let body = '';
+  if (s.mediaUrl && looksLikeYouTube(s.mediaUrl)) {
+    body = '<iframe src="' + escapeHtml(toYouTubeEmbed(s.mediaUrl)) + '" title="' + title + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+  } else if (s.mediaUrl && String(s.mediaType || '').toLowerCase() === 'video') {
+    body = '<video controls playsinline preload="metadata"' + (thumb ? ' poster="' + escapeHtml(thumb) + '"' : '') + '><source src="' + escapeHtml(s.mediaUrl) + '"></video>';
+  } else if (thumb) {
+    body = '<img src="' + escapeHtml(thumb) + '" alt="' + title + '" loading="eager" />';
+  } else {
+    body = '<div class="hero-placeholder" id="heroPlaceholder">No preview available</div>';
+  }
+  media.style.backgroundImage = 'none';
+  media.innerHTML = body + '<div class="hero-placeholder" id="heroPlaceholder" style="display:none"></div><div class="alpha-badge" id="heroBadge" style="display:none"></div>';
+}
+
+function copySignalSummary(id) {
+  const s = signals.find(function(item) { return item.id === id; }) || keptSignals.find(function(item) { return item.id === id; });
+  if (!s) return;
+  const text = sigId(s) + ' // ' + regionNode(s) + ' // ' + signalDate(s) + '\n\n' +
+    s.title + '\n\n' +
+    'Avg setup: $' + s.setupCost.toLocaleString() +
+    ' // Monthly est. ~$' + monthlyRevEst(s).toLocaleString() +
+    ' // Market growth: ' + marketGrowth(s) + '\n' +
+    'Benefits: ' + benefitTags(s).join(' · ');
+  copyToClipboardSafe(text, function(ok) {
+    showToast(ok ? 'Copied to clipboard' : 'Copy failed');
+  });
 }
 
 // Re-render the signal cards in gap.html media-card style
@@ -1229,8 +1471,8 @@ function renderGapCards() {
   grid.innerHTML = filtered.map(s => {
     const thumb = getThumb(s);
     const alpha = getAlphaScore(s);
-    const originClass = (s.origin || '').toLowerCase().replace(/[^a-z]/g, '-');
-    const isPatent = (s.source || '').toLowerCase().includes('wipo') || (s.source || '').toLowerCase().includes('patent');
+    const originClass = normalizeOrigin(s.origin).replace(/[^a-z]/g, '-').replace(/^me$/, 'middle-east');
+    const isPatent = normalizeSourceType(s.sourceType) === 'PATENT' || (s.source || '').toLowerCase().includes('patent');
     return `<article class="media-card-g" onclick="selectSignal(${s.id})">
       <div class="card-thumb-g">
         <img src="${thumb}" alt="${s.title}" loading="lazy" onerror="this.style.display='none'"/>
@@ -1238,8 +1480,8 @@ function renderGapCards() {
       </div>
       <div class="card-title-g">${s.title}</div>
       <div class="card-chips-g">
-        <span class="chip-g ${originClass}">${s.origin || ''}</span>
-        <span class="chip-g">${s.stream || ''}</span>
+        <span class="chip-g ${originClass}">${prettyOriginLabel(s.origin, s.originLabel)}</span>
+        <span class="chip-g">${streamLabel(s.stream)}</span>
         <span class="chip-g alpha">${alpha}</span>
         ${isPatent ? '<span class="chip-g patent">Patent</span>' : ''}
       </div>
@@ -1257,27 +1499,23 @@ function renderGapCards() {
 function selectSignal(id) {
   const s = signals.find(x => x.id === id);
   if (!s) return;
-  const thumb = getThumb(s);
+  activeSignalId = id;
   const alpha = getAlphaScore(s);
-  document.getElementById('heroPlaceholder').style.display = 'none';
   const _ht = document.getElementById('heroTitle');
   const _hi = document.getElementById('heroInsight');
   if (_ht) _ht.textContent = s.title;
   if (_hi) _hi.textContent = (s.desc || '') + ' · ' + (s.originLabel || s.origin || '') + ' · Alpha ' + alpha;
+  renderHeroMedia(s);
   const badge = document.getElementById('heroBadge');
   badge.textContent = 'Alpha ' + alpha;
   badge.style.display = 'block';
-  const media = document.getElementById('heroMedia');
-  media.style.backgroundImage = 'url(' + thumb + ')';
-  media.style.backgroundSize = 'cover';
-  media.style.backgroundPosition = 'center';
   document.getElementById('footerSelected').textContent = 'Selected: ' + s.title + ' — ' + (s.source || '') + ' / ' + (s.origin || '');
   document.getElementById('footerProgress').style.width = Math.floor(Math.random()*55+20) + '%';
   gapLog('Loaded: ' + s.title);
   wireHeroSocialExtract(s);
   renderSignalInsight(s);
   highlightMapDot(s.origin);
-  if (typeof showDetail === 'function') showDetail(s);
+  if (typeof showDetail === 'function') showDetail(s.id);
 }
 
 // Wire social extract into the hero col2 panel
@@ -1375,9 +1613,16 @@ function getFilteredSignals() {
   if (gf !== 'all') {
     const regionFilters = ['asia','europe','middle_east','americas'];
     if (regionFilters.includes(gf)) {
-      results = results.filter(s => (s.origin||'').toLowerCase().replace(/[^a-z]/g,'-') === gf || (s.origin||'').toLowerCase() === gf);
+      results = results.filter(function(s) {
+        const origin = normalizeOrigin(s.origin);
+        return gf === 'middle_east' ? origin === 'me' : origin === gf;
+      });
     } else {
-      results = results.filter(s => (s.stream||'').toLowerCase() === gf || (s.type||'').toLowerCase() === gf);
+      const streamMap = { tech: 'tech', business: 'biz', concepts: 'rd' };
+      const wanted = streamMap[gf] || gf;
+      results = results.filter(function(s) {
+        return normalizeStream(s.stream) === wanted || String(s.type || '').toLowerCase() === wanted;
+      });
     }
   }
   return results;
@@ -1413,8 +1658,19 @@ function renderSignalInsight(s) {
 
 // Export template
 function exportTemplate(t) {
-  const sel = document.getElementById('footerSelected').textContent.replace('Selected: ','');
-  gapLog('Exported "' + sel + '" → ' + t);
+  const fmt = String(t || 'TikTok').toLowerCase();
+  const s = signals.find(function(item) { return item.id === activeSignalId; }) || keptSignals.find(function(item) { return item.id === activeSignalId; });
+  if (!s) {
+    showToast('Select a signal first');
+    return;
+  }
+  const d = socialCaption(s, fmt === 'reels' ? 'reels' : fmt === 'shorts' ? 'shorts' : 'tiktok');
+  copyToClipboardSafe(d.hook + '\n\n' + d.caption, function(ok) {
+    if (!ok) showToast('Copy failed');
+  });
+  downloadOrOpenMedia(s, t);
+  gapLog('Export prepared "' + s.title + '" → ' + t);
+  showToast(t + ' export ready');
 }
 
 // Console logger
@@ -1591,27 +1847,65 @@ function keepCard(id) {
   openSaveModal(id);
 }
 
+function applySignalFeed(data, announce) {
+  const normalized = normalizeIncomingFeed(data || {});
+  signals = normalized.signals || [];
+  keptSignals = signals.map(function(s) { return { ...s, status: 'Kept' }; });
+  uiState = loadUiState();
+  uiState.mapRegion = normalizeRegion(uiState.mapRegion);
+  uiState.hubSignalId = normalizeHubSignalId(uiState.hubSignalId);
+  const luEl = document.getElementById('meta-updated');
+  if (luEl && normalized.meta && normalized.meta.last_updated) {
+    luEl.textContent = 'Updated ' + normalized.meta.last_updated;
+  }
+  renderHub();
+  filterByRegion(uiState.mapRegion);
+  renderGapCards();
+  renderGapQueue();
+  renderGapSaves();
+  renderFloatMap();
+  if (uiState.hubSignalId !== null) {
+    showDetail(uiState.hubSignalId);
+  }
+  if (announce) {
+    showToast('Refresh complete');
+  }
+  gapLog('GAP initialized — ' + signals.length + ' signals loaded');
+}
+
+function refreshSignalFeed() {
+  const feedUrl = getFeedEndpoint();
+  showToast('Pulling new alpha…');
+  fetch(feedUrl, { cache: 'no-store' })
+    .then(function(r) {
+      if (!r.ok) throw new Error('Feed returned ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      applySignalFeed(data, true);
+    })
+    .catch(function(err) {
+      gapLog('Live feed error: ' + err.message);
+      if (feedUrl === DEFAULT_FEED_URL) {
+        renderGapCards();
+        return;
+      }
+      fetch(DEFAULT_FEED_URL)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          applySignalFeed(data, false);
+          showToast('Live feed unavailable — sample feed loaded');
+        })
+        .catch(function(fallbackErr) {
+          gapLog('Data load error: ' + fallbackErr.message);
+          renderGapCards();
+        });
+    });
+}
+
 // Init gap features after existing restoreUiState
 function restoreUiState() {
-  fetch('./data.json')
-    .then(r => r.json())
-    .then(data => {
-      signals = data.signals || [];
-      keptSignals = signals.map(s => ({ ...s, status: 'Kept' }));
-      const luEl = document.getElementById('meta-updated');
-      if (luEl && data.meta && data.meta.last_updated) {
-        luEl.textContent = 'Updated ' + data.meta.last_updated;
-      }
-      try { if(typeof loadUiState==='function') loadUiState(); } catch(e) {}
-      renderGapCards();
-      renderGapQueue();
-      renderFloatMap();
-      gapLog('GAP initialized — ' + signals.length + ' signals loaded');
-    })
-    .catch(err => {
-      gapLog('Data load error: ' + err.message);
-      renderGapCards();
-    });
+  refreshSignalFeed();
 }
 </script>
 </body>
