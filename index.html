@@ -679,7 +679,13 @@ body { padding-bottom: 70px; }
   </div> </div>
 </header>
 
-
+<!-- VIEW TABS -->
+<nav class="view-tabs" style="display:flex;gap:0;padding:0 28px;background:var(--panel);border-bottom:1px solid var(--border-inactive);">
+  <div class="nav-tab active" onclick="setActiveView('triage')" id="bc-triage" style="padding:14px 18px;cursor:pointer;color:var(--signal-green);border-bottom:2px solid var(--signal-green);font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;">Triage</div>
+  <div class="nav-tab" onclick="setActiveView('map')" id="bc-analysis" style="padding:14px 18px;cursor:pointer;color:rgba(0,230,216,0.5);font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;border-bottom:2px solid transparent;">Map</div>
+  <div class="nav-tab" onclick="setActiveView('hub')" style="padding:14px 18px;cursor:pointer;color:rgba(0,230,216,0.5);font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;border-bottom:2px solid transparent;">Hub</div>
+  <div class="nav-tab" onclick="setActiveView('pipeline')" id="bc-export" style="padding:14px 18px;cursor:pointer;color:rgba(0,230,216,0.5);font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;border-bottom:2px solid transparent;">Pipeline</div>
+</nav>
 
 <!-- ── TRIAGE VIEW ── -->
 
