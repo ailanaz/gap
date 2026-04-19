@@ -1573,11 +1573,13 @@ function selectSignal(id) {
   const _ht = document.getElementById('heroTitle');
   const _hi = document.getElementById('heroInsight');
   if (_ht) _ht.textContent = s.title;
-  if (_hi) _hi.textContent = (s.desc || '') + ' · ' + (s.originLabel || s.origin || '') + ' · Alpha ' + alpha;
+  if (_hi) _hi.textContent = (s.desc || '') + ' · ' + (s.originLabel || s.origin || '') + ' · Alpha ' + gapScore;
   renderHeroMedia(s);
   const badge = document.getElementById('heroBadge');
-  badge.textContent = 'Alpha ' + alpha;
-  badge.style.display = 'block';
+  if (badge) {
+    badge.textContent = 'Alpha ' + gapScore;
+    badge.style.display = 'block';
+  }
   document.getElementById('footerSelected').textContent = 'Selected: ' + s.title + ' — ' + (s.source || '') + ' / ' + (s.origin || '');
   document.getElementById('footerProgress').style.width = Math.floor(Math.random()*55+20) + '%';
   gapLog('Loaded: ' + s.title);
@@ -1738,7 +1740,7 @@ function openModal(id) {
   if (!s) return;
   const gapScore = getGapScore(s);
   document.getElementById('modalTitle').textContent = s.title;
-  document.getElementById('modalBody').innerHTML = '<strong style="color:var(--accent)">Alpha Score: ' + alpha + '</strong><br>Region: ' + (s.originLabel || s.origin || '') + ' | Stream: ' + (s.stream || '') + '<br>Source: ' + (s.source || '') + '<br><br>' + (s.desc || '');
+  document.getElementById('modalBody').innerHTML = '<strong style="color:var(--accent)">Alpha Score: ' + gapScore + '</strong><br>Region: ' + (s.originLabel || s.origin || '') + ' | Stream: ' + (s.stream || '') + '<br>Source: ' + (s.source || '') + '<br><br>' + (s.desc || '');
   document.getElementById('modalBg').classList.add('open');
   gapLog('Analyzed: ' + s.title);
 }
