@@ -843,6 +843,14 @@ var THUMB_MAP = {
 var gapQueue = [];
 window._gapFilter = 'all';
 
+    // Favorites storage
+const FAVORITES_KEY = 'gap-favorites-v1';
+function loadFavorites() { try { return JSON.parse(localStorage.getItem(FAVORITES_KEY)||'[]'); } catch(e) { return []; } }
+function saveFavorites() { try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites)); } catch(e) {} }
+var favorites = [];
+
+
+let signals = [];
 
 let signals = [];
 let activeSignalId = null;
