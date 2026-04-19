@@ -1036,17 +1036,106 @@ function openSignalSource(id) {
 }
 
 function downloadOrOpenMedia(signal, label) {
-  const target = signal.mediaUrl || signal.thumbUrl || signal.url;
-  if (!target) {
+  const titleSlug = (signal.title || 'gap-signal').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const platformSlug = String(label || 'export').toLowerCase();
+  const exportAsset = resolveExportAsset(signal, titleSlug, platformSlug);
+  if (!exportAsset || !exportAsset.url) {
     showToast('No media available');
     return;
   }
-  const href = looksLikeYouTube(target) ? toYouTubeWatch(target) : target;
+  showToast('Preparing download…');
+  fetch(exportAsset.url, { mode: 'cors', cache: 'no-store' })
+    .then(function(response) {
+      if (!response.ok) throw new Error('download failed');
+      return response.blob();
+    })
+    .then(function(blob) {
+      const objectUrl = URL.createObjectURL(blob);
+      triggerFileDownload(objectUrl, exportAsset.filename);
+      setTimeout(function() { URL.revokeObjectURL(objectUrl); }, 2000);
+      showToast(exportAsset.toastLabel + ' downloaded');
+    })
+    .catch(function() {
+      if (exportAsset.fallbackUrl && exportAsset.fallbackUrl !== exportAsset.url) {
+        fetch(exportAsset.fallbackUrl, { mode: 'cors', cache: 'no-store' })
+          .then(function(response) {
+            if (!response.ok) throw new Error('fallback failed');
+            return response.blob();
+          })
+          .then(function(blob) {
+            const objectUrl = URL.createObjectURL(blob);
+            triggerFileDownload(objectUrl, exportAsset.filename);
+            setTimeout(function() { URL.revokeObjectURL(objectUrl); }, 2000);
+            showToast(exportAsset.toastLabel + ' downloaded');
+          })
+          .catch(function() {
+            showToast('Download blocked for this source');
+          });
+        return;
+      }
+      showToast('Download blocked for this source');
+    });
+}
+
+function resolveExportAsset(signal, titleSlug, platformSlug) {
+  const mediaUrl = signal.mediaUrl || '';
+  const thumbUrl = signal.thumbUrl || getThumb(signal) || '';
+  const isEmbeddedVideo = looksLikeYouTube(mediaUrl) || looksLikeYouTube(signal.url || '');
+  const directVideo = mediaUrl && !looksLikeYouTube(mediaUrl) && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(mediaUrl);
+  const directImage = (signal.mediaType === 'image' && mediaUrl) || /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(mediaUrl);
+
+  if (directVideo) {
+    return {
+      url: mediaUrl,
+      filename: titleSlug + '-' + platformSlug + guessFileExtension(mediaUrl, '.mp4'),
+      toastLabel: 'Video'
+    };
+  }
+  if (directImage) {
+    return {
+      url: mediaUrl,
+      filename: titleSlug + '-' + platformSlug + guessFileExtension(mediaUrl, '.jpg'),
+      toastLabel: 'Image'
+    };
+  }
+  if (isEmbeddedVideo) {
+    const previewUrl = normalizeYouTubeThumbUrl(thumbUrl || mediaUrl);
+    return {
+      url: previewUrl,
+      fallbackUrl: thumbUrl || getThumb(signal),
+      filename: titleSlug + '-' + platformSlug + '-preview.jpg',
+      toastLabel: 'Preview asset'
+    };
+  }
+  if (thumbUrl) {
+    return {
+      url: thumbUrl,
+      filename: titleSlug + '-' + platformSlug + guessFileExtension(thumbUrl, '.jpg'),
+      toastLabel: 'Image'
+    };
+  }
+  return null;
+}
+
+function normalizeYouTubeThumbUrl(url) {
+  const raw = String(url || '');
+  const embed = toYouTubeEmbed(raw);
+  const match = embed.match(/\/embed\/([^?&/]+)/);
+  if (!match) return raw;
+  return 'https://i.ytimg.com/vi/' + match[1] + '/hqdefault.jpg';
+}
+
+function guessFileExtension(url, fallback) {
+  const clean = String(url || '').split('?')[0];
+  const match = clean.match(/(\.[a-z0-9]{3,5})$/i);
+  return match ? match[1].toLowerCase() : fallback;
+}
+
+function triggerFileDownload(href, filename) {
   const link = document.createElement('a');
   link.href = href;
-  link.target = '_blank';
+  link.download = filename;
   link.rel = 'noopener';
-  link.download = (signal.title || 'gap-signal').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') + '-' + String(label || 'export').toLowerCase() + (signal.mediaType === 'image' ? '.jpg' : '');
   document.body.appendChild(link);
   link.click();
   link.remove();
