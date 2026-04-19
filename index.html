@@ -1541,7 +1541,7 @@ function renderGapCards() {
       <div class="card-chips-g">
         <span class="chip-g ${originClass}">${prettyOriginLabel(s.origin, s.originLabel)}</span>
         <span class="chip-g">${streamLabel(s.stream)}</span>
-        <span class="chip-g alpha">${alpha}</span>
+<span class="chip-g alpha">${gapScore}</span>
         ${isPatent ? '<span class="chip-g patent">Patent</span>' : ''}
       </div>
       <div class="card-desc-g">${(s.desc || '').slice(0,100)}${s.desc && s.desc.length > 100 ? '…' : ''}</div>
