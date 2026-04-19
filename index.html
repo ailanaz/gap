@@ -524,6 +524,7 @@ html, body { font-family: var(--sans); }
 .chip-filters { display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
 .chip-btn-g { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); color:var(--muted); padding:5px 14px; border-radius:20px; font-size:12px; cursor:pointer; transition:all .2s; font-family:var(--mono); letter-spacing:0.06em; }
 .chip-btn-g.active { background:var(--accent); color:#021014; border-color:var(--accent); font-weight:700; }
+.chip-btn-g.region-selected:not(.active) { border-color:rgba(0,230,216,0.45); color:var(--text); background:rgba(0,230,216,0.05); }
 .chip-btn-g:hover:not(.active) { border-color:rgba(0,230,216,0.25); color:var(--text); }
 
 /* media cards (gap.html style) */
@@ -871,6 +872,11 @@ function normalizeOrigin(value) {
   if (v.includes('europe') || v.includes('france') || v.includes('switzerland') || v.includes('germany')) return 'europe';
   if (v.includes('america') || v.includes('usa') || v.includes('united states') || v.includes('canada')) return 'americas';
   return v.replace(/[^a-z]/g, '') || 'asia';
+}
+
+function regionFilterKey(value) {
+  const origin = normalizeOrigin(value);
+  return origin === 'me' ? 'middle_east' : origin;
 }
 
 function normalizeSourceType(value) {
@@ -1502,6 +1508,9 @@ function renderGapCards() {
       </div>
     </article>`;
   }).join('');
+  if (window._activeRegion) {
+    applyRegionFocus(window._activeRegion, { syncBubble: true });
+  }
 }
 
 // Select a signal → update hero
@@ -1523,7 +1532,7 @@ function selectSignal(id) {
   gapLog('Loaded: ' + s.title);
   wireHeroSocialExtract(s);
   renderSignalInsight(s);
-  highlightMapDot(s.origin);
+  applyRegionFocus(regionFilterKey(s.origin), { syncBubble: true });
   if (typeof showDetail === 'function') showDetail(s.id);
 }
 
@@ -1612,7 +1621,12 @@ function setGapFilter(btn, filter) {
   document.querySelectorAll('.chip-btn-g').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   window._gapFilter = filter;
-  renderGapCards();  if (filter === 'all') { resetMapDots(); } else { highlightMapDot(filter); }
+  renderGapCards();
+  if (['asia','europe','middle_east','americas'].includes(filter)) {
+    applyRegionFocus(filter, { syncBubble: true });
+  } else {
+    clearRegionFocus({ keepActiveBubble: false });
+  }
 }
 
 // Override getFilteredSignals to also respect gap filter chips + topbar search/dropdowns
@@ -1792,10 +1806,10 @@ function renderFloatMap() {
 function highlightMapDot(origin) {
   const g = document.getElementById('floatMarkers');
   if (!g) return;
-  const norm = (origin || '').toLowerCase().replace(/[^a-z_]/g,'');
+  const norm = regionFilterKey(origin);
   g.querySelectorAll('.region-zone').forEach(function(zone) {
     const r = zone.dataset.region;
-    const active = (r === norm) || (r === 'middle_east' && norm === 'me');
+    const active = r === norm;
     zone.classList.toggle('zone-active', active);
     zone.classList.toggle('zone-dim', !active);
   });
@@ -1809,24 +1823,48 @@ function resetMapDots() {
   });
 }
 
-function selectRegion(key) {
-  if (window._activeRegion === key) { clearRegionSelect(); return; }
+function syncRegionBubble(regionKey) {
+  document.querySelectorAll('.chip-btn-g[data-filter]').forEach(function(btn) {
+    const filter = btn.dataset.filter;
+    if (['asia','europe','middle_east','americas'].includes(filter)) {
+      btn.classList.toggle('region-selected', filter === regionKey);
+    } else {
+      btn.classList.remove('region-selected');
+    }
+  });
+}
+
+function applyRegionFocus(regionKey, options) {
+  const opts = options || {};
+  const key = regionFilterKey(regionKey);
   highlightMapDot(key);
-  const allCards = document.querySelectorAll('#cards-grid .signal-card, #cards-grid .media-card-g');
-  allCards.forEach(function(card) {
-    const reg = (card.dataset.origin || '').toLowerCase();
-    const match = reg === key || (key === 'middle_east' && reg === 'me');
+  document.querySelectorAll('#cards-grid .signal-card, #cards-grid .media-card-g').forEach(function(card) {
+    const reg = regionFilterKey(card.dataset.origin || '');
+    const match = reg === key;
     card.classList.toggle('region-highlight', match);
     card.classList.toggle('region-dim', !match);
   });
+  if (opts.syncBubble !== false) syncRegionBubble(key);
   window._activeRegion = key;
 }
-function clearRegionSelect() {
+
+function clearRegionFocus(options) {
+  const opts = options || {};
   resetMapDots();
   document.querySelectorAll('#cards-grid .signal-card, #cards-grid .media-card-g').forEach(function(card) {
     card.classList.remove('region-highlight', 'region-dim');
   });
+  if (!opts.keepActiveBubble) syncRegionBubble(null);
   window._activeRegion = null;
+}
+
+function selectRegion(key) {
+  const regionKey = regionFilterKey(key);
+  if (window._activeRegion === regionKey) { clearRegionSelect(); return; }
+  applyRegionFocus(regionKey, { syncBubble: true });
+}
+function clearRegionSelect() {
+  clearRegionFocus({ keepActiveBubble: false });
 }
 function toggleFloatMap() {
   const panel = document.getElementById('mapFloatPanel');
