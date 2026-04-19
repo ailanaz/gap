@@ -1610,15 +1610,18 @@ function doFinancialCalc() {
 // Signal image thumbnails (mapped by stream/source type for visual richness)
 
 function getThumb(s) {
- // Check source type FIRST, before thumbUrl
- const src = (s.source || s.sourceType || '').toUpperCase();
- for (const key of Object.keys(THUMB_MAP)) {
- if (src.includes(key) || src.includes(key.replace(/_/g, ' '))) return THUMB_MAP[key];
- }
- // Then check explicit thumbUrl
- if (s.thumbUrl) return s.thumbUrl;
- if (s.mediaType === 'image' && s.mediaUrl) return s.mediaUrl;
- return THUMB_MAP.DEFAULT;
+  if (s.thumbUrl) return normalizeYouTubeThumbUrl(s.thumbUrl);
+  if (s.mediaType === 'image' && s.mediaUrl) return s.mediaUrl;
+  if (s.mediaUrl && looksLikeYouTube(s.mediaUrl)) return normalizeYouTubeThumbUrl(s.mediaUrl);
+  return getFallbackThumb(s);
+}
+
+function getFallbackThumb(s) {
+  const src = (s.source || s.sourceType || '').toUpperCase();
+  for (const key of Object.keys(THUMB_MAP)) {
+    if (src.includes(key) || src.includes(key.replace(/_/g, ' '))) return THUMB_MAP[key];
+  }
+  return THUMB_MAP.DEFAULT;
 }
 
 function getGapScore(s) {
@@ -1669,12 +1672,13 @@ function renderGapCards() {
   }
   grid.innerHTML = filtered.map(s => {
     const thumb = getThumb(s);
+    const fallbackThumb = getFallbackThumb(s);
     const gapScore = getGapScore(s);
     const originClass = normalizeOrigin(s.origin).replace(/[^a-z]/g, '-').replace(/^me$/, 'middle-east');
     const isPatent = normalizeSourceType(s.sourceType) === 'PATENT' || (s.source || '').toLowerCase().includes('patent');
     return `<article class="media-card-g" data-origin="${normalizeOrigin(s.origin)}" onclick="selectSignal(${s.id})">
       <div class="card-thumb-g">
-        <img src="${thumb}" alt="${s.title}" loading="lazy" onerror="this.style.display='none'"/>
+        <img src="${thumb}" alt="${s.title}" loading="lazy" data-fallback="${fallbackThumb}" onerror="if(this.dataset.fallback&&this.src!==this.dataset.fallback){this.src=this.dataset.fallback;return;}this.style.display='none';"/>
         <div class="thumb-overlay-g"><span class="play-icon-g">▶</span></div>
       </div>
       <div class="card-title-g">${s.title}</div>
