@@ -1645,7 +1645,8 @@ function renderGapQueue() {
   if (cnt) { cnt.textContent = gapQueue.length; cnt.style.display = 'inline'; }
   el.innerHTML = gapQueue.map((id, i) => {
     const s = signals.find(x => x.id === id);
-    return `<div class="queue-row-g" onclick="selectSignal(${id})">${i+1}. ${s ? s.title.slice(0,34) : id}<span style="color:var(--accent);font-size:10px;margin-left:6px">α${getAlphaScore(s||{id:0,stream:'tech'})}</span></div>`;
+    return `<div class="queue-row-g" onclick="selectSignal(${id})">${i+1}. ${s ? s.title.slice(0,34) : id}<span style="color:var(--accent);font-size:10px;margin-left:6px">α${getGapScore(s||{id:0,stream:'tech'})}
+</span></div>`;
   }).join('');
 }
 
