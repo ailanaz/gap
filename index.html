@@ -748,25 +748,25 @@ body { padding-bottom: 70px; }
     
   </div>
 </section>
-<div class="cards-grid" id="cards-grid"></div>
-  <!-- MAIN FEED + RIGHT WORKBENCH -->
-  <div class="gap-main">
-    <div class="gap-left-col">
-
-       <!-- CHIP FILTERS -->
-      <div class="chip-filters">
-        <button class="chip-btn-g active" data-filter="all" onclick="setGapFilter(this,'all')">All</button>
-        <button class="chip-btn-g" data-filter="favorites" onclick="setGapFilter(this,'favorites')">★ Favorites</button>
-        <button class="chip-btn-g" data-filter="tech" onclick="setGapFilter(this,'tech')">Tech</button>
-        <button class="chip-btn-g" data-filter="business" onclick="setGapFilter(this,'business')">Business</button>
-        <button class="chip-btn-g" data-filter="concepts" onclick="setGapFilter(this,'concepts')">Concepts</button>
-        <button class="chip-btn-g" data-filter="asia" onclick="setGapFilter(this,'asia')">Asia</button>
-        <button class="chip-btn-g" data-filter="europe" onclick="setGapFilter(this,'europe')">Europe</button>
-        <button class="chip-btn-g" data-filter="middle_east" onclick="setGapFilter(this,'middle_east')">Middle East</button>
-        <button class="chip-btn-g" data-filter="americas" onclick="setGapFilter(this,'americas')">Americas</button>
-
-        <button class="chip-btn-g" style="margin-left:auto;border-radius:20px;" onclick="refreshSignalFeed();">Refresh</button></div>
+<!-- MAIN FEED + RIGHT WORKBENCH -->
+<div class="gap-main">
+  <div class="gap-left-col">
+    <!-- CHIP FILTERS -->
+    <div class="chip-filters">
+      <button class="chip-btn-g active" data-filter="all" onclick="setGapFilter(this,'all')">All</button>
+      <button class="chip-btn-g" data-filter="favorites" onclick="setGapFilter(this,'favorites')">★ Favorites</button>
+      <button class="chip-btn-g" data-filter="tech" onclick="setGapFilter(this,'tech')">Tech</button>
+      <button class="chip-btn-g" data-filter="business" onclick="setGapFilter(this,'business')">Business</button>
+      <button class="chip-btn-g" data-filter="concepts" onclick="setGapFilter(this,'concepts')">Concepts</button>
+      <button class="chip-btn-g" data-filter="asia" onclick="setGapFilter(this,'asia')">Asia</button>
+      <button class="chip-btn-g" data-filter="europe" onclick="setGapFilter(this,'europe')">Europe</button>
+      <button class="chip-btn-g" data-filter="middle_east" onclick="setGapFilter(this,'middle_east')">Middle East</button>
+      <button class="chip-btn-g" data-filter="americas" onclick="setGapFilter(this,'americas')">Americas</button>
+      <button class="chip-btn-g" style="margin-left:auto;border-radius:20px;" onclick="refreshSignalFeed();">Refresh</button>
+    </div>
+    <div class="cards-grid" id="cards-grid"></div>
   </div>
+</div>
 </main><!-- FLOATING MAP -->
 <div class="map-float glass" id="mapFloatPanel">
   <div class="map-float-header" onclick="toggleFloatMap()">
