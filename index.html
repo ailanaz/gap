@@ -1065,6 +1065,77 @@ function marketGrowth(s) {
   if (stream === 'biz') return '12% CAGR';
   return '22% CAGR';
 }
+function parseGrowthPercent(value) {
+  const match = String(value || '').match(/(\d+(?:\.\d+)?)/);
+  return match ? Number(match[1]) : 0;
+}
+function clampScore(value, min, max) {
+  return Math.max(min, Math.min(max, Math.round(value)));
+}
+function getGapMetrics(s) {
+  const stream = normalizeStream(s.stream);
+  const sourceType = normalizeSourceType(s.sourceType);
+  const monthly = monthlyRevEst(s);
+  const setup = Number(s.setupCost) || 0;
+  const growthPct = parseGrowthPercent(marketGrowth(s));
+  const roiRatio = setup > 0 ? monthly / setup : 0;
+  const paybackMonths = monthly > 0 ? setup / monthly : 99;
+
+  let easeOfEntry = stream === 'tech' ? 72 : stream === 'biz' ? 84 : 76;
+  if (setup <= 10000) easeOfEntry += 10;
+  else if (setup <= 20000) easeOfEntry += 6;
+  else if (setup <= 30000) easeOfEntry += 1;
+  else easeOfEntry -= 6;
+  if (sourceType === 'CROWDFUNDED') easeOfEntry += 6;
+  if (sourceType === 'TRADE_SHOW') easeOfEntry += 3;
+  if (sourceType === 'PATENT') easeOfEntry -= 5;
+  if (roiRatio >= 0.8) easeOfEntry += 4;
+  else if (roiRatio >= 0.4) easeOfEntry += 2;
+
+  let longevity = sourceType === 'PATENT' ? 94
+    : sourceType === 'TRADE_SHOW' ? 84
+    : sourceType === 'CROWDFUNDED' ? 76
+    : sourceType === 'NEWS_SIGNAL' ? 72
+    : 80;
+  longevity += Math.round((growthPct - 10) / 2);
+  if (stream === 'tech') longevity += 2;
+  if (stream === 'rd') longevity += 3;
+
+  let viability = paybackMonths <= 3 ? 96
+    : paybackMonths <= 6 ? 90
+    : paybackMonths <= 12 ? 82
+    : paybackMonths <= 18 ? 74
+    : 66;
+  if (monthly >= 20000) viability += 4;
+  else if (monthly >= 10000) viability += 2;
+  else if (monthly < 5000) viability -= 4;
+  if (sourceType === 'CROWDFUNDED') viability += 4;
+  if (sourceType === 'TRADE_SHOW') viability += 2;
+  if (sourceType === 'PATENT') viability += 1;
+
+  easeOfEntry = clampScore(easeOfEntry, 55, 96);
+  longevity = clampScore(longevity, 60, 99);
+  viability = clampScore(viability, 58, 98);
+
+  return {
+    easeOfEntry,
+    longevity,
+    viability,
+    gapScore: clampScore((easeOfEntry + longevity + viability) / 3, 60, 99)
+  };
+}
+function gapThesis(s) {
+  const region = s.originLabel || prettyOriginLabel(s.origin, s.originLabel);
+  const title = String(s.title || 'This GAP item').replace(/^(WIPO Patent|WIPO|Patent|Kickstarter|Indiegogo|LEAP|Behance|Dribbble|NAMA|RetailTech)\s*[:|-]\s*/i, '').trim();
+  const stream = streamLabel(s.stream).toLowerCase();
+  const sourceType = normalizeSourceType(s.sourceType);
+  const benefit = benefitTags(s)[0] || 'scalable execution';
+  let closer = 'It looks built for low-friction rollout and early-mover positioning.';
+  if (sourceType === 'PATENT') closer = 'Its patent-backed angle gives it a more defensible path if adapted well for local demand.';
+  if (sourceType === 'CROWDFUNDED') closer = 'Its early traction suggests clearer demand validation than a typical new concept.';
+  if (sourceType === 'TRADE_SHOW') closer = 'Its trade-show profile suggests market-ready positioning rather than a purely speculative concept.';
+  return 'A ' + stream + ' signal from ' + region + ' centered on ' + title + '. ' + closer;
+}
 function benefitTags(s) {
   const tags = [];
   const sourceType = normalizeSourceType(s.sourceType);
@@ -1462,10 +1533,7 @@ function getThumb(s) {
 }
 
 function getGapScore(s) {
-  const base = { tech: 85, business: 72, concepts: 68 };
-  const stream = normalizeStream(s.stream);
-  const score = base[stream === 'tech' ? 'tech' : stream === 'biz' ? 'business' : 'concepts'] || 75;
-  return Math.min(99, score + (s.id % 15));
+  return getGapMetrics(s).gapScore;
 }
 
 function renderHeroMedia(s) {
@@ -1545,16 +1613,16 @@ function selectSignal(id) {
   const s = signals.find(x => x.id === id);
   if (!s) return;
   activeSignalId = id;
-  const gapScore = getGapScore(s);
+  const gapScore = getGapMetrics(s).gapScore;
 
   const _ht = document.getElementById('heroTitle');
   const _hi = document.getElementById('heroInsight');
   if (_ht) _ht.textContent = s.title;
-  if (_hi) _hi.textContent = (s.desc || '') + ' · ' + (s.originLabel || s.origin || '') + ' · Alpha ' + gapScore;
+  if (_hi) _hi.textContent = (s.desc || '') + ' · ' + (s.originLabel || s.origin || '') + ' · GAP Score ' + gapScore;
   renderHeroMedia(s);
   const badge = document.getElementById('heroBadge');
   if (badge) {
-    badge.textContent = 'Alpha ' + gapScore;
+    badge.textContent = 'GAP Score ' + gapScore;
     badge.style.display = 'block';
   }
   gapLog('Loaded: ' + s.title);
@@ -1664,22 +1732,19 @@ function setGapFilter(btn, filter) {
 function renderSignalInsight(s) {
   const panel = document.getElementById('signal-insight-panel');
   if (!panel) return;
+  const metrics = getGapMetrics(s);
   const monthly = Math.round(s.unitPrice * s.dailyVolume * 30);
-  const marketRef = '$' + monthly.toLocaleString() + '/mo';
   const avgEarnings = '$' + monthly.toLocaleString() + '/mo avg.';
   const costLow = Math.round(s.setupCost * 0.8);
   const costHigh = Math.round(s.setupCost * 1.4);
   const costStr = '$' + (costLow >= 1000 ? (costLow/1000).toFixed(0) + 'k' : costLow) + '-$' + (costHigh >= 1000 ? (costHigh/1000).toFixed(0) + 'k' : costHigh);
-  const gapScore = Math.min(10, Math.max(1, Math.round(1 + (s.setupCost / 15000) * 4 + (s.dailyVolume / 200) * 3)));
-  const gapLabel = gapScore <= 2 ? 'Passive - Easy Entry' : gapScore <= 4 ? 'Low Effort' : gapScore <= 6 ? 'Moderate' : gapScore <= 8 ? 'Active' : 'Full-time Operation';
-  const region = (s.originLabel || s.origin || '').replace(/_/g,' ');
-  const titleClean = (s.title || 'opportunity').replace(/^(WIPO|Patent|Kickstarter|Indiegogo|LEAP|Behance|Dribbble|NAMA|RetailTech)\s*[:|-]\s*/i, '');
-  const thesis = 'A ' + (s.stream || 'business') + ' opportunity in ' + region + '. ' + titleClean + ' could generate estimated earnings of ' + marketRef + '.';
+  const growth = marketGrowth(s);
+  const thesis = gapThesis(s);
   panel.innerHTML =
-    '<div class="insight-row"><div class="insight-body"><div class="insight-label">Market Reference</div><div class="insight-val">Projected growth: ' + marketRef + ' potential</div></div></div>' +
+    '<div class="insight-row"><div class="insight-body"><div class="insight-label">Market Reference</div><div class="insight-val">Industry growth: ' + growth + '</div></div></div>' +
     '<div class="insight-row"><div class="insight-body"><div class="insight-label">Average Earnings</div><div class="insight-val">' + avgEarnings + '</div></div></div>' +
     '<div class="insight-row"><div class="insight-body"><div class="insight-label">Average Cost of Entry</div><div class="insight-val">Est. startup cost: ' + costStr + '</div></div></div>' +
-    '<div class="insight-row"><div class="insight-body"><div class="insight-label">GAP Score</div><div class="insight-gauge-wrap"><div class="insight-gauge-track"><div class="insight-gauge-fill" style="width:' + (gapScore * 10) + '%"></div></div><span class="insight-diff-num">' + gapScore + '/10 — ' + gapLabel + '</span></div></div></div>' +
+    '<div class="insight-row"><div class="insight-body"><div class="insight-label">GAP Score</div><div class="insight-gauge-wrap"><div class="insight-gauge-track"><div class="insight-gauge-fill" style="width:' + metrics.gapScore + '%"></div></div><span class="insight-diff-num">' + metrics.gapScore + '/100 — Ease ' + metrics.easeOfEntry + ' · Longevity ' + metrics.longevity + ' · Viability ' + metrics.viability + '</span></div></div></div>' +
     '<div class="insight-row"><div class="insight-body"><div class="insight-label">Gap Thesis</div><div class="insight-val insight-thesis">' + thesis + '</div></div></div>';
   gapLog('Signal insight: ' + (s.title || s.id));
 }
@@ -1715,7 +1780,7 @@ function openModal(id) {
   if (!s) return;
   const gapScore = getGapScore(s);
   document.getElementById('modalTitle').textContent = s.title;
-  document.getElementById('modalBody').innerHTML = '<strong style="color:var(--accent)">Alpha Score: ' + gapScore + '</strong><br>Region: ' + (s.originLabel || s.origin || '') + ' | Stream: ' + (s.stream || '') + '<br>Source: ' + (s.source || '') + '<br><br>' + (s.desc || '');
+  document.getElementById('modalBody').innerHTML = '<strong style="color:var(--accent)">GAP Score: ' + gapScore + '</strong><br>Region: ' + (s.originLabel || s.origin || '') + ' | Stream: ' + (s.stream || '') + '<br>Source: ' + (s.source || '') + '<br><br>' + (s.desc || '');
   document.getElementById('modalBg').classList.add('open');
   gapLog('Analyzed: ' + s.title);
 }
