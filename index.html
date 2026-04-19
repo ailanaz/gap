@@ -847,7 +847,7 @@ window._gapFilter = 'all';
 const FAVORITES_KEY = 'gap-favorites-v1';
 function loadFavorites() { try { return JSON.parse(localStorage.getItem(FAVORITES_KEY)||'[]'); } catch(e) { return []; } }
 function saveFavorites() { try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites)); } catch(e) {} }
-var favorites = [];
+var favorites = loadFavorites();
 
 
 let signals = [];
