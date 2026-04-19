@@ -1287,14 +1287,46 @@ function wireSocialExtract(s) {
   }
 }
 
+// Unified filter – works with an explicit filter argument OR with the global _gapFilter
 function getFilteredSignals(filter) {
-  const f = normalizeFilter(filter);
-  let d = signals;
-  if (['tech','biz','rd'].includes(f)) d = d.filter(s => s.stream===f);
-  if (['asia','europe','me','americas'].includes(f)) d = d.filter(s => s.origin===f);
-  return d;
-}
+  // If no argument was passed, fall back to the UI’s current filter
+  const gf = filter || window._gapFilter || 'all';
+  // Load persisted favorites (if any)
+  if (typeof favorites === 'undefined') {
+    // safety fallback – will be defined later when UI loads
+    favorites = [];
+  }
 
+  // Start with all non‑removed signals
+  let results = signals.filter(s => !s._removed);
+
+  if (gf !== 'all') {
+    // ---------- FAVORITES ----------
+    if (gf === 'favorites') {
+      results = results.filter(s => favorites.includes(s.id));
+    }
+    // ---------- REGION FILTER ----------
+    else {
+      const regionFilters = ['asia','europe','middle_east','americas'];
+      if (regionFilters.includes(gf)) {
+        results = results.filter(function(s) {
+          const origin = normalizeOrigin(s.origin);
+          return gf === 'middle_east' ? origin === 'me' : origin === gf;
+        });
+      }
+      // ---------- STREAM FILTER ----------
+      else {
+        const streamMap = { tech: 'tech', business: 'biz', concepts: 'rd' };
+        const wanted = streamMap[gf] || gf;
+        results = results.filter(function(s) {
+          return normalizeStream(s.stream) === wanted ||
+                 String(s.type || '').toLowerCase() === wanted;
+        });
+      }
+    }
+  }
+  return results;
+}
 function syncFilterControls(filter) {
   document.querySelectorAll('.filter-key').forEach(n => n.classList.toggle('active', n.dataset.filter===filter));
 }
