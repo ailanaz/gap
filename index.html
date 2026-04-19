@@ -1665,36 +1665,7 @@ function setGapFilter(btn, filter) {
   }
 }
 
-// Override getFilteredSignals to also respect gap filter chips + topbar search/dropdowns
-function getFilteredSignals() {
-  let results = signals.filter(s => !s._removed);
-  const gf = window._gapFilter || 'all';
-  if (gf !== 'all') {
-    // Handle favorites filter
-    if (gf === 'favorites') {
-      results = results.filter(s => favorites && favorites.includes(s.id));
-    } else {
-      const regionFilters = ['asia','europe','middle_east','americas'];
-      if (regionFilters.includes(gf)) {
-        results = results.filter(function(s) {
-          const origin = normalizeOrigin(s.origin);
-          return gf === 'middle_east' ? origin === 'me' : origin === gf;
-        });
-      } else {
-        const streamMap = { tech: 'tech', business: 'biz', concepts: 'rd' };
-        const wanted = streamMap[gf] || gf;
-        results = results.filter(function(s) {
-          return normalizeStream(s.stream) === wanted || String(s.type || '').toLowerCase() === wanted;
-        });
-      }
-    }
-  }
-  return results;
-}
-// Topbar dropdowns sync
-function syncFilterControls() {
-  renderGapCards();
-}
+
 
 // Financial calc for workbench
 function renderSignalInsight(s) {
