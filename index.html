@@ -513,6 +513,7 @@ html, body { font-family: var(--sans); }
 .thumb-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
 .thumb-mini { aspect-ratio:16/9; background:#0b1014; border-radius:4px; cursor:pointer; border:1px solid transparent; transition:border-color .2s; overflow:hidden; background-size:cover; background-position:center; }
 .thumb-mini:hover { border-color:rgba(0,230,216,0.3); }
+.thumb-mini.empty { display:flex; align-items:center; justify-content:center; color:var(--muted-dim); font-size:9px; text-transform:uppercase; letter-spacing:0.08em; }
 .mono-log { font-family:var(--mono); font-size:11px; color:var(--accent); line-height:1.6; }
 
 /* main layout */
@@ -533,6 +534,7 @@ html, body { font-family: var(--sans); }
 .media-card-g:hover { background:rgba(14,17,20,0.9); border-color:rgba(0,230,216,0.15); }
 .card-thumb-g { width:100%; aspect-ratio:16/9; border-radius:7px; overflow:hidden; background:#0b0e12; position:relative; margin-bottom:10px; }
 .card-thumb-g img { width:100%; height:100%; object-fit:cover; display:block; }
+.card-thumb-empty-g { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--muted-dim); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; text-align:center; padding:12px; }
 .thumb-overlay-g { position:absolute; inset:0; background:rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .2s; }
 .card-thumb-g:hover .thumb-overlay-g { opacity:1; }
 .play-icon-g { color:white; font-size:22px; }
@@ -959,8 +961,8 @@ function normalizeSignal(raw, index) {
   const sourceType = normalizeSourceType(raw.sourceType || raw.category || raw.source);
   const origin = normalizeOrigin(raw.origin || raw.region || raw.country || raw.originLabel);
   const fallbackMetrics = estimateMetrics(stream, sourceType);
-  const mediaUrl = raw.mediaUrl || raw.videoUrl || raw.image || raw.imageUrl || raw.thumbnail || raw.thumbUrl || sourceUrl || '';
-  const thumbUrl = raw.thumbUrl || raw.thumbnail || raw.image || raw.imageUrl || (looksLikeYouTube(mediaUrl) ? 'https://img.youtube.com/vi/' + (toYouTubeEmbed(mediaUrl).match(/\/embed\/([^?&/]+)/) || [])[1] + '/hqdefault.jpg' : '');
+  const mediaUrl = raw.mediaUrl || raw.videoUrl || raw.image || raw.imageUrl || raw.thumbnail || raw.thumbUrl || '';
+  const thumbUrl = raw.thumbUrl || raw.thumbnail || raw.image || raw.imageUrl || '';
   const mediaType = String(raw.mediaType || '').toLowerCase() || (looksLikeYouTube(mediaUrl) ? 'video' : /\.(mp4|mov|webm)(\?|$)/i.test(mediaUrl) ? 'video' : 'image');
   return {
     id: Number(raw.id) || index + 1,
@@ -977,10 +979,10 @@ function normalizeSignal(raw, index) {
     tradeShow: raw.tradeShow || raw.event || '',
     date: formatIncomingDate(raw.date || raw.pubDate || raw.priority_date || raw.publication_date, Number(raw.id) || index + 1),
     mediaType,
-    mediaUrl: looksLikeYouTube(mediaUrl) ? toYouTubeEmbed(mediaUrl) : mediaUrl,
+    mediaUrl: mediaUrl,
     thumbUrl: thumbUrl && thumbUrl.includes('undefined') ? '' : thumbUrl,
     mediaOrigin: raw.mediaOrigin || formatCode(origin),
-    url: sourceUrl || (looksLikeYouTube(mediaUrl) ? toYouTubeWatch(mediaUrl) : mediaUrl)
+    url: sourceUrl || ''
   };
 }
 
@@ -1026,9 +1028,9 @@ function copyToClipboardSafe(text, onDone) {
 function openSignalSource(id) {
   const s = signals.find(function(item) { return item.id === id; }) || keptSignals.find(function(item) { return item.id === id; });
   if (!s) return;
-  const target = s.url || (looksLikeYouTube(s.mediaUrl) ? toYouTubeWatch(s.mediaUrl) : s.mediaUrl) || s.thumbUrl;
+  const target = s.url || '';
   if (!target) {
-    showToast('No source available');
+    showToast('No source link in feed');
     return;
   }
   window.open(target, '_blank', 'noopener');
@@ -1079,10 +1081,9 @@ function downloadOrOpenMedia(signal, label) {
 
 function resolveExportAsset(signal, titleSlug, platformSlug) {
   const mediaUrl = signal.mediaUrl || '';
-  const thumbUrl = signal.thumbUrl || getThumb(signal) || '';
-  const isEmbeddedVideo = looksLikeYouTube(mediaUrl) || looksLikeYouTube(signal.url || '');
-  const directVideo = mediaUrl && !looksLikeYouTube(mediaUrl) && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(mediaUrl);
-  const directImage = (signal.mediaType === 'image' && mediaUrl) || /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(mediaUrl);
+  const thumbUrl = signal.thumbUrl || '';
+  const directVideo = isDirectSourceVideo(mediaUrl);
+  const directImage = isDirectSourceImage(mediaUrl);
 
   if (directVideo) {
     return {
@@ -1098,16 +1099,7 @@ function resolveExportAsset(signal, titleSlug, platformSlug) {
       toastLabel: 'Image'
     };
   }
-  if (isEmbeddedVideo) {
-    const previewUrl = normalizeYouTubeThumbUrl(thumbUrl || mediaUrl);
-    return {
-      url: previewUrl,
-      fallbackUrl: thumbUrl || getThumb(signal),
-      filename: titleSlug + '-' + platformSlug + '-preview.jpg',
-      toastLabel: 'Preview asset'
-    };
-  }
-  if (thumbUrl) {
+  if (isDirectSourceImage(thumbUrl)) {
     return {
       url: thumbUrl,
       filename: titleSlug + '-' + platformSlug + guessFileExtension(thumbUrl, '.jpg'),
@@ -1123,6 +1115,25 @@ function normalizeYouTubeThumbUrl(url) {
   const match = embed.match(/\/embed\/([^?&/]+)/);
   if (!match) return raw;
   return 'https://i.ytimg.com/vi/' + match[1] + '/hqdefault.jpg';
+}
+
+function isYouTubeHostedUrl(url) {
+  return /(?:youtube\.com|youtu\.be|ytimg\.com|img\.youtube\.com)/i.test(String(url || ''));
+}
+
+function isGenericThumbUrl(url) {
+  const raw = String(url || '');
+  return /images\.unsplash\.com/i.test(raw) || Object.values(THUMB_MAP).includes(raw);
+}
+
+function isDirectSourceVideo(url) {
+  const raw = String(url || '');
+  return !!raw && !isYouTubeHostedUrl(raw) && /\.(mp4|mov|webm|m4v)(\?|$)/i.test(raw);
+}
+
+function isDirectSourceImage(url) {
+  const raw = String(url || '');
+  return !!raw && !isYouTubeHostedUrl(raw) && !isGenericThumbUrl(raw) && /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(raw);
 }
 
 function guessFileExtension(url, fallback) {
@@ -1610,18 +1621,9 @@ function doFinancialCalc() {
 // Signal image thumbnails (mapped by stream/source type for visual richness)
 
 function getThumb(s) {
-  if (s.thumbUrl) return normalizeYouTubeThumbUrl(s.thumbUrl);
-  if (s.mediaType === 'image' && s.mediaUrl) return s.mediaUrl;
-  if (s.mediaUrl && looksLikeYouTube(s.mediaUrl)) return normalizeYouTubeThumbUrl(s.mediaUrl);
-  return getFallbackThumb(s);
-}
-
-function getFallbackThumb(s) {
-  const src = (s.source || s.sourceType || '').toUpperCase();
-  for (const key of Object.keys(THUMB_MAP)) {
-    if (src.includes(key) || src.includes(key.replace(/_/g, ' '))) return THUMB_MAP[key];
-  }
-  return THUMB_MAP.DEFAULT;
+  if (isDirectSourceImage(s.thumbUrl)) return s.thumbUrl;
+  if (isDirectSourceImage(s.mediaUrl)) return s.mediaUrl;
+  return '';
 }
 
 function getGapScore(s) {
@@ -1634,14 +1636,12 @@ function renderHeroMedia(s) {
   const title = escapeHtml(s.title || 'Selected signal');
   const thumb = getThumb(s);
   let body = '';
-  if (s.mediaUrl && looksLikeYouTube(s.mediaUrl)) {
-    body = '<iframe src="' + escapeHtml(toYouTubeEmbed(s.mediaUrl)) + '" title="' + title + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';
-  } else if (s.mediaUrl && String(s.mediaType || '').toLowerCase() === 'video') {
+  if (isDirectSourceVideo(s.mediaUrl)) {
     body = '<video controls playsinline preload="metadata"' + (thumb ? ' poster="' + escapeHtml(thumb) + '"' : '') + '><source src="' + escapeHtml(s.mediaUrl) + '"></video>';
   } else if (thumb) {
     body = '<img src="' + escapeHtml(thumb) + '" alt="' + title + '" loading="eager" />';
   } else {
-    body = '<div class="hero-placeholder" id="heroPlaceholder">No preview available</div>';
+    body = '<div class="hero-placeholder" id="heroPlaceholder">No source media in feed</div>';
   }
   media.style.backgroundImage = 'none';
   media.innerHTML = body + '<div class="hero-placeholder" id="heroPlaceholder" style="display:none"></div><div class="alpha-badge" id="heroBadge" style="display:none"></div>';
@@ -1672,13 +1672,12 @@ function renderGapCards() {
   }
   grid.innerHTML = filtered.map(s => {
     const thumb = getThumb(s);
-    const fallbackThumb = getFallbackThumb(s);
     const gapScore = getGapScore(s);
     const originClass = normalizeOrigin(s.origin).replace(/[^a-z]/g, '-').replace(/^me$/, 'middle-east');
     const isPatent = normalizeSourceType(s.sourceType) === 'PATENT' || (s.source || '').toLowerCase().includes('patent');
     return `<article class="media-card-g" data-origin="${normalizeOrigin(s.origin)}" onclick="selectSignal(${s.id})">
       <div class="card-thumb-g">
-        <img src="${thumb}" alt="${s.title}" loading="lazy" data-fallback="${fallbackThumb}" onerror="if(this.dataset.fallback&&this.src!==this.dataset.fallback){this.src=this.dataset.fallback;return;}this.style.display='none';"/>
+        ${thumb ? `<img src="${thumb}" alt="${s.title}" loading="lazy" onerror="this.remove();"/>` : '<div class="card-thumb-empty-g">No source media</div>'}
         <div class="thumb-overlay-g"><span class="play-icon-g">▶</span></div>
       </div>
       <div class="card-title-g">${s.title}</div>
@@ -1801,9 +1800,12 @@ function renderGapSaves() {
   const saved = signals.filter(s => s._saved).slice(-8);
   document.getElementById('saveCount').textContent = signals.filter(s=>s._saved).length;
   if (!saved.length) { grid.innerHTML = ''; return; }
-  grid.innerHTML = saved.map(s =>
-    `<div class="thumb-mini" style="background-image:url(${getThumb(s)})" onclick="selectSignal(${s.id})" title="${s.title}"></div>`
-  ).join('');
+  grid.innerHTML = saved.map(s => {
+    const thumb = getThumb(s);
+    return thumb
+      ? `<div class="thumb-mini" style="background-image:url(${thumb})" onclick="selectSignal(${s.id})" title="${s.title}"></div>`
+      : `<div class="thumb-mini empty" onclick="selectSignal(${s.id})" title="${s.title}">No Media</div>`;
+  }).join('');
 }
 
 // Gap filter chips
