@@ -1424,13 +1424,15 @@ function doFinancialCalc() {
 // Signal image thumbnails (mapped by stream/source type for visual richness)
 
 function getThumb(s) {
-  if (s.thumbUrl) return s.thumbUrl;
-  if (s.mediaType === 'image' && s.mediaUrl) return s.mediaUrl;
-  const src = (s.source || '').toUpperCase();
-  for (const key of Object.keys(THUMB_MAP)) {
-    if (src.includes(key)) return THUMB_MAP[key];
-  }
-  return THUMB_MAP.DEFAULT;
+ // Check source type FIRST, before thumbUrl
+ const src = (s.source || s.sourceType || '').toUpperCase();
+ for (const key of Object.keys(THUMB_MAP)) {
+ if (src.includes(key) || src.includes(key.replace(/_/g, ' '))) return THUMB_MAP[key];
+ }
+ // Then check explicit thumbUrl
+ if (s.thumbUrl) return s.thumbUrl;
+ if (s.mediaType === 'image' && s.mediaUrl) return s.mediaUrl;
+ return THUMB_MAP.DEFAULT;
 }
 
 function getAlphaScore(s) {
