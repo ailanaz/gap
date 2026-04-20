@@ -1632,15 +1632,15 @@ function doFinancialCalc() {
 function getThumb(s) {
   if (isDirectSourceImage(s.thumbUrl)) return s.thumbUrl;
   if (isDirectSourceImage(s.mediaUrl)) return s.mediaUrl;
-  // Fallback: use YouTube thumbnail directly
   if (s.thumbUrl && isYouTubeHostedUrl(s.thumbUrl)) return s.thumbUrl;
   if (s.mediaUrl && looksLikeYouTube(s.mediaUrl)) {
-    var ytId = s.mediaUrl.replace(/.*(?:youtu.be/|v/|embed/|watch?v=|&v=)([^#&?]*).*/,'$1');
+    var embedUrl = toYouTubeEmbed(s.mediaUrl);
+    var parts = embedUrl ? embedUrl.split('/') : [];
+    var ytId = parts.length ? parts[parts.length - 1].split('?')[0] : '';
     if (ytId) return 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg';
   }
   return '';
 }
-
 function getGapScore(s) {
   return getGapMetrics(s).gapScore;
 }
