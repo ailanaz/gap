@@ -1106,6 +1106,14 @@ function resolveExportAsset(signal, titleSlug, platformSlug) {
       toastLabel: 'Image'
     };
   }
+  // Fallback: if YouTube embed, try to download the YouTube thumbnail
+  if (isYouTubeHostedUrl(thumbUrl) && thumbUrl) {
+    return {
+      url: thumbUrl,
+      filename: (titleSlug || 'signal') + '-' + (platformSlug || 'export') + '.jpg',
+      toastLabel: 'Thumbnail'
+    };
+  }
   return null;
 }
 
@@ -1511,6 +1519,7 @@ function keepCard(id, evt) {
   if (selectedTriageId===id) selectedTriageId=null;
   card.style.opacity='0.24'; card.style.pointerEvents='none';
   showToast('Alpha added to pipeline'); updateTriageCount(-1);
+  if (!favorites.includes(id)) { favorites.push(id); saveFavorites(); renderGapSaves(); }
 }
 
 function zapCard(id, evt) {
@@ -1623,6 +1632,12 @@ function doFinancialCalc() {
 function getThumb(s) {
   if (isDirectSourceImage(s.thumbUrl)) return s.thumbUrl;
   if (isDirectSourceImage(s.mediaUrl)) return s.mediaUrl;
+  // Fallback: use YouTube thumbnail directly
+  if (s.thumbUrl && isYouTubeHostedUrl(s.thumbUrl)) return s.thumbUrl;
+  if (s.mediaUrl && looksLikeYouTube(s.mediaUrl)) {
+    var ytId = s.mediaUrl.replace(/.*(?:youtu.be/|v/|embed/|watch?v=|&v=)([^#&?]*).*/,'$1');
+    if (ytId) return 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg';
+  }
   return '';
 }
 
@@ -1640,6 +1655,8 @@ function renderHeroMedia(s) {
     body = '<video controls playsinline preload="metadata"' + (thumb ? ' poster="' + escapeHtml(thumb) + '"' : '') + '><source src="' + escapeHtml(s.mediaUrl) + '"></video>';
   } else if (thumb) {
     body = '<img src="' + escapeHtml(thumb) + '" alt="' + title + '" loading="eager" />';
+  } else if (looksLikeYouTube(s.mediaUrl)) {
+    body = '<div class="hero-yt-wrap" style="position:relative;width:100%;padding-top:177.7%;background:#000"><iframe src="' + escapeHtml(toYouTubeEmbed(s.mediaUrl)) + '" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%"></iframe></div>';
   } else {
     body = '<div class="hero-placeholder" id="heroPlaceholder">No source media in feed</div>';
   }
